@@ -184,6 +184,15 @@ func runLocal[T any, _ PointerToMain[T]](ctx context.Context, app func(context.C
 	if err != nil {
 		return err
 	}
+
+	line := ctx.Value(contextKey("lineage"))
+
+	if line != nil {
+		fmt.Println("main found lineage:", line)
+	} else {
+		fmt.Println("main error", line)
+	}
+
 	return app(ctx, main.(*T))
 }
 
