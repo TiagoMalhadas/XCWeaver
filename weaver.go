@@ -135,9 +135,12 @@ func Run[T any, P PointerToMain[T]](ctx context.Context, app func(context.Contex
 		http.HandleFunc(HealthzURL, HealthzHandler)
 	})
 
+	//add empty lineage to context
 	var lineage []WriteIdentifier
 
 	ctx = context.WithValue(ctx, contextKey("lineage"), lineage)
+
+	fmt.Println("correct version")
 
 	bootstrap, err := runtime.GetBootstrap(ctx)
 	if err != nil {
