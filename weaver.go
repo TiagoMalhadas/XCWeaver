@@ -135,6 +135,10 @@ func Run[T any, P PointerToMain[T]](ctx context.Context, app func(context.Contex
 		http.HandleFunc(HealthzURL, HealthzHandler)
 	})
 
+	var lineage []WriteIdentifier
+
+	ctx = context.WithValue(ctx, contextKey("lineage"), lineage)
+
 	bootstrap, err := runtime.GetBootstrap(ctx)
 	if err != nil {
 		return err
@@ -582,3 +586,103 @@ func (AutoMarshal) WeaverMarshal(*codegen.Encoder)   {}
 func (AutoMarshal) WeaverUnmarshal(*codegen.Decoder) {}
 
 type NotRetriable interface{}
+
+type Datastore_type interface {
+	write(context.Context, string, AntiObj) error
+	read(context.Context, string) (AntiObj, error)
+	barrier(context.Context, []WriteIdentifier, string) error
+}
+
+type AntiObj struct {
+	Version any
+	Lineage []WriteIdentifier
+}
+
+type WriteIdentifier struct {
+	AutoMarshal
+	Dtstid  string
+	Key     string
+	Version string
+}
+
+type Antipode[T Datastore_type] struct {
+	datastore_type T
+	datastore_ID   string
+}
+
+type contextKey string
+
+// TO-DO
+// Test this method with values as string, bool, int and struct
+func (a Antipode[T]) Write(ctx context.Context, key string, value string) (context.Context, error) {
+
+	//span := trace.SpanFromContext(ctx)
+	//if span.SpanContext().IsValid() {
+
+	//	var lineage []string
+
+	// Add the array attribute to the span
+	//	span.SetAttributes(attribute.StringSlice("lineage", lineage))
+
+	//}
+
+	//extract lineage from ctx
+	lineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
+
+	if lineage == nil {
+		err := fmt.Errorf("Lineage not found inside context")
+		return ctx, err
+	}
+
+	//update lineage
+	lineage = append(lineage, WriteIdentifier{Dtstid: a.datastore_ID, Key: key, Version: value})
+
+	//initialize AntiObj
+	obj := AntiObj{value, lineage}
+
+	err := a.datastore_type.write(ctx, key, obj)
+
+	if err != nil {
+		return ctx, err
+	}
+
+	//update ctx with the updated lineage
+	ctx = context.WithValue(ctx, contextKey("lineage"), lineage)
+
+	return ctx, nil
+}
+
+func (a Antipode[T]) Read(ctx context.Context, key string) (any, []WriteIdentifier, error) {
+
+	obj, err := a.datastore_type.read(ctx, key)
+
+	return obj.Version, obj.Lineage, err
+}
+
+func (a Antipode[T]) Barrier(ctx context.Context) error {
+	//extract lineage from ctx
+	lineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
+
+	if lineage == nil {
+		err := fmt.Errorf("Lineage not found inside context")
+		return err
+	}
+
+	return a.datastore_type.barrier(ctx, lineage, a.datastore_ID)
+}
+
+func (a Antipode[T]) Transfer(ctx context.Context, lineage []WriteIdentifier) (context.Context, error) {
+	//extract lineage from ctx
+	oldLineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
+
+	if oldLineage != nil {
+		err := fmt.Errorf("Lineage not found inside context")
+		return ctx, err
+	}
+
+	newLineage := append(oldLineage, lineage...)
+
+	ctx = context.WithValue(ctx, contextKey("lineage"), newLineage)
+
+	return ctx, nil
+}
