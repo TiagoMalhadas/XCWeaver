@@ -185,14 +185,6 @@ func runLocal[T any, _ PointerToMain[T]](ctx context.Context, app func(context.C
 		return err
 	}
 
-	line := ctx.Value(contextKey("lineage"))
-
-	if line != nil {
-		fmt.Println("main found lineage:", line)
-	} else {
-		fmt.Println("main error", line)
-	}
-
 	return app(ctx, main.(*T))
 }
 
@@ -697,4 +689,14 @@ func (a Antipode[T]) Transfer(ctx context.Context, lineage []WriteIdentifier) (c
 	ctx = context.WithValue(ctx, contextKey("lineage"), newLineage)
 
 	return ctx, nil
+}
+
+func GetLineage(ctx context.Context){
+	line := ctx.Value(contextKey("lineage"))
+
+	if line != nil {
+		fmt.Println("getLineage found lineage:", line)
+	} else {
+		fmt.Println("getLineage error", line)
+	}
 }
