@@ -6,8 +6,8 @@ package xcweaver
 import (
 	"context"
 	"errors"
-	"github.com/ServiceWeaver/weaver/runtime/codegen"
-	"github.com/ServiceWeaver/weaver/runtime/protos"
+	"github.com/TiagoMalhadas/xcweaver/runtime/codegen"
+	"github.com/TiagoMalhadas/xcweaver/runtime/protos"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"reflect"
@@ -15,14 +15,14 @@ import (
 
 func init() {
 	codegen.Register(codegen.Registration{
-		Name:  "github.com/ServiceWeaver/weaver/deployerControl",
+		Name:  "github.com/TiagoMalhadas/xcweaver/deployerControl",
 		Iface: reflect.TypeOf((*deployerControl)(nil)).Elem(),
 		Impl:  reflect.TypeOf(localDeployerControl{}),
 		LocalStubFn: func(impl any, caller string, tracer trace.Tracer) any {
-			return deployerControl_local_stub{impl: impl.(deployerControl), tracer: tracer, activateComponentMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "ActivateComponent", Remote: false}), exportListenerMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "ExportListener", Remote: false}), getListenerAddressMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "GetListenerAddress", Remote: false}), getSelfCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "GetSelfCertificate", Remote: false}), handleTraceSpansMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "HandleTraceSpans", Remote: false}), logBatchMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "LogBatch", Remote: false}), verifyClientCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "VerifyClientCertificate", Remote: false}), verifyServerCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "VerifyServerCertificate", Remote: false})}
+			return deployerControl_local_stub{impl: impl.(deployerControl), tracer: tracer, activateComponentMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ActivateComponent", Remote: false}), exportListenerMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ExportListener", Remote: false}), getListenerAddressMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetListenerAddress", Remote: false}), getSelfCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetSelfCertificate", Remote: false}), handleTraceSpansMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "HandleTraceSpans", Remote: false}), logBatchMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "LogBatch", Remote: false}), verifyClientCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyClientCertificate", Remote: false}), verifyServerCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyServerCertificate", Remote: false})}
 		},
 		ClientStubFn: func(stub codegen.Stub, caller string) any {
-			return deployerControl_client_stub{stub: stub, activateComponentMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "ActivateComponent", Remote: true}), exportListenerMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "ExportListener", Remote: true}), getListenerAddressMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "GetListenerAddress", Remote: true}), getSelfCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "GetSelfCertificate", Remote: true}), handleTraceSpansMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "HandleTraceSpans", Remote: true}), logBatchMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "LogBatch", Remote: true}), verifyClientCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "VerifyClientCertificate", Remote: true}), verifyServerCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/deployerControl", Method: "VerifyServerCertificate", Remote: true})}
+			return deployerControl_client_stub{stub: stub, activateComponentMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ActivateComponent", Remote: true}), exportListenerMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ExportListener", Remote: true}), getListenerAddressMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetListenerAddress", Remote: true}), getSelfCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetSelfCertificate", Remote: true}), handleTraceSpansMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "HandleTraceSpans", Remote: true}), logBatchMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "LogBatch", Remote: true}), verifyClientCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyClientCertificate", Remote: true}), verifyServerCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyServerCertificate", Remote: true})}
 		},
 		ServerStubFn: func(impl any, addLoad func(uint64, float64)) codegen.Server {
 			return deployerControl_server_stub{impl: impl.(deployerControl), addLoad: addLoad}
@@ -33,14 +33,14 @@ func init() {
 		RefData: "",
 	})
 	codegen.Register(codegen.Registration{
-		Name:  "github.com/ServiceWeaver/weaver/weaveletControl",
+		Name:  "github.com/TiagoMalhadas/xcweaver/weaveletControl",
 		Iface: reflect.TypeOf((*weaveletControl)(nil)).Elem(),
 		Impl:  reflect.TypeOf(noopWeaveletControl{}),
 		LocalStubFn: func(impl any, caller string, tracer trace.Tracer) any {
-			return weaveletControl_local_stub{impl: impl.(weaveletControl), tracer: tracer, getHealthMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "GetHealth", Remote: false}), getLoadMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "GetLoad", Remote: false}), getMetricsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "GetMetrics", Remote: false}), getProfileMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "GetProfile", Remote: false}), initWeaveletMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "InitWeavelet", Remote: false}), updateComponentsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "UpdateComponents", Remote: false}), updateRoutingInfoMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "UpdateRoutingInfo", Remote: false})}
+			return weaveletControl_local_stub{impl: impl.(weaveletControl), tracer: tracer, getHealthMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "GetHealth", Remote: false}), getLoadMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "GetLoad", Remote: false}), getMetricsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "GetMetrics", Remote: false}), getProfileMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "GetProfile", Remote: false}), initWeaveletMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "InitWeavelet", Remote: false}), updateComponentsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "UpdateComponents", Remote: false}), updateRoutingInfoMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "UpdateRoutingInfo", Remote: false})}
 		},
 		ClientStubFn: func(stub codegen.Stub, caller string) any {
-			return weaveletControl_client_stub{stub: stub, getHealthMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "GetHealth", Remote: true}), getLoadMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "GetLoad", Remote: true}), getMetricsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "GetMetrics", Remote: true}), getProfileMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "GetProfile", Remote: true}), initWeaveletMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "InitWeavelet", Remote: true}), updateComponentsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "UpdateComponents", Remote: true}), updateRoutingInfoMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/ServiceWeaver/weaver/weaveletControl", Method: "UpdateRoutingInfo", Remote: true})}
+			return weaveletControl_client_stub{stub: stub, getHealthMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "GetHealth", Remote: true}), getLoadMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "GetLoad", Remote: true}), getMetricsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "GetMetrics", Remote: true}), getProfileMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "GetProfile", Remote: true}), initWeaveletMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "InitWeavelet", Remote: true}), updateComponentsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "UpdateComponents", Remote: true}), updateRoutingInfoMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/weaveletControl", Method: "UpdateRoutingInfo", Remote: true})}
 		},
 		ServerStubFn: func(impl any, addLoad func(uint64, float64)) codegen.Server {
 			return weaveletControl_server_stub{impl: impl.(weaveletControl), addLoad: addLoad}
@@ -52,11 +52,11 @@ func init() {
 	})
 }
 
-// weaver.InstanceOf checks.
+// xcweaver.InstanceOf checks.
 var _ InstanceOf[deployerControl] = (*localDeployerControl)(nil)
 var _ InstanceOf[weaveletControl] = (*noopWeaveletControl)(nil)
 
-// weaver.Router checks.
+// xcweaver.Router checks.
 var _ Unrouted = (*localDeployerControl)(nil)
 var _ Unrouted = (*noopWeaveletControl)(nil)
 
@@ -85,7 +85,7 @@ func (s deployerControl_local_stub) ActivateComponent(ctx context.Context, a0 *p
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.deployerControl.ActivateComponent", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.deployerControl.ActivateComponent", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -105,7 +105,7 @@ func (s deployerControl_local_stub) ExportListener(ctx context.Context, a0 *prot
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.deployerControl.ExportListener", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.deployerControl.ExportListener", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -125,7 +125,7 @@ func (s deployerControl_local_stub) GetListenerAddress(ctx context.Context, a0 *
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.deployerControl.GetListenerAddress", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.deployerControl.GetListenerAddress", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -145,7 +145,7 @@ func (s deployerControl_local_stub) GetSelfCertificate(ctx context.Context, a0 *
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.deployerControl.GetSelfCertificate", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.deployerControl.GetSelfCertificate", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -165,7 +165,7 @@ func (s deployerControl_local_stub) HandleTraceSpans(ctx context.Context, a0 *pr
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.deployerControl.HandleTraceSpans", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.deployerControl.HandleTraceSpans", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -185,7 +185,7 @@ func (s deployerControl_local_stub) LogBatch(ctx context.Context, a0 *protos.Log
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.deployerControl.LogBatch", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.deployerControl.LogBatch", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -205,7 +205,7 @@ func (s deployerControl_local_stub) VerifyClientCertificate(ctx context.Context,
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.deployerControl.VerifyClientCertificate", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.deployerControl.VerifyClientCertificate", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -225,7 +225,7 @@ func (s deployerControl_local_stub) VerifyServerCertificate(ctx context.Context,
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.deployerControl.VerifyServerCertificate", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.deployerControl.VerifyServerCertificate", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -260,7 +260,7 @@ func (s weaveletControl_local_stub) GetHealth(ctx context.Context, a0 *protos.Ge
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.weaveletControl.GetHealth", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.weaveletControl.GetHealth", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -280,7 +280,7 @@ func (s weaveletControl_local_stub) GetLoad(ctx context.Context, a0 *protos.GetL
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.weaveletControl.GetLoad", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.weaveletControl.GetLoad", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -300,7 +300,7 @@ func (s weaveletControl_local_stub) GetMetrics(ctx context.Context, a0 *protos.G
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.weaveletControl.GetMetrics", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.weaveletControl.GetMetrics", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -320,7 +320,7 @@ func (s weaveletControl_local_stub) GetProfile(ctx context.Context, a0 *protos.G
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.weaveletControl.GetProfile", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.weaveletControl.GetProfile", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -340,7 +340,7 @@ func (s weaveletControl_local_stub) InitWeavelet(ctx context.Context, a0 *protos
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.weaveletControl.InitWeavelet", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.weaveletControl.InitWeavelet", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -360,7 +360,7 @@ func (s weaveletControl_local_stub) UpdateComponents(ctx context.Context, a0 *pr
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.weaveletControl.UpdateComponents", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.weaveletControl.UpdateComponents", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -380,7 +380,7 @@ func (s weaveletControl_local_stub) UpdateRoutingInfo(ctx context.Context, a0 *p
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.tracer.Start(ctx, "weaver.weaveletControl.UpdateRoutingInfo", trace.WithSpanKind(trace.SpanKindInternal))
+		ctx, span = s.tracer.Start(ctx, "xcweaver.weaveletControl.UpdateRoutingInfo", trace.WithSpanKind(trace.SpanKindInternal))
 		defer func() {
 			if err != nil {
 				span.RecordError(err)
@@ -419,7 +419,7 @@ func (s deployerControl_client_stub) ActivateComponent(ctx context.Context, a0 *
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.deployerControl.ActivateComponent", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.deployerControl.ActivateComponent", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -470,7 +470,7 @@ func (s deployerControl_client_stub) ExportListener(ctx context.Context, a0 *pro
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.deployerControl.ExportListener", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.deployerControl.ExportListener", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -521,7 +521,7 @@ func (s deployerControl_client_stub) GetListenerAddress(ctx context.Context, a0 
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.deployerControl.GetListenerAddress", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.deployerControl.GetListenerAddress", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -572,7 +572,7 @@ func (s deployerControl_client_stub) GetSelfCertificate(ctx context.Context, a0 
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.deployerControl.GetSelfCertificate", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.deployerControl.GetSelfCertificate", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -623,7 +623,7 @@ func (s deployerControl_client_stub) HandleTraceSpans(ctx context.Context, a0 *p
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.deployerControl.HandleTraceSpans", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.deployerControl.HandleTraceSpans", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -673,7 +673,7 @@ func (s deployerControl_client_stub) LogBatch(ctx context.Context, a0 *protos.Lo
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.deployerControl.LogBatch", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.deployerControl.LogBatch", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -723,7 +723,7 @@ func (s deployerControl_client_stub) VerifyClientCertificate(ctx context.Context
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.deployerControl.VerifyClientCertificate", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.deployerControl.VerifyClientCertificate", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -774,7 +774,7 @@ func (s deployerControl_client_stub) VerifyServerCertificate(ctx context.Context
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.deployerControl.VerifyServerCertificate", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.deployerControl.VerifyServerCertificate", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -839,7 +839,7 @@ func (s weaveletControl_client_stub) GetHealth(ctx context.Context, a0 *protos.G
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.weaveletControl.GetHealth", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.weaveletControl.GetHealth", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -890,7 +890,7 @@ func (s weaveletControl_client_stub) GetLoad(ctx context.Context, a0 *protos.Get
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.weaveletControl.GetLoad", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.weaveletControl.GetLoad", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -941,7 +941,7 @@ func (s weaveletControl_client_stub) GetMetrics(ctx context.Context, a0 *protos.
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.weaveletControl.GetMetrics", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.weaveletControl.GetMetrics", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -992,7 +992,7 @@ func (s weaveletControl_client_stub) GetProfile(ctx context.Context, a0 *protos.
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.weaveletControl.GetProfile", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.weaveletControl.GetProfile", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -1043,7 +1043,7 @@ func (s weaveletControl_client_stub) InitWeavelet(ctx context.Context, a0 *proto
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.weaveletControl.InitWeavelet", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.weaveletControl.InitWeavelet", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -1094,7 +1094,7 @@ func (s weaveletControl_client_stub) UpdateComponents(ctx context.Context, a0 *p
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.weaveletControl.UpdateComponents", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.weaveletControl.UpdateComponents", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -1145,7 +1145,7 @@ func (s weaveletControl_client_stub) UpdateRoutingInfo(ctx context.Context, a0 *
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
 		// Create a child span for this method.
-		ctx, span = s.stub.Tracer().Start(ctx, "weaver.weaveletControl.UpdateRoutingInfo", trace.WithSpanKind(trace.SpanKindClient))
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.weaveletControl.UpdateRoutingInfo", trace.WithSpanKind(trace.SpanKindClient))
 	}
 
 	defer func() {
@@ -1194,19 +1194,19 @@ var _ codegen.LatestVersion = codegen.Version[[0][20]struct{}](`
 
 ERROR: You generated this file with 'weaver generate' (devel) (codegen
 version v0.20.0). The generated code is incompatible with the version of the
-github.com/ServiceWeaver/weaver module that you're using. The weaver module
+github.com/TiagoMalhadas/xcweaver module that you're using. The weaver module
 version can be found in your go.mod file or by running the following command.
 
-    go list -m github.com/ServiceWeaver/weaver
+    go list -m github.com/TiagoMalhadas/xcweaver
 
 We recommend updating the weaver module and the 'weaver generate' command by
 running the following.
 
-    go get github.com/ServiceWeaver/weaver@latest
-    go install github.com/ServiceWeaver/weaver/cmd/weaver@latest
+    go get github.com/TiagoMalhadas/xcweaver@latest
+    go install github.com/TiagoMalhadas/xcweaver/cmd/weaver@latest
 
 Then, re-run 'weaver generate' and re-build your code. If the problem persists,
-please file an issue at https://github.com/ServiceWeaver/weaver/issues.
+please file an issue at https://github.com/TiagoMalhadas/xcweaver/issues.
 
 `)
 
