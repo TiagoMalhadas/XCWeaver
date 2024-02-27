@@ -141,11 +141,11 @@ func Run[T any, P PointerToMain[T]](ctx context.Context, app func(context.Contex
 	})
 
 	//add empty lineage to context
-	var lineage []WriteIdentifier
+	var lineage []WriteIdentifier = []WriteIdentifier{}
 
 	ctx = context.WithValue(ctx, contextKey("lineage"), lineage)
 
-	fmt.Println("correct version")
+	fmt.Println("version v0.3.0")
 
 	bootstrap, err := runtime.GetBootstrap(ctx)
 	if err != nil {
@@ -705,6 +705,15 @@ func GetLineage(ctx context.Context) ([]WriteIdentifier, error) {
 	}
 
 	return lineage.([]WriteIdentifier), nil
+}
+
+// to remove
+func InitCtx(ctx context.Context) context.Context {
+	var lineage []WriteIdentifier = []WriteIdentifier{}
+
+	ctx = context.WithValue(ctx, contextKey("lineage"), lineage)
+
+	return ctx
 }
 
 // TO-DO
