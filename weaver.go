@@ -26,13 +26,18 @@ package xcweaver
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"sync"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/TiagoMalhadas/xcweaver/internal/reflection"
 	"github.com/TiagoMalhadas/xcweaver/internal/weaver"
@@ -691,7 +696,7 @@ func (a Antipode[T]) Transfer(ctx context.Context, lineage []WriteIdentifier) (c
 	return ctx, nil
 }
 
-func GetLineage(ctx context.Context){
+func GetLineage(ctx context.Context) {
 	line := ctx.Value(contextKey("lineage"))
 
 	if line != nil {
@@ -699,4 +704,185 @@ func GetLineage(ctx context.Context){
 	} else {
 		fmt.Println("getLineage error", line)
 	}
+}
+
+// TO-DO
+// all the code below this line should be deleted
+type RabbitMQ struct {
+	connection *amqp.Connection
+	queue      string
+}
+
+// How can I close the connection?
+func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, rabbit_password string, queue string) RabbitMQ {
+
+	conn, err := amqp.Dial("amqp://" + rabbit_user + ":" + rabbit_password + "@" + rabbit_host + ":" + rabbit_port + "/")
+	if err != nil {
+		fmt.Println(err)
+		return RabbitMQ{}
+	}
+	//defer conn.Close()
+
+	return RabbitMQ{conn, queue}
+}
+
+func (r RabbitMQ) write(ctx context.Context, key string, obj AntiObj) error {
+
+	jsonAntiObj, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return err
+	}
+	defer channel.Close()
+
+	queue, err := channel.QueueDeclare(
+		r.queue, // Queue name
+		false,   // Durable
+		false,   // Delete when unused
+		false,   // Exclusive
+		false,   // No-wait
+		nil,     // Arguments
+	)
+	if err != nil {
+		return err
+	}
+
+	err = channel.PublishWithContext(ctx,
+		"",         // exchange
+		queue.Name, // routing key
+		false,      // mandatory
+		false,      // immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        jsonAntiObj,
+		})
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (r RabbitMQ) read(ctx context.Context, key string) (AntiObj, error) {
+
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return AntiObj{}, err
+	}
+	defer channel.Close()
+
+	queue, err := channel.QueueDeclare(
+		r.queue, // Queue name
+		false,   // Durable
+		false,   // Delete when unused
+		false,   // Exclusive
+		false,   // No-wait
+		nil,     // Arguments
+	)
+	if err != nil {
+		return AntiObj{}, err
+	}
+
+	msgs, err := channel.Consume(
+		queue.Name, // Queue
+		"",         // Consumer tag
+		true,       // Auto-ack
+		false,      // Exclusive
+		false,      // No local
+		false,      // No wait
+		nil,        // Args
+	)
+	if err != nil {
+		log.Fatalf("Failed to consume messages from queue: %v", err)
+	}
+
+	// Wait for the first message to arrive
+	msg := <-msgs
+
+	var antiObj AntiObj
+
+	err = json.Unmarshal(msg.Body, &antiObj)
+	if err != nil {
+		return AntiObj{}, fmt.Errorf("Failed to unmarshal JSON: %v", err)
+	}
+
+	return antiObj, err
+}
+
+func (r RabbitMQ) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
+	return nil
+}
+
+type Redis struct {
+	client *redis.Client
+}
+
+func CreateRedis(redis_host string, redis_port string, redis_password string) Redis {
+	return Redis{redis.NewClient(&redis.Options{
+		Addr:     redis_host + ":" + redis_port,
+		Password: redis_password, // no password set
+		DB:       0,              // use default DB
+	})}
+}
+
+func (r Redis) write(ctx context.Context, key string, obj AntiObj) error {
+
+	jsonAntiObj, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+
+	err = r.client.Set(ctx, key, jsonAntiObj, 0).Err()
+
+	return err
+}
+
+func (r Redis) read(ctx context.Context, key string) (AntiObj, error) {
+
+	jsonAntiObj, err := r.client.Get(ctx, key).Bytes()
+
+	if err != nil {
+		return AntiObj{}, err
+	}
+
+	var obj AntiObj
+	err = json.Unmarshal(jsonAntiObj, &obj)
+	if err != nil {
+		return AntiObj{}, err
+	}
+
+	return obj, err
+}
+
+func (r Redis) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
+
+	for _, writeIdentifier := range lineage {
+		if writeIdentifier.Dtstid == datastoreID {
+			for {
+				jsonAntiObj, err := r.client.Get(ctx, writeIdentifier.Key).Bytes()
+
+				if !errors.Is(err, redis.Nil) && err != nil {
+					return err
+				} else if errors.Is(err, redis.Nil) { //the version replication process is not yet completed
+					continue
+				} else {
+					var obj AntiObj
+					err = json.Unmarshal(jsonAntiObj, &obj)
+					if err != nil {
+						return err
+					} else if obj.Version == writeIdentifier.Version { //the version replication process is already completed
+						break
+					} else { //the version replication process is not yet completed
+						continue
+					}
+				}
+			}
+		}
+	}
+
+	return nil
 }
