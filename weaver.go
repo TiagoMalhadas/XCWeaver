@@ -680,7 +680,7 @@ func (a Antipode[T]) Barrier(ctx context.Context) error {
 	return a.Datastore_type.barrier(ctx, lineage, a.Datastore_ID)
 }
 
-func (a Antipode[T]) Transfer(ctx context.Context, lineage []WriteIdentifier) (context.Context, error) {
+func Transfer(ctx context.Context, lineage []WriteIdentifier) (context.Context, error) {
 	//extract lineage from ctx
 	oldLineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
 
@@ -696,14 +696,15 @@ func (a Antipode[T]) Transfer(ctx context.Context, lineage []WriteIdentifier) (c
 	return ctx, nil
 }
 
-func GetLineage(ctx context.Context) {
-	line := ctx.Value(contextKey("lineage"))
+func GetLineage(ctx context.Context) ([]WriteIdentifier, error) {
+	lineage := ctx.Value(contextKey("lineage"))
 
-	if line != nil {
-		fmt.Println("getLineage found lineage:", line)
-	} else {
-		fmt.Println("getLineage error", line)
+	if lineage == nil {
+		err := fmt.Errorf("Lineage not found inside context")
+		return []WriteIdentifier{}, err
 	}
+
+	return lineage.([]WriteIdentifier), nil
 }
 
 // TO-DO
