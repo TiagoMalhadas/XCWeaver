@@ -615,8 +615,8 @@ type WriteIdentifier struct {
 }
 
 type Antipode[T Datastore_type] struct {
-	datastore_type T
-	datastore_ID   string
+	Datastore_type T
+	Datastore_ID   string
 }
 
 type contextKey string
