@@ -644,12 +644,12 @@ func (a Antipode[T]) Write(ctx context.Context, key string, value string) (conte
 	}
 
 	//update lineage
-	lineage = append(lineage, WriteIdentifier{Dtstid: a.datastore_ID, Key: key, Version: value})
+	lineage = append(lineage, WriteIdentifier{Dtstid: a.Datastore_ID, Key: key, Version: value})
 
 	//initialize AntiObj
 	obj := AntiObj{value, lineage}
 
-	err := a.datastore_type.write(ctx, key, obj)
+	err := a.Datastore_type.write(ctx, key, obj)
 
 	if err != nil {
 		return ctx, err
@@ -663,7 +663,7 @@ func (a Antipode[T]) Write(ctx context.Context, key string, value string) (conte
 
 func (a Antipode[T]) Read(ctx context.Context, key string) (any, []WriteIdentifier, error) {
 
-	obj, err := a.datastore_type.read(ctx, key)
+	obj, err := a.Datastore_type.read(ctx, key)
 
 	return obj.Version, obj.Lineage, err
 }
@@ -677,7 +677,7 @@ func (a Antipode[T]) Barrier(ctx context.Context) error {
 		return err
 	}
 
-	return a.datastore_type.barrier(ctx, lineage, a.datastore_ID)
+	return a.Datastore_type.barrier(ctx, lineage, a.Datastore_ID)
 }
 
 func (a Antipode[T]) Transfer(ctx context.Context, lineage []WriteIdentifier) (context.Context, error) {
