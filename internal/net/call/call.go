@@ -69,6 +69,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -78,6 +79,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/TiagoMalhadas/xcweaver/internal/antipode"
 	"github.com/TiagoMalhadas/xcweaver/runtime/logging"
 	"github.com/TiagoMalhadas/xcweaver/runtime/retry"
 	"go.opentelemetry.io/otel/codes"
@@ -86,7 +88,7 @@ import (
 
 const (
 	// Size of the header included in each message.
-	msgHeaderSize = 16 + 8 + traceHeaderLen // handler_key + deadline + trace_context
+	msgHeaderSize = 16 + 8 + traceHeaderLen + 8 // handler_key + deadline + trace_context + lineage_len
 )
 
 // Connection allows a client to send RPCs.
@@ -385,7 +387,21 @@ func (rc *reconnectingConnection) Call(ctx context.Context, h MethodKey, arg []b
 }
 
 func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg []byte, opts CallOptions) ([]byte, error) {
-	var hdr [msgHeaderSize]byte
+
+	//extract lineage from context
+	lineage, err := antipode.GetLineage(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	lineageBytes, err := json.Marshal(lineage)
+	if err != nil {
+		return nil, err
+	}
+
+	//i removed the msgHeaderSize contant
+	//does it still works?
+	var hdr []byte
 	copy(hdr[0:], h[:])
 	deadline, haveDeadline := ctx.Deadline()
 	if haveDeadline {
@@ -404,6 +420,12 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	// Send trace information in the header.
 	writeTraceContext(ctx, hdr[24:])
+
+	// Send len(lineage) in the header.
+	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
+
+	// Send lineage information in the header.
+	copy(hdr[57:], lineageBytes[:])
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
@@ -969,6 +991,28 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		defer span.End()
 	}
 
+	//extract lineage size.
+	lineageSize := binary.LittleEndian.Uint64(msg[49:])
+
+	//extract lineage information and add it to the context.
+	var lineageBytes []byte
+	limit := msgHeaderSize + int(lineageSize)
+	copy(lineageBytes[:], msg[57:limit])
+	var lineage []antipode.WriteIdentifier
+	er := json.Unmarshal(lineageBytes, &lineage)
+	if er != nil {
+		fmt.Println(er)
+		//think on how to send the error
+		return
+	}
+	ctx = antipode.InitCtx(ctx)
+	ctx, er = antipode.Transfer(ctx, lineage)
+	if er != nil {
+		fmt.Println(er)
+		//think on how to send the error
+		return
+	}
+
 	// Add deadline information from the header to the context.
 	micros := binary.LittleEndian.Uint64(msg[16:])
 	var cancelFunc func()
@@ -985,7 +1029,7 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	}()
 
 	// Call the handler passing it the payload.
-	payload := msg[msgHeaderSize:]
+	payload := msg[msgHeaderSize+int(lineageSize):]
 	var err error
 	var result []byte
 	fn, ok := hmap.handlers[hkey]

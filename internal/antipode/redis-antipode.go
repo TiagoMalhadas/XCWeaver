@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -13,7 +12,7 @@ type Redis struct {
 	client *redis.Client
 }
 
-func createRedis(redis_host string, redis_port string, redis_password string) Redis {
+func CreateRedis(redis_host string, redis_port string, redis_password string) Redis {
 	return Redis{redis.NewClient(&redis.Options{
 		Addr:     redis_host + ":" + redis_port,
 		Password: redis_password, // no password set
@@ -21,7 +20,7 @@ func createRedis(redis_host string, redis_port string, redis_password string) Re
 	})}
 }
 
-func (r Redis) write(ctx context.Context, key string, obj xcweaver.AntiObj) error {
+func (r Redis) write(ctx context.Context, key string, obj AntiObj) error {
 
 	jsonAntiObj, err := json.Marshal(obj)
 	if err != nil {
@@ -33,24 +32,24 @@ func (r Redis) write(ctx context.Context, key string, obj xcweaver.AntiObj) erro
 	return err
 }
 
-func (r Redis) read(ctx context.Context, key string) (xcweaver.AntiObj, error) {
+func (r Redis) read(ctx context.Context, key string) (AntiObj, error) {
 
 	jsonAntiObj, err := r.client.Get(ctx, key).Bytes()
 
 	if err != nil {
-		return xcweaver.AntiObj{}, err
+		return AntiObj{}, err
 	}
 
-	var obj xcweaver.AntiObj
+	var obj AntiObj
 	err = json.Unmarshal(jsonAntiObj, &obj)
 	if err != nil {
-		return xcweaver.AntiObj{}, err
+		return AntiObj{}, err
 	}
 
 	return obj, err
 }
 
-func (r Redis) barrier(ctx context.Context, lineage []xcweaver.WriteIdentifier, datastoreID string) error {
+func (r Redis) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
 
 	for _, writeIdentifier := range lineage {
 		if writeIdentifier.Dtstid == datastoreID {
@@ -62,7 +61,7 @@ func (r Redis) barrier(ctx context.Context, lineage []xcweaver.WriteIdentifier, 
 				} else if errors.Is(err, redis.Nil) { //the version replication process is not yet completed
 					continue
 				} else {
-					var obj xcweaver.AntiObj
+					var obj AntiObj
 					err = json.Unmarshal(jsonAntiObj, &obj)
 					if err != nil {
 						return err

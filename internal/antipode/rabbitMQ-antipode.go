@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/TiagoMalhadas/xcweaver"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -16,7 +15,7 @@ type RabbitMQ struct {
 }
 
 // How can I close the connection?
-func createRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, rabbit_password string, queue string) RabbitMQ {
+func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, rabbit_password string, queue string) RabbitMQ {
 
 	conn, err := amqp.Dial("amqp://" + rabbit_user + ":" + rabbit_password + "@" + rabbit_host + ":" + rabbit_port + "/")
 	if err != nil {
@@ -28,7 +27,7 @@ func createRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, 
 	return RabbitMQ{conn, queue}
 }
 
-func (r RabbitMQ) write(ctx context.Context, key string, obj xcweaver.AntiObj) error {
+func (r RabbitMQ) write(ctx context.Context, key string, obj AntiObj) error {
 
 	jsonAntiObj, err := json.Marshal(obj)
 	if err != nil {
@@ -69,11 +68,11 @@ func (r RabbitMQ) write(ctx context.Context, key string, obj xcweaver.AntiObj) e
 	return err
 }
 
-func (r RabbitMQ) read(ctx context.Context, key string) (xcweaver.AntiObj, error) {
+func (r RabbitMQ) read(ctx context.Context, key string) (AntiObj, error) {
 
 	channel, err := r.connection.Channel()
 	if err != nil {
-		return xcweaver.AntiObj{}, err
+		return AntiObj{}, err
 	}
 	defer channel.Close()
 
@@ -86,7 +85,7 @@ func (r RabbitMQ) read(ctx context.Context, key string) (xcweaver.AntiObj, error
 		nil,     // Arguments
 	)
 	if err != nil {
-		return xcweaver.AntiObj{}, err
+		return AntiObj{}, err
 	}
 
 	msgs, err := channel.Consume(
@@ -105,16 +104,16 @@ func (r RabbitMQ) read(ctx context.Context, key string) (xcweaver.AntiObj, error
 	// Wait for the first message to arrive
 	msg := <-msgs
 
-	var antiObj xcweaver.AntiObj
+	var antiObj AntiObj
 
 	err = json.Unmarshal(msg.Body, &antiObj)
 	if err != nil {
-		return xcweaver.AntiObj{}, fmt.Errorf("Failed to unmarshal JSON: %v", err)
+		return AntiObj{}, fmt.Errorf("Failed to unmarshal JSON: %v", err)
 	}
 
 	return antiObj, err
 }
 
-func (r RabbitMQ) barrier(ctx context.Context, lineage []xcweaver.WriteIdentifier, datastoreID string) error {
+func (r RabbitMQ) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
 	return nil
 }

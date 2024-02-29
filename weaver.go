@@ -29,16 +29,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"sync"
 
-	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/redis/go-redis/v9"
-
+	"github.com/TiagoMalhadas/xcweaver/internal/antipode"
 	"github.com/TiagoMalhadas/xcweaver/internal/reflection"
 	"github.com/TiagoMalhadas/xcweaver/internal/weaver"
 	"github.com/TiagoMalhadas/xcweaver/runtime"
@@ -141,9 +138,7 @@ func Run[T any, P PointerToMain[T]](ctx context.Context, app func(context.Contex
 	})
 
 	//add empty lineage to context
-	var lineage []WriteIdentifier = []WriteIdentifier{}
-
-	ctx = context.WithValue(ctx, contextKey("lineage"), lineage)
+	antipode.InitCtx(ctx)
 
 	fmt.Println("version v0.3.0")
 
@@ -596,303 +591,83 @@ func (AutoMarshal) WeaverUnmarshal(*codegen.Decoder) {}
 
 type NotRetriable interface{}
 
-type Datastore_type interface {
-	write(context.Context, string, AntiObj) error
-	read(context.Context, string) (AntiObj, error)
-	barrier(context.Context, []WriteIdentifier, string) error
-}
-
-type AntiObj struct {
-	Version any
-	Lineage []WriteIdentifier
-}
-
-type WriteIdentifier struct {
-	AutoMarshal
-	Dtstid  string
-	Key     string
-	Version string
-}
-
-type Antipode[T Datastore_type] struct {
+type Antipode[T antipode.Datastore_type] struct {
 	Datastore_type T
 	Datastore_ID   string
 }
 
-type contextKey string
+type Lineage struct {
+	WriteIdentifiers []byte
+}
 
 // TO-DO
 // Test this method with values as string, bool, int and struct
 func (a Antipode[T]) Write(ctx context.Context, key string, value string) (context.Context, error) {
 
-	//span := trace.SpanFromContext(ctx)
-	//if span.SpanContext().IsValid() {
-
-	//	var lineage []string
-
-	// Add the array attribute to the span
-	//	span.SetAttributes(attribute.StringSlice("lineage", lineage))
-
-	//}
-
-	//extract lineage from ctx
-	lineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
-
-	if lineage == nil {
-		err := fmt.Errorf("Lineage not found inside context")
-		return ctx, err
-	}
-
-	//update lineage
-	lineage = append(lineage, WriteIdentifier{Dtstid: a.Datastore_ID, Key: key, Version: value})
-
-	//initialize AntiObj
-	obj := AntiObj{value, lineage}
-
-	err := a.Datastore_type.write(ctx, key, obj)
-
-	if err != nil {
-		return ctx, err
-	}
-
-	//update ctx with the updated lineage
-	ctx = context.WithValue(ctx, contextKey("lineage"), lineage)
-
-	return ctx, nil
+	return antipode.Write(ctx, a.Datastore_type, a.Datastore_ID, key, value)
 }
 
-func (a Antipode[T]) Read(ctx context.Context, key string) (any, []WriteIdentifier, error) {
+func (a Antipode[T]) Read(ctx context.Context, key string) (string, Lineage, error) {
 
-	obj, err := a.Datastore_type.read(ctx, key)
+	value, line, err := antipode.Read(ctx, a.Datastore_type, key)
+	if err != nil {
+		return "", Lineage{}, err
+	}
 
-	return obj.Version, obj.Lineage, err
+	lineageBytes, err := json.Marshal(line)
+	if err != nil {
+		return "", Lineage{}, err
+	}
+
+	lineage := Lineage{lineageBytes}
+
+	return value, lineage, nil
 }
 
 func (a Antipode[T]) Barrier(ctx context.Context) error {
-	//extract lineage from ctx
-	lineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
 
-	if lineage == nil {
-		err := fmt.Errorf("Lineage not found inside context")
-		return err
-	}
-
-	return a.Datastore_type.barrier(ctx, lineage, a.Datastore_ID)
+	return antipode.Barrier(ctx, a.Datastore_type, a.Datastore_ID)
 }
 
-func Transfer(ctx context.Context, lineage []WriteIdentifier) (context.Context, error) {
-	//extract lineage from ctx
-	oldLineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
+func Transfer(ctx context.Context, lineage Lineage) (context.Context, error) {
 
-	if oldLineage != nil {
-		err := fmt.Errorf("Lineage not found inside context")
-		return ctx, err
+	var line []antipode.WriteIdentifier
+	err := json.Unmarshal(lineage.WriteIdentifiers, &line)
+	if err != nil {
+		return nil, err
 	}
 
-	newLineage := append(oldLineage, lineage...)
-
-	ctx = context.WithValue(ctx, contextKey("lineage"), newLineage)
-
-	return ctx, nil
+	return antipode.Transfer(ctx, line)
 }
 
-func GetLineage(ctx context.Context) ([]WriteIdentifier, error) {
-	lineage := ctx.Value(contextKey("lineage"))
+func GetLineage(ctx context.Context) (Lineage, error) {
 
-	if lineage == nil {
-		err := fmt.Errorf("Lineage not found inside context")
-		return []WriteIdentifier{}, err
+	line, err := antipode.GetLineage(ctx)
+	if err != nil {
+		return Lineage{}, err
 	}
 
-	return lineage.([]WriteIdentifier), nil
+	lineageBytes, err := json.Marshal(line)
+	if err != nil {
+		return Lineage{}, err
+	}
+
+	lineage := Lineage{lineageBytes}
+
+	return lineage, nil
 }
 
 // to remove
 func InitCtx(ctx context.Context) context.Context {
-	var lineage []WriteIdentifier = []WriteIdentifier{}
 
-	ctx = context.WithValue(ctx, contextKey("lineage"), lineage)
-
-	return ctx
+	return antipode.InitCtx(ctx)
 }
 
-// TO-DO
-// all the code below this line should be deleted
-type RabbitMQ struct {
-	connection *amqp.Connection
-	queue      string
+func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, rabbit_password string, queue string) antipode.RabbitMQ {
+
+	return antipode.CreateRabbitMQ(rabbit_host, rabbit_port, rabbit_user, rabbit_password, queue)
 }
 
-// How can I close the connection?
-func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, rabbit_password string, queue string) RabbitMQ {
-
-	conn, err := amqp.Dial("amqp://" + rabbit_user + ":" + rabbit_password + "@" + rabbit_host + ":" + rabbit_port + "/")
-	if err != nil {
-		fmt.Println(err)
-		return RabbitMQ{}
-	}
-	//defer conn.Close()
-
-	return RabbitMQ{conn, queue}
-}
-
-func (r RabbitMQ) write(ctx context.Context, key string, obj AntiObj) error {
-
-	jsonAntiObj, err := json.Marshal(obj)
-	if err != nil {
-		return err
-	}
-
-	channel, err := r.connection.Channel()
-	if err != nil {
-		return err
-	}
-	defer channel.Close()
-
-	queue, err := channel.QueueDeclare(
-		r.queue, // Queue name
-		false,   // Durable
-		false,   // Delete when unused
-		false,   // Exclusive
-		false,   // No-wait
-		nil,     // Arguments
-	)
-	if err != nil {
-		return err
-	}
-
-	err = channel.PublishWithContext(ctx,
-		"",         // exchange
-		queue.Name, // routing key
-		false,      // mandatory
-		false,      // immediate
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        jsonAntiObj,
-		})
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
-func (r RabbitMQ) read(ctx context.Context, key string) (AntiObj, error) {
-
-	channel, err := r.connection.Channel()
-	if err != nil {
-		return AntiObj{}, err
-	}
-	defer channel.Close()
-
-	queue, err := channel.QueueDeclare(
-		r.queue, // Queue name
-		false,   // Durable
-		false,   // Delete when unused
-		false,   // Exclusive
-		false,   // No-wait
-		nil,     // Arguments
-	)
-	if err != nil {
-		return AntiObj{}, err
-	}
-
-	msgs, err := channel.Consume(
-		queue.Name, // Queue
-		"",         // Consumer tag
-		true,       // Auto-ack
-		false,      // Exclusive
-		false,      // No local
-		false,      // No wait
-		nil,        // Args
-	)
-	if err != nil {
-		log.Fatalf("Failed to consume messages from queue: %v", err)
-	}
-
-	// Wait for the first message to arrive
-	msg := <-msgs
-
-	var antiObj AntiObj
-
-	err = json.Unmarshal(msg.Body, &antiObj)
-	if err != nil {
-		return AntiObj{}, fmt.Errorf("Failed to unmarshal JSON: %v", err)
-	}
-
-	return antiObj, err
-}
-
-func (r RabbitMQ) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
-	return nil
-}
-
-type Redis struct {
-	client *redis.Client
-}
-
-func CreateRedis(redis_host string, redis_port string, redis_password string) Redis {
-	return Redis{redis.NewClient(&redis.Options{
-		Addr:     redis_host + ":" + redis_port,
-		Password: redis_password, // no password set
-		DB:       0,              // use default DB
-	})}
-}
-
-func (r Redis) write(ctx context.Context, key string, obj AntiObj) error {
-
-	jsonAntiObj, err := json.Marshal(obj)
-	if err != nil {
-		return err
-	}
-
-	err = r.client.Set(ctx, key, jsonAntiObj, 0).Err()
-
-	return err
-}
-
-func (r Redis) read(ctx context.Context, key string) (AntiObj, error) {
-
-	jsonAntiObj, err := r.client.Get(ctx, key).Bytes()
-
-	if err != nil {
-		return AntiObj{}, err
-	}
-
-	var obj AntiObj
-	err = json.Unmarshal(jsonAntiObj, &obj)
-	if err != nil {
-		return AntiObj{}, err
-	}
-
-	return obj, err
-}
-
-func (r Redis) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
-
-	for _, writeIdentifier := range lineage {
-		if writeIdentifier.Dtstid == datastoreID {
-			for {
-				jsonAntiObj, err := r.client.Get(ctx, writeIdentifier.Key).Bytes()
-
-				if !errors.Is(err, redis.Nil) && err != nil {
-					return err
-				} else if errors.Is(err, redis.Nil) { //the version replication process is not yet completed
-					continue
-				} else {
-					var obj AntiObj
-					err = json.Unmarshal(jsonAntiObj, &obj)
-					if err != nil {
-						return err
-					} else if obj.Version == writeIdentifier.Version { //the version replication process is already completed
-						break
-					} else { //the version replication process is not yet completed
-						continue
-					}
-				}
-			}
-		}
-	}
-
-	return nil
+func CreateRedis(redis_host string, redis_port string, redis_password string) antipode.Redis {
+	return antipode.CreateRedis(redis_host, redis_port, redis_password)
 }
