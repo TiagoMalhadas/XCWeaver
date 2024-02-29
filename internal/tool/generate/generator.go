@@ -51,42 +51,42 @@ import (
 const (
 	generatedCodeFile = "weaver_gen.go"
 
-	Usage = `Generate code for a Service Weaver application.
+	Usage = `Generate code for a XCWeaver application.
 
 Usage:
-  weaver generate [packages]
+  xcweaver generate [packages]
 
 Description:
-  "weaver generate" generates code for the Service Weaver applications in the
-  provided packages. For example, "weaver generate . ./foo" will generate code
-  for the Service Weaver applications in the current directory and in the ./foo
+  "xcweaver generate" generates code for the XCWeaver applications in the
+  provided packages. For example, "xcweaver generate . ./foo" will generate code
+  for the XCWeaver applications in the current directory and in the ./foo
   directory. For every package, the generated code is placed in a weaver_gen.go
-  file in the package's directory. For example, "weaver generate . ./foo" will
+  file in the package's directory. For example, "xcweaver generate . ./foo" will
   create ./weaver_gen.go and ./foo/weaver_gen.go.
 
-  You specify packages for "weaver generate" in the same way you specify
+  You specify packages for "xcweaver generate" in the same way you specify
   packages for go build, go test, go vet, etc. See "go help packages" for more
   information.
 
-  Rather than invoking "weaver generate" directly, you can place a line of the
+  Rather than invoking "xcweaver generate" directly, you can place a line of the
   following form in one of the .go files in the package:
 
-      //go:generate weaver generate
+      //go:generate xcweaver generate
 
   and then use the normal "go generate" command.
 
 Examples:
   # Generate code for the package in the current directory.
-  weaver generate
+  xcweaver generate
 
-  # Same as "weaver generate".
-  weaver generate .
+  # Same as "xcweaver generate".
+  xcweaver generate .
 
   # Generate code for the package in the ./foo directory.
-  weaver generate ./foo
+  xcweaver generate ./foo
 
   # Generate code for all packages in all subdirectories of current directory.
-  weaver generate ./...`
+  xcweaver generate ./...`
 )
 
 // Options controls the operation of Generate.
@@ -332,7 +332,7 @@ func findMethodAttributes(pkg *packages.Package, f *ast.File, components map[str
 				// We allow non-blank vars for uniformity.
 				comp, method, ok := findComponentMethod(pkg, components, val)
 				if !ok {
-					errs = append(errs, errorf(pkg.Fset, valspec.Pos(), "weaver.NonRetriable should only be assigned a value that identifies a method of a component implemented by this package"))
+					errs = append(errs, errorf(pkg.Fset, valspec.Pos(), "xcweaver.NonRetriable should only be assigned a value that identifies a method of a component implemented by this package"))
 					continue
 				}
 				if comp.noretry == nil {
@@ -447,7 +447,7 @@ func findAutoMarshals(pkg *packages.Package, f *ast.File) ([]*types.Named, error
 			// TODO(mwhittaker): Handle generics somehow?
 			if n.TypeParams() != nil { // generics have non-nil TypeParams()
 				errs = append(errs, errorf(pkg.Fset, spec.Pos(),
-					"generic struct %v cannot embed weaver.AutoMarshal. See serviceweaver.dev/docs.html#serializable-types for more information.",
+					"generic struct %v cannot embed xcweaver.AutoMarshal. See serviceweaver.dev/docs.html#serializable-types for more information.",
 					formatType(pkg, n)))
 				continue
 			}
@@ -498,12 +498,12 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 			arg := t.(*types.Named).TypeArgs().At(0)
 			if isWeaverMain(arg) {
 				return nil, errorf(pkg.Fset, f.Pos(),
-					"components cannot contain a reference to weaver.Main")
+					"components cannot contain a reference to xcweaver.Main")
 			}
 			named, ok := arg.(*types.Named)
 			if !ok {
 				return nil, errorf(pkg.Fset, f.Pos(),
-					"weaver.Ref argument %s is not a named type.",
+					"xcweaver.Ref argument %s is not a named type.",
 					formatType(pkg, arg))
 			}
 			refs = append(refs, named)
@@ -531,18 +531,18 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 			named, ok := arg.(*types.Named)
 			if !ok {
 				return nil, errorf(pkg.Fset, f.Pos(),
-					"weaver.Implements argument %s is not a named type.",
+					"xcweaver.Implements argument %s is not a named type.",
 					formatType(pkg, arg))
 			}
 			isMain = isWeaverMain(arg)
 			if !isMain && named.Obj().Pkg() != pkg.Types {
 				return nil, errorf(pkg.Fset, f.Pos(),
-					"weaver.Implements argument %s is a type outside the current package. A component interface and implementation must be in the same package. If you can't move them into the same package, you can add `type %s %v` to the implementation's package and embed `weaver.Implements[%s]` instead of `weaver.Implements[%s]`.",
+					"xcweaver.Implements argument %s is a type outside the current package. A component interface and implementation must be in the same package. If you can't move them into the same package, you can add `type %s %v` to the implementation's package and embed `xcweaver.Implements[%s]` instead of `xcweaver.Implements[%s]`.",
 					formatType(pkg, named), named.Obj().Name(), formatType(pkg, named), named.Obj().Name(), formatType(pkg, named))
 			}
 			if _, ok := named.Underlying().(*types.Interface); !ok {
 				return nil, errorf(pkg.Fset, f.Pos(),
-					"weaver.Implements argument %s is not an interface.",
+					"xcweaver.Implements argument %s is not an interface.",
 					formatType(pkg, named))
 			}
 			intf = named
@@ -554,12 +554,12 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 			named, ok := arg.(*types.Named)
 			if !ok {
 				return nil, errorf(pkg.Fset, f.Pos(),
-					"weaver.WithRouter argument %s is not a named type.",
+					"xcweaver.WithRouter argument %s is not a named type.",
 					formatType(pkg, arg))
 			}
 			if named.Obj().Pkg() != pkg.Types {
 				return nil, errorf(pkg.Fset, f.Pos(),
-					"weaver.WithRouter argument %s is a type outside the current package.",
+					"xcweaver.WithRouter argument %s is a type outside the current package.",
 					formatType(pkg, named))
 			}
 			router = named
@@ -576,7 +576,7 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 	// interface.
 	if !types.Implements(types.NewPointer(impl), intf.Underlying().(*types.Interface)) {
 		return nil, errorf(pkg.Fset, spec.Pos(),
-			"type %s embeds weaver.Implements[%s] but does not implement interface %s.",
+			"type %s embeds xcweaver.Implements[%s] but does not implement interface %s.",
 			formatType(pkg, impl), formatType(pkg, intf), formatType(pkg, intf))
 	}
 
@@ -643,7 +643,7 @@ func getListenerNamesFromStructField(pkg *packages.Package, f *ast.Field) ([]str
 			return nil, errorf(pkg.Fset, f.Pos(),
 				"Tag %s repeated for multiple fields", tag)
 		}
-		if name, ok := tag.Lookup("weaver"); ok {
+		if name, ok := tag.Lookup("xcweaver"); ok {
 			if !token.IsIdentifier(name) {
 				return nil, errorf(pkg.Fset, f.Pos(),
 					"Listener tag %s is not a valid Go identifier", tag)
@@ -738,7 +738,7 @@ func validateMethods(pkg *packages.Package, tset *typeSet, intf *types.Named) er
 		// Disallow unexported methods.
 		if !m.Exported() {
 			errs = append(errs, errorf(pkg.Fset, m.Pos(),
-				"Method `%s%s %s` of Service Weaver component %q is unexported. Every method in a component interface must be exported.",
+				"Method `%s%s %s` of XCWeaver component %q is unexported. Every method in a component interface must be exported.",
 				m.Name(), formatType(pkg, t.Params()), formatType(pkg, t.Results()), intf.Obj().Name()))
 			continue
 		}
@@ -748,7 +748,7 @@ func validateMethods(pkg *packages.Package, tset *typeSet, intf *types.Named) er
 			err := fmt.Errorf(format, arg...)
 			return errorf(
 				pkg.Fset, m.Pos(),
-				"Method `%s%s %s` of Service Weaver component %q has incorrect %s types. %w",
+				"Method `%s%s %s` of XCWeaver component %q has incorrect %s types. %w",
 				m.Name(), formatType(pkg, t.Params()), formatType(pkg, t.Results()), intf.Obj().Name(), bad, err)
 		}
 
@@ -1003,7 +1003,7 @@ func (g *generator) componentRef(comp *component) string {
 
 // generateImports generates code to import all the dependencies.
 func (g *generator) generateImports(p printFn) {
-	p(`// Code generated by "weaver generate". DO NOT EDIT.`)
+	p(`// Code generated by "xcweaver generate". DO NOT EDIT.`)
 	p("//go:build !ignoreWeaverGen")
 	p("")
 	p("package %s", g.pkg.Name)
@@ -1032,7 +1032,7 @@ func (g *generator) generateVersionCheck(p printFn) error {
 	//
 	//     var _ codegen.LatestVersion = codegen.Version[[0][1]struct{}]("You used ...")
 	p(``)
-	p(`// Note that "weaver generate" will always generate the error message below.`)
+	p(`// Note that "xcweaver generate" will always generate the error message below.`)
 	p(`// Everything is okay. The error message is only relevant if you see it when`)
 	p(`// you run "go build" or "go run".`)
 	p(`var _ %s = %s[[%d][%d]struct{}](%s)`,
@@ -1040,20 +1040,20 @@ func (g *generator) generateVersionCheck(p printFn) error {
 		version.CodegenMajor, version.CodegenMinor,
 		fmt.Sprintf("`"+`
 
-ERROR: You generated this file with 'weaver generate' %s (codegen
+ERROR: You generated this file with 'xcweaver generate' %s (codegen
 version %s). The generated code is incompatible with the version of the
-github.com/TiagoMalhadas/xcweaver module that you're using. The weaver module
+github.com/TiagoMalhadas/xcweaver module that you're using. The xcweaver module
 version can be found in your go.mod file or by running the following command.
 
     go list -m github.com/TiagoMalhadas/xcweaver
 
-We recommend updating the weaver module and the 'weaver generate' command by
+We recommend updating the xcweaver module and the 'xcweaver generate' command by
 running the following.
 
     go get github.com/TiagoMalhadas/xcweaver@latest
     go install github.com/TiagoMalhadas/xcweaver/cmd/weaver@latest
 
-Then, re-run 'weaver generate' and re-build your code. If the problem persists,
+Then, re-run 'xcweaver generate' and re-build your code. If the problem persists,
 please file an issue at https://github.com/TiagoMalhadas/xcweaver/issues.
 
 `+"`", selfVersion, version.CodegenVersion),
@@ -1069,7 +1069,7 @@ func (g *generator) generateInstanceChecks(p printFn) {
 	// changes the interface in a weaver.Implements and forgets to re-run
 	// `weaver generate`, these checks will fail to build.
 	p(``)
-	p(`// weaver.InstanceOf checks.`)
+	p(`// xcweaver.InstanceOf checks.`)
 	for _, c := range g.components {
 		// e.g., var _ weaver.InstanceOf[Odd] = &odd{}
 		p(`var _ %s[%s] = (*%s)(nil)`, g.weaver().qualify("InstanceOf"), g.tset.genTypeString(c.intf), g.tset.genTypeString(c.impl))
@@ -1079,18 +1079,18 @@ func (g *generator) generateInstanceChecks(p printFn) {
 // generateRouterChecks generates code that checks that every component
 // implementation is either unrouted or is routed by the expected router.
 func (g *generator) generateRouterChecks(p printFn) {
-	// If a user adds, deletes, or changes an embedded weaver.WithRouter[T]
+	// If a user adds, deletes, or changes an embedded xcweaver.WithRouter[T]
 	// annotation and forgets to re-run `weaver generate`, these checks will
 	// fail to build.
 	p(``)
-	p(`// weaver.Router checks.`)
+	p(`// xcweaver.Router checks.`)
 	for _, c := range g.components {
 		if c.router == nil {
 			// e.g., var _ weaver.Unrouted = &odd{}
 			p(`var _ %s = (*%s)(nil)`, g.weaver().qualify("Unrouted"), g.tset.genTypeString(c.impl))
 
 		} else {
-			// e.g., var _ weaver.RoutedBy[router] = &odd{}
+			// e.g., var _ xcweaver.RoutedBy[router] = &odd{}
 			p(`var _ %s[%s] = (*%s)(nil)`, g.weaver().qualify("RoutedBy"), g.tset.genTypeString(c.router), g.tset.genTypeString(c.impl))
 		}
 	}
@@ -2001,7 +2001,7 @@ func (g *generator) generateReflectStubs(p printFn) {
 }
 
 // generateAutoMarshalMethods generates WeaverMarshal and WeaverUnmarshal methods
-// for any types that declares itself as weaver.AutoMarshal.
+// for any types that declares itself as xcweaver.AutoMarshal.
 func (g *generator) generateAutoMarshalMethods(p printFn) {
 	if g.tset.automarshalCandidates.Len() > 0 {
 		p(``)
@@ -2500,7 +2500,7 @@ func (g *generator) generateEncDecMethodsFor(p printFn, t types.Type) {
 
 // weaver imports and returns the weaver package.
 func (g *generator) weaver() importPkg {
-	return g.tset.importPackage(weaverPackagePath, "weaver")
+	return g.tset.importPackage(weaverPackagePath, "xcweaver")
 }
 
 // codegen imports and returns the codegen package.
