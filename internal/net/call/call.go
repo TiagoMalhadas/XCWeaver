@@ -391,7 +391,6 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	//extract lineage from context
 	lineage, err := antipode.GetLineage(ctx)
 	if err != nil {
-		fmt.Println("err")
 		return nil, err
 	}
 
@@ -427,6 +426,8 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	// Send lineage information in the header.
 	copy(hdr[57:], lineageBytes[:])
+
+	fmt.Println("done!")
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
