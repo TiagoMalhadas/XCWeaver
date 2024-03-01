@@ -148,7 +148,7 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	const headerSize = 16
 	var hdr [headerSize]byte
 	if _, err := io.ReadFull(r, hdr[:]); err != nil {
-		fmt.Println("error1")
+		fmt.Println(err)
 		return 0, 0, nil, err
 	}
 
