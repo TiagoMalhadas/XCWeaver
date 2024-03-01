@@ -139,13 +139,11 @@ func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraH
 	if err == nil && n != len(data) {
 		err = fmt.Errorf("partial write")
 	}
-	fmt.Println("writeFlat")
 	return err
 }
 
 // readMessage reads, parses, and returns the next message from r.
 func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
-	fmt.Println("Read message")
 	// Read the header.
 	const headerSize = 16
 	var hdr [headerSize]byte
@@ -168,6 +166,7 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	if _, err := io.ReadFull(r, msg); err != nil {
 		return 0, 0, nil, err
 	}
+	fmt.Println("Read message")
 	return mt, id, msg, nil
 }
 
