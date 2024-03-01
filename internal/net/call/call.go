@@ -399,6 +399,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		return nil, err
 	}
 
+	fmt.Println("start")
 	//i removed the msgHeaderSize contant
 	//does it still works?
 	var hdr []byte
