@@ -426,8 +426,8 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	fmt.Println("middle2")
 	// Send len(lineage) in the header.
-	aux = []byte{}
-	binary.LittleEndian.PutUint64(aux, uint64(len(lineageBytes)))
+	var aux2 [8]byte
+	binary.LittleEndian.PutUint64(aux2[0:], uint64(len(lineageBytes)))
 	hdr = append(hdr, aux...)
 
 	fmt.Println("middle3")
