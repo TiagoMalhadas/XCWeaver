@@ -391,6 +391,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	//extract lineage from context
 	lineage, err := antipode.GetLineage(ctx)
 	if err != nil {
+		fmt.Println("err")
 		return nil, err
 	}
 
