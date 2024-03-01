@@ -844,7 +844,7 @@ func (c *clientConnection) connectOnce(ctx context.Context) bool {
 
 // exchangeVersions sends client version to server and waits for the server version.
 func (c *clientConnection) exchangeVersions() error {
-	fmt.Println("exchangeVersions")
+
 	nc, buf := c.c, c.cbuf
 
 	// Do not hold mutex while reading from the network.
@@ -871,7 +871,7 @@ func (c *clientConnection) exchangeVersions() error {
 
 // readAndProcessMessage reads and handles one message sent from the server.
 func (c *clientConnection) readAndProcessMessage() error {
-	fmt.Println("readAndProcessMessage")
+
 	buf := c.cbuf
 
 	// Do not hold mutex while reading from the network.
@@ -913,7 +913,7 @@ func (c *clientConnection) readAndProcessMessage() error {
 
 // readRequests runs on the server side reading messages sent over a connection by the client.
 func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, onDone func()) {
-	fmt.Println("readRequests")
+
 	for ctx.Err() == nil {
 		mt, id, msg, err := readMessage(c.cbuf)
 		if err != nil {

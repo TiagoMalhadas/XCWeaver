@@ -148,6 +148,7 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	const headerSize = 16
 	var hdr [headerSize]byte
 	if _, err := io.ReadFull(r, hdr[:]); err != nil {
+		fmt.Println("error1")
 		return 0, 0, nil, err
 	}
 
@@ -158,12 +159,14 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	dataLen := w2 >> 8
 	const maxSize = 100 << 20
 	if dataLen > maxSize {
+		fmt.Println("error2")
 		return 0, 0, nil, fmt.Errorf("overly large message length %d", dataLen)
 	}
 
 	// Read the payload.
 	msg := make([]byte, int(dataLen))
 	if _, err := io.ReadFull(r, msg); err != nil {
+		fmt.Println("error3")
 		return 0, 0, nil, err
 	}
 	fmt.Println("Read message")
