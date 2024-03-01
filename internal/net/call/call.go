@@ -399,7 +399,6 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		return nil, err
 	}
 
-	fmt.Println("start")
 	//i removed the msgHeaderSize contant
 	//does it still works?
 	var hdr []byte
@@ -418,24 +417,19 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		}
 		binary.LittleEndian.PutUint64(hdr[16:], uint64(micros))
 	}
-	fmt.Println("middle")
+
 	// Send trace information in the header.
 	var aux []byte
 	writeTraceContext(ctx, aux[:])
 	hdr = append(hdr, aux...)
 
-	fmt.Println("middle2")
 	// Send len(lineage) in the header.
 	var aux2 [8]byte
 	binary.LittleEndian.PutUint64(aux2[0:], uint64(len(lineageBytes)))
 	hdr = append(hdr, aux...)
 
-	fmt.Println("middle3")
-
 	// Send lineage information in the header.
 	hdr = append(hdr, lineageBytes...)
-
-	fmt.Println("done!")
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
