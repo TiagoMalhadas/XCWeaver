@@ -418,7 +418,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		}
 		binary.LittleEndian.PutUint64(hdr[16:], uint64(micros))
 	}
-
+	fmt.Println("middle")
 	// Send trace information in the header.
 	writeTraceContext(ctx, hdr[24:])
 
