@@ -420,10 +420,15 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	}
 	fmt.Println("middle")
 	// Send trace information in the header.
-	writeTraceContext(ctx, hdr[24:])
+	var aux []byte
+	writeTraceContext(ctx, aux[:])
+	hdr = append(hdr, aux...)
 
+	fmt.Println("middle2")
 	// Send len(lineage) in the header.
 	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
+
+	fmt.Println("middle3")
 
 	// Send lineage information in the header.
 	copy(hdr[57:], lineageBytes[:])
