@@ -96,8 +96,6 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 	// We use an iovec with up to three entries.
 	var vec [3][]byte
 
-	fmt.Println("writeChunked")
-
 	nh, np := len(extraHdr), len(payload)
 	var hdr [16]byte
 	binary.LittleEndian.PutUint64(hdr[0:], id)
@@ -123,7 +121,6 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 // writeFlat concatenates the header, extra header, and the payload into
 // a single flat byte slice, and writes it into w using a single w.Write() call.
 func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraHdr []byte, payload []byte) error {
-	fmt.Println("writeFlat")
 	nh, np := len(extraHdr), len(payload)
 	data := make([]byte, 16+nh+np)
 	binary.LittleEndian.PutUint64(data[0:], id)
@@ -142,11 +139,13 @@ func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraH
 	if err == nil && n != len(data) {
 		err = fmt.Errorf("partial write")
 	}
+	fmt.Println("writeFlat")
 	return err
 }
 
 // readMessage reads, parses, and returns the next message from r.
 func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
+	fmt.Println("Read message")
 	// Read the header.
 	const headerSize = 16
 	var hdr [headerSize]byte
