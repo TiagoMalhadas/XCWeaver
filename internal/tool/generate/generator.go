@@ -481,11 +481,12 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 	}
 
 	// Find any weaver.Implements[T] or weaver.WithRouter[T] embedded fields.
-	var intf *types.Named   // The component interface type
-	var router *types.Named // Router type (if any)
-	var isMain bool         // Is intf weaver.Main?
-	var refs []*types.Named // T for which weaver.Ref[T] exists in struct
-	var listeners []string  // Names of all listener fields declared in struct
+	var intf *types.Named       // The component interface type
+	var router *types.Named     // Router type (if any)
+	var isMain bool             // Is intf weaver.Main?
+	var refs []*types.Named     // T for which weaver.Ref[T] exists in struct
+	var listeners []string      // Names of all listener fields declared in struct
+	var antipodeAgents []string // Names of all listener fields declared in struct
 	for _, f := range s.Fields.List {
 		typeAndValue, ok := pkg.TypesInfo.Types[f.Type]
 		if !ok {
@@ -513,6 +514,12 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 				return nil, err
 			}
 			listeners = append(listeners, lis...)
+		} else if isWeaverAntipodeAgente(t) {
+			antipode, err := getAntipodeAgentNamesFromStructField(pkg, f)
+			if err != nil {
+				return nil, err
+			}
+			antipodeAgents = append(antipodeAgents, antipode...)
 		}
 
 		if len(f.Names) != 0 {
@@ -602,6 +609,16 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 		seenLis[lis] = struct{}{}
 	}
 
+	// Check that antipode agent names are unique.
+	seenAntipodeAgents := map[string]struct{}{}
+	for _, antipodeAgent := range antipodeAgents {
+		if _, ok := seenAntipodeAgents[antipodeAgent]; ok {
+			return nil, errorf(pkg.Fset, spec.Pos(),
+				"component implementation %s declares multiple antipode agents with name %s. Please disambiguate.", formatType(pkg, impl), antipodeAgent)
+		}
+		seenAntipodeAgents[antipodeAgent] = struct{}{}
+	}
+
 	// Warn the user if the component has a mistyped Init method. Init methods
 	// are supposed to have type "func(context.Context) error", but it's easy
 	// to forget to add a context.Context argument or error return. Without
@@ -611,13 +628,16 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 		opt.Warn(err)
 	}
 
+	fmt.Println(antipodeAgents)
+
 	comp := &component{
-		intf:      intf,
-		impl:      impl,
-		router:    router,
-		isMain:    isMain,
-		refs:      refs,
-		listeners: listeners,
+		intf:           intf,
+		impl:           impl,
+		router:         router,
+		isMain:         isMain,
+		refs:           refs,
+		listeners:      listeners,
+		antipodeAgents: antipodeAgents,
 	}
 
 	// Find routing information if needed.
@@ -664,6 +684,38 @@ func getListenerNamesFromStructField(pkg *packages.Package, f *ast.Field) ([]str
 	return ret, nil
 }
 
+// getAntipodeAgentNamesFromStructField extracts antipode agents names from the given
+// weaver.Antipode[T] field in the component implementation struct.
+func getAntipodeAgentNamesFromStructField(pkg *packages.Package, f *ast.Field) ([]string, error) {
+	// Try to get the antipode agent name from the struct tag.
+	if f.Tag != nil {
+		tag := reflect.StructTag(strings.TrimPrefix(
+			strings.TrimSuffix(f.Tag.Value, "`"), "`"))
+		if len(f.Names) > 1 {
+			return nil, errorf(pkg.Fset, f.Pos(),
+				"Tag %s repeated for multiple fields", tag)
+		}
+		if name, ok := tag.Lookup("xcweaver"); ok {
+			if !token.IsIdentifier(name) {
+				return nil, errorf(pkg.Fset, f.Pos(),
+					"Listener tag %s is not a valid Go identifier", tag)
+			}
+			return []string{name}, nil
+		}
+		// fallthrough
+	}
+
+	// Get the antipode agent name(s) from the struct field name(s).
+	if f.Names == nil { // embedded field
+		return []string{"Antipode"}, nil
+	}
+	var ret []string
+	for _, fname := range f.Names {
+		ret = append(ret, fname.Name)
+	}
+	return ret, nil
+}
+
 // component represents a Service Weaver component.
 //
 // A component is divided into an interface and implementation. For example, in
@@ -677,15 +729,16 @@ func getListenerNamesFromStructField(pkg *packages.Package, f *ast.Field) ([]str
 //	}
 //	type router struct{}
 type component struct {
-	intf          *types.Named        // component interface
-	impl          *types.Named        // component implementation
-	router        *types.Named        // router, or nil if there is no router
-	routingKey    types.Type          // routing key, or nil if there is no router
-	routedMethods map[string]bool     // the set of methods with a routing function
-	isMain        bool                // intf is weaver.Main
-	refs          []*types.Named      // List of T where a weaver.Ref[T] field is in impl struct
-	listeners     []string            // Names of listener fields declared in impl struct
-	noretry       map[string]struct{} // Methods that should not be retried
+	intf           *types.Named        // component interface
+	impl           *types.Named        // component implementation
+	router         *types.Named        // router, or nil if there is no router
+	routingKey     types.Type          // routing key, or nil if there is no router
+	routedMethods  map[string]bool     // the set of methods with a routing function
+	isMain         bool                // intf is weaver.Main
+	refs           []*types.Named      // List of T where a weaver.Ref[T] field is in impl struct
+	listeners      []string            // Names of listener fields declared in impl struct
+	noretry        map[string]struct{} // Methods that should not be retried
+	antipodeAgents []string            // Names of antipode agent fields declared in impl struct
 }
 
 func fullName(t *types.Named) string {
