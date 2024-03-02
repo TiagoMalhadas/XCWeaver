@@ -591,8 +591,8 @@ func (AutoMarshal) WeaverUnmarshal(*codegen.Decoder) {}
 
 type NotRetriable interface{}
 
-type Antipode[T antipode.Datastore_type] struct {
-	Datastore_type T
+type Antipode[T string] struct {
+	Datastore_type antipode.Datastore_type
 	Datastore_ID   string
 }
 
