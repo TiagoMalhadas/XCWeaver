@@ -591,7 +591,7 @@ func (AutoMarshal) WeaverUnmarshal(*codegen.Decoder) {}
 
 type NotRetriable interface{}
 
-type Antipode[T string] struct {
+type Antipode struct {
 	Datastore_type antipode.Datastore_type
 	Datastore_ID   string
 }
@@ -602,12 +602,12 @@ type Lineage struct {
 
 // TO-DO
 // Test this method with values as string, bool, int and struct
-func (a Antipode[T]) Write(ctx context.Context, key string, value string) (context.Context, error) {
+func (a Antipode) Write(ctx context.Context, key string, value string) (context.Context, error) {
 
 	return antipode.Write(ctx, a.Datastore_type, a.Datastore_ID, key, value)
 }
 
-func (a Antipode[T]) Read(ctx context.Context, key string) (string, Lineage, error) {
+func (a Antipode) Read(ctx context.Context, key string) (string, Lineage, error) {
 
 	value, line, err := antipode.Read(ctx, a.Datastore_type, key)
 	if err != nil {
@@ -624,7 +624,7 @@ func (a Antipode[T]) Read(ctx context.Context, key string) (string, Lineage, err
 	return value, lineage, nil
 }
 
-func (a Antipode[T]) Barrier(ctx context.Context) error {
+func (a Antipode) Barrier(ctx context.Context) error {
 
 	return antipode.Barrier(ctx, a.Datastore_type, a.Datastore_ID)
 }

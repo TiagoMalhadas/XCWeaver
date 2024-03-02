@@ -877,7 +877,7 @@ func isWeaverListener(t types.Type) bool {
 	return isWeaverType(t, "Listener", 0)
 }
 
-func isWeaverAntipodeAgente(t types.Type) bool {
+func isWeaverAntipodeAgent(t types.Type) bool {
 	return isWeaverType(t, "Antipode", 0)
 }
 

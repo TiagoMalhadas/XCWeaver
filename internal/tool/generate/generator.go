@@ -514,7 +514,8 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 				return nil, err
 			}
 			listeners = append(listeners, lis...)
-		} else if isWeaverAntipodeAgente(t) {
+		} else if isWeaverAntipodeAgent(t) {
+			fmt.Println("antipode")
 			antipode, err := getAntipodeAgentNamesFromStructField(pkg, f)
 			if err != nil {
 				return nil, err
