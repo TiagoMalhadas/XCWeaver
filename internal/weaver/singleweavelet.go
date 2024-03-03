@@ -174,6 +174,7 @@ func parseSingleConfig(regs []*codegen.Registration, filename, contents string) 
 	}
 
 	fmt.Println("antipode agent", config.AntipodeAgents["client"])
+	fmt.Println("listeners", config.Listeners["client3"])
 
 	// Validate listeners in the config.
 	listeners := map[string]struct{}{}
