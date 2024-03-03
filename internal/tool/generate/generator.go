@@ -515,7 +515,6 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 			}
 			listeners = append(listeners, lis...)
 		} else if isWeaverAntipodeAgent(t) {
-			fmt.Println("antipode")
 			antipode, err := getAntipodeAgentNamesFromStructField(pkg, f)
 			if err != nil {
 				return nil, err
@@ -628,8 +627,6 @@ func extractComponent(opt Options, pkg *packages.Package, file *ast.File, tset *
 	if err := checkMistypedInit(pkg, tset, impl); err != nil {
 		opt.Warn(err)
 	}
-
-	fmt.Println(antipodeAgents)
 
 	comp := &component{
 		intf:           intf,
@@ -1286,6 +1283,9 @@ func (g *generator) generateRegisteredComponents(p printFn) {
 		if len(comp.listeners) > 0 {
 			refData.WriteString(codegen.MakeListenersString(myName, comp.listeners))
 		}
+		if len(comp.antipodeAgents) > 0 {
+			refData.WriteString(codegen.MakeAntipodeAgentsString(myName, comp.antipodeAgents))
+		}
 
 		// E.g.,
 		//	weaver.Register(weaver.Registration{
@@ -1308,6 +1308,13 @@ func (g *generator) generateRegisteredComponents(p printFn) {
 				listeners[i] = fmt.Sprintf("%q", lis)
 			}
 			p(`		Listeners: []string{%s},`, strings.Join(listeners, ", "))
+		}
+		if len(comp.antipodeAgents) > 0 {
+			antipodeAgents := make([]string, len(comp.antipodeAgents))
+			for i, anti := range comp.antipodeAgents {
+				antipodeAgents[i] = fmt.Sprintf("%q", anti)
+			}
+			p(`		AntipodeAgents: []string{%s},`, strings.Join(antipodeAgents, ", "))
 		}
 		if len(comp.noretry) > 0 {
 			p(`		NoRetry: []int{%s},`, noRetryString(comp))
