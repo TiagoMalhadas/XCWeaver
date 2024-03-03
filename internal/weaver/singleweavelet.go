@@ -173,7 +173,7 @@ func parseSingleConfig(regs []*codegen.Registration, filename, contents string) 
 		config.App.Name = filepath.Base(os.Args[0])
 	}
 
-	fmt.Println("antipode agent", config.AntipodeAgents["client"])
+	//fmt.Println("antipode agent", config.AntipodeAgents["client"])
 	fmt.Println("listeners", config.Listeners["client3"])
 
 	// Validate listeners in the config.
