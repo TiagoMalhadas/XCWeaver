@@ -28,6 +28,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/TiagoMalhadas/xcweaver/internal/antipode"
 	"github.com/TiagoMalhadas/xcweaver/internal/config"
 	"github.com/TiagoMalhadas/xcweaver/internal/env"
 	imetrics "github.com/TiagoMalhadas/xcweaver/internal/metrics"
@@ -80,9 +81,10 @@ type SingleWeavelet struct {
 	stats  *imetrics.StatsProcessor // metrics aggregator
 
 	// Components and listeners.
-	mu         sync.Mutex              // guards the following fields
-	components map[string]any          // components, by name
-	listeners  map[string]net.Listener // listeners, by name
+	mu             sync.Mutex                         // guards the following fields
+	components     map[string]any                     // components, by name
+	listeners      map[string]net.Listener            // listeners, by name
+	antipodeAgents map[string]antipode.Datastore_type // antipodeAgents, by name
 }
 
 // NewSingleWeavelet returns a new SingleWeavelet that hosts the components
@@ -133,22 +135,23 @@ func NewSingleWeavelet(ctx context.Context, regs []*codegen.Registration, opts S
 	}
 
 	return &SingleWeavelet{
-		ctx:          ctx,
-		regs:         regs,
-		regsByName:   regsByName,
-		regsByIntf:   regsByIntf,
-		regsByImpl:   regsByImpl,
-		opts:         opts,
-		config:       config,
-		deploymentId: deploymentId,
-		id:           id,
-		weaverInfo:   &WeaverInfo{DeploymentID: id},
-		createdAt:    time.Now(),
-		pp:           logging.NewPrettyPrinter(colors.Enabled()),
-		tracer:       tracer,
-		stats:        imetrics.NewStatsProcessor(),
-		components:   map[string]any{},
-		listeners:    map[string]net.Listener{},
+		ctx:            ctx,
+		regs:           regs,
+		regsByName:     regsByName,
+		regsByIntf:     regsByIntf,
+		regsByImpl:     regsByImpl,
+		opts:           opts,
+		config:         config,
+		deploymentId:   deploymentId,
+		id:             id,
+		weaverInfo:     &WeaverInfo{DeploymentID: id},
+		createdAt:      time.Now(),
+		pp:             logging.NewPrettyPrinter(colors.Enabled()),
+		tracer:         tracer,
+		stats:          imetrics.NewStatsProcessor(),
+		components:     map[string]any{},
+		listeners:      map[string]net.Listener{},
+		antipodeAgents: map[string]antipode.Datastore_type{},
 	}, nil
 }
 

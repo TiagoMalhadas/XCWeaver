@@ -45,6 +45,7 @@ type SingleConfig struct {
 	// Application config.
 	App       *protos.AppConfig                        `protobuf:"bytes,1,opt,name=app,proto3" json:"app,omitempty"`
 	Listeners map[string]*SingleConfig_ListenerOptions `protobuf:"bytes,3,rep,name=listeners,proto3" json:"listeners,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	AntipodeAgents map[string]*SingleConfig_AntipodeAgentOptions `protobuf:"bytes,5,rep,name=antipodeAgents,proto3" json:"antipodeAgents,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (x *SingleConfig) Reset() {
@@ -140,6 +141,84 @@ func (*SingleConfig_ListenerOptions) Descriptor() ([]byte, []int) {
 func (x *SingleConfig_ListenerOptions) GetAddress() string {
 	if x != nil {
 		return x.Address
+	}
+	return ""
+}
+
+// Options for the application antipode agents, keyed by antipode agents name.
+// If an antipode agent isn't specified in the map, default options will be used.
+type SingleConfig_AntipodeAgentOptions struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Address of the listener. The value must have the form :port or
+	// host:port, or it may be the empty string, which is treated as ":0".
+	DatastoreType string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Host string `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"`
+	Port string `protobuf:"bytes,3,opt,name=port,proto3" json:"port,omitempty"`
+	Password string `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
+	Datastore string `protobuf:"bytes,5,opt,name=datastore,proto3" json:"datastore,omitempty"`
+}
+
+func (x *SingleConfig_AntipodeAgentOptions) Reset() {
+	*x = SingleConfig_AntipodeAgentOptions{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_internal_tool_single_single_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SingleConfig_AntipodeAgentOptions) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SingleConfig_AntipodeAgentOptions) ProtoMessage() {}
+
+func (x *SingleConfig_AntipodeAgentOptions) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_tool_single_single_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SingleConfig_AntipodeAgentOptions) GetDatastoreType() string {
+	if x != nil {
+		return x.DatastoreType
+	}
+	return ""
+}
+
+func (x *SingleConfig_AntipodeAgentOptions) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *SingleConfig_AntipodeAgentOptions) GetPort() string {
+	if x != nil {
+		return x.Port
+	}
+	return ""
+}
+
+func (x *SingleConfig_AntipodeAgentOptions) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *SingleConfig_AntipodeAgentOptions) GetDatastore() string {
+	if x != nil {
+		return x.Datastore
 	}
 	return ""
 }
