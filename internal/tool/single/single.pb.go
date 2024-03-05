@@ -154,7 +154,7 @@ type SingleConfig_AntipodeAgentOptions struct {
 
 	// Address of the listener. The value must have the form :port or
 	// host:port, or it may be the empty string, which is treated as ":0".
-	DatastoreType string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	DatastoreType string `protobuf:"bytes,1,opt,name=datastoreType,proto3" json:"datastoreType,omitempty"`
 	Host string `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"`
 	Port string `protobuf:"bytes,3,opt,name=port,proto3" json:"port,omitempty"`
 	Password string `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
