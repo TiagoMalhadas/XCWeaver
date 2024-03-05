@@ -140,7 +140,7 @@ func Run[T any, P PointerToMain[T]](ctx context.Context, app func(context.Contex
 	//add empty lineage to context
 	ctx = antipode.InitCtx(ctx)
 
-	fmt.Println("version v0.3.29")
+	fmt.Println("version v0.4.1")
 
 	bootstrap, err := runtime.GetBootstrap(ctx)
 	if err != nil {

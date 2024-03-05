@@ -21,11 +21,13 @@
 package single
 
 import (
+	"fmt"
+	reflect "reflect"
+	sync "sync"
+
 	protos "github.com/TiagoMalhadas/xcweaver/runtime/protos"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -152,8 +154,7 @@ type SingleConfig_AntipodeAgentOptions struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// Address of the listener. The value must have the form :port or
-	// host:port, or it may be the empty string, which is treated as ":0".
+	// Info of the antipode agent.
 	DatastoreType string `protobuf:"bytes,1,opt,name=datastoreType,proto3" json:"datastoreType,omitempty"`
 	Host string `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"`
 	Port string `protobuf:"bytes,3,opt,name=port,proto3" json:"port,omitempty"`
@@ -171,6 +172,7 @@ func (x *SingleConfig_AntipodeAgentOptions) Reset() {
 }
 
 func (x *SingleConfig_AntipodeAgentOptions) String() string {
+	fmt.Println("datatsore name", x.Datastore)
 	return protoimpl.X.MessageStringOf(x)
 }
 
