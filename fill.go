@@ -219,7 +219,7 @@ func fillAntipodeAgents(impl any, get func(string) (antipode.Datastore_type, str
 		// The antipode agent's name is the field name, unless a tag is present.
 		name := t.Name
 		if tag, ok := t.Tag.Lookup("xcweaver"); ok {
-			if !isValidListenerName(name) {
+			if !isValidAntipodeAgentName(name) {
 				return fmt.Errorf("FillAntipodeAgents: antipode agent tag %s is not a valid Go identifier", tag)
 			}
 			name = tag
@@ -230,6 +230,8 @@ func fillAntipodeAgents(impl any, get func(string) (antipode.Datastore_type, str
 		if err != nil {
 			return fmt.Errorf("FillAntipodeAgents: setting field %v.%s: %w", s.Type(), t.Name, err)
 		}
+
+		fmt.Println("start antipode fill")
 
 		// Set the listener. We have to use UnsafePointer because the field may
 		// not be exported.
