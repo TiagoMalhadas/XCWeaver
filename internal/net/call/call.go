@@ -438,11 +438,13 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	// TODO: Arrange to obey deadline in any reconnection done inside startCall.
 	conn, nc, err := rc.startCall(ctx, rpc, opts)
 	if err != nil {
+		fmt.Println("err1")
 		return nil, err
 	}
 	if err := writeMessage(nc, &conn.wlock, requestMessage, rpc.id, hdr[:], arg, rc.opts.WriteFlattenLimit); err != nil {
 		conn.shutdown("client send request", err)
 		conn.endCall(rpc)
+		fmt.Println("err2")
 		return nil, fmt.Errorf("%w: %s", CommunicationError, err)
 	}
 
@@ -450,6 +452,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		// Optimistically spin, waiting for the results.
 		for start := time.Now(); time.Since(start) < rc.opts.OptimisticSpinDuration; {
 			if atomic.LoadUint32(&rpc.done) > 0 {
+				fmt.Println("err3")
 				return rpc.response, rpc.err
 			}
 		}
@@ -469,6 +472,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 					conn.shutdown("client send cancel", err)
 				}
 			}
+			fmt.Println("err4")
 
 			return nil, ctx.Err()
 		}
