@@ -475,6 +475,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	} else {
 		<-rpc.doneSignal
 	}
+	fmt.Println("callonce final")
 	return rpc.response, rpc.err
 }
 

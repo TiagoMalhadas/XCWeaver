@@ -96,6 +96,8 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 	// We use an iovec with up to three entries.
 	var vec [3][]byte
 
+	fmt.Println("writeChunked")
+
 	nh, np := len(extraHdr), len(payload)
 	var hdr [16]byte
 	binary.LittleEndian.PutUint64(hdr[0:], id)
