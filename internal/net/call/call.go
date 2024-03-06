@@ -567,7 +567,9 @@ func (rc *reconnectingConnection) updateEndpoints(ctx context.Context, endpoints
 // startCall registers a new in-progress call.
 // REQUIRES: rc.mu is not held.
 func (rc *reconnectingConnection) startCall(ctx context.Context, rpc *call, opts CallOptions) (*clientConnection, net.Conn, error) {
+	fmt.Println("startcall")
 	for r := retry.Begin(); r.Continue(ctx); {
+		fmt.Println("loop")
 		rc.mu.Lock()
 		if rc.closed {
 			rc.mu.Unlock()
