@@ -140,7 +140,7 @@ func Run[T any, P PointerToMain[T]](ctx context.Context, app func(context.Contex
 	//add empty lineage to context
 	ctx = antipode.InitCtx(ctx)
 
-	fmt.Println("version v0.4.1")
+	fmt.Println("version v0.4.2")
 
 	bootstrap, err := runtime.GetBootstrap(ctx)
 	if err != nil {
@@ -594,6 +594,10 @@ type NotRetriable interface{}
 type Antipode struct {
 	Datastore_type antipode.Datastore_type
 	Datastore_ID   string
+}
+
+func (a Antipode) String() string {
+	return a.Datastore_ID
 }
 
 type Lineage struct {

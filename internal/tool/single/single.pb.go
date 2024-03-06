@@ -21,7 +21,6 @@
 package single
 
 import (
-	"fmt"
 	reflect "reflect"
 	sync "sync"
 
@@ -158,8 +157,10 @@ type SingleConfig_AntipodeAgentOptions struct {
 	DatastoreType string `protobuf:"bytes,1,opt,name=datastoreType,proto3" json:"datastoreType,omitempty"`
 	Host string `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"`
 	Port string `protobuf:"bytes,3,opt,name=port,proto3" json:"port,omitempty"`
-	Password string `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
-	Datastore string `protobuf:"bytes,5,opt,name=datastore,proto3" json:"datastore,omitempty"`
+	User string `protobuf:"bytes,4,opt,name=user,proto3" json:"user,omitempty"`
+	Password string `protobuf:"bytes,5,opt,name=password,proto3" json:"password,omitempty"`
+	Datastore string `protobuf:"bytes,6,opt,name=datastore,proto3" json:"datastore,omitempty"`
+	Queue string `protobuf:"bytes,7,opt,name=queue,proto3" json:"queue,omitempty"`
 }
 
 func (x *SingleConfig_AntipodeAgentOptions) Reset() {
@@ -172,7 +173,6 @@ func (x *SingleConfig_AntipodeAgentOptions) Reset() {
 }
 
 func (x *SingleConfig_AntipodeAgentOptions) String() string {
-	fmt.Println("datatsore name", x.Datastore)
 	return protoimpl.X.MessageStringOf(x)
 }
 
@@ -211,6 +211,13 @@ func (x *SingleConfig_AntipodeAgentOptions) GetPort() string {
 	return ""
 }
 
+func (x *SingleConfig_AntipodeAgentOptions) GetUser() string {
+	if x != nil {
+		return x.User
+	}
+	return ""
+}
+
 func (x *SingleConfig_AntipodeAgentOptions) GetPassword() string {
 	if x != nil {
 		return x.Password
@@ -221,6 +228,13 @@ func (x *SingleConfig_AntipodeAgentOptions) GetPassword() string {
 func (x *SingleConfig_AntipodeAgentOptions) GetDatastore() string {
 	if x != nil {
 		return x.Datastore
+	}
+	return ""
+}
+
+func (x *SingleConfig_AntipodeAgentOptions) GetQueue() string {
+	if x != nil {
+		return x.Queue
 	}
 	return ""
 }

@@ -42,10 +42,14 @@ message SingleConfig {
     string host = 2;
     // the datastore port
     string port = 3;
+    // the datastore user
+    string user = 4;
     // the datastore password
-    string password = 4;
+    string password = 5;
     // the datastore name
-    string datastore = 5;
+    string datastore = 6;
+    // the datastore queue
+    string queue = 7;
   }
   map<string, AntipodeAgentOptions> antipodeAgents = 5;
 }
