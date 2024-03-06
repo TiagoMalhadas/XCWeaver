@@ -225,15 +225,13 @@ func fillAntipodeAgents(impl any, get func(string) (antipode.Datastore_type, str
 			name = tag
 		}
 
-		// Get the listener.
+		// Get the datastore agent.
 		datastoreType, datastoreId, err := get(name)
 		if err != nil {
 			return fmt.Errorf("FillAntipodeAgents: setting field %v.%s: %w", s.Type(), t.Name, err)
 		}
 
-		fmt.Println("start antipode fill")
-
-		// Set the listener. We have to use UnsafePointer because the field may
+		// Set the antipode agent. We have to use UnsafePointer because the field may
 		// not be exported.
 		antipode := (*Antipode)(f.Addr().UnsafePointer())
 		antipode.Datastore_type = datastoreType
