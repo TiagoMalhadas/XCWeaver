@@ -388,6 +388,7 @@ func (rc *reconnectingConnection) Call(ctx context.Context, h MethodKey, arg []b
 
 func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg []byte, opts CallOptions) ([]byte, error) {
 
+	fmt.Println("callonce")
 	//extract lineage from context
 	lineage, err := antipode.GetLineage(ctx)
 	if err != nil {
@@ -437,22 +438,18 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	// TODO: Arrange to obey deadline in any reconnection done inside startCall.
 	conn, nc, err := rc.startCall(ctx, rpc, opts)
 	if err != nil {
-		fmt.Println("if1")
 		return nil, err
 	}
 	if err := writeMessage(nc, &conn.wlock, requestMessage, rpc.id, hdr[:], arg, rc.opts.WriteFlattenLimit); err != nil {
-		fmt.Println("if2")
 		conn.shutdown("client send request", err)
 		conn.endCall(rpc)
 		return nil, fmt.Errorf("%w: %s", CommunicationError, err)
 	}
 
 	if rc.opts.OptimisticSpinDuration > 0 {
-		fmt.Println("if3")
 		// Optimistically spin, waiting for the results.
 		for start := time.Now(); time.Since(start) < rc.opts.OptimisticSpinDuration; {
 			if atomic.LoadUint32(&rpc.done) > 0 {
-				fmt.Println("if4")
 				return rpc.response, rpc.err
 			}
 		}
@@ -469,18 +466,15 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 			if !haveDeadline || time.Now().Before(deadline) {
 				// Early cancellation. Tell server about it.
 				if err := writeMessage(nc, &conn.wlock, cancelMessage, rpc.id, nil, nil, rc.opts.WriteFlattenLimit); err != nil {
-					fmt.Println("if5")
 					conn.shutdown("client send cancel", err)
 				}
 			}
-			fmt.Println("if6")
 
 			return nil, ctx.Err()
 		}
 	} else {
 		<-rpc.doneSignal
 	}
-	fmt.Println("if7")
 	return rpc.response, rpc.err
 }
 
