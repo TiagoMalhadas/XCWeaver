@@ -435,8 +435,11 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
 
+	fmt.Println("1")
+
 	// TODO: Arrange to obey deadline in any reconnection done inside startCall.
 	conn, nc, err := rc.startCall(ctx, rpc, opts)
+	fmt.Println("2")
 	if err != nil {
 		fmt.Println("err1")
 		return nil, err
@@ -447,8 +450,10 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		fmt.Println("err2")
 		return nil, fmt.Errorf("%w: %s", CommunicationError, err)
 	}
+	fmt.Println("3")
 
 	if rc.opts.OptimisticSpinDuration > 0 {
+		fmt.Println("4")
 		// Optimistically spin, waiting for the results.
 		for start := time.Now(); time.Since(start) < rc.opts.OptimisticSpinDuration; {
 			if atomic.LoadUint32(&rpc.done) > 0 {
@@ -457,6 +462,8 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 			}
 		}
 	}
+
+	fmt.Println("5")
 
 	if cdone := ctx.Done(); cdone != nil {
 		select {
