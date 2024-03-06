@@ -573,18 +573,21 @@ func (rc *reconnectingConnection) startCall(ctx context.Context, rpc *call, opts
 		rc.mu.Lock()
 		if rc.closed {
 			rc.mu.Unlock()
+			fmt.Println("err1")
 			return nil, nil, fmt.Errorf("Call on closed Connection")
 		}
 
 		replica, ok := rc.opts.Balancer.Pick(opts)
 		if !ok {
 			rc.mu.Unlock()
+			fmt.Println("err1")
 			continue
 		}
 
 		c, ok := replica.(*clientConnection)
 		if !ok {
 			rc.mu.Unlock()
+			fmt.Println("err1")
 			return nil, nil, fmt.Errorf("internal error: wrong connection type %#v returned by load balancer", replica)
 		}
 
