@@ -69,6 +69,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -78,6 +79,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/TiagoMalhadas/xcweaver/internal/antipode"
 	"github.com/TiagoMalhadas/xcweaver/runtime/logging"
 	"github.com/TiagoMalhadas/xcweaver/runtime/retry"
 	"go.opentelemetry.io/otel/codes"
@@ -388,7 +390,6 @@ func (rc *reconnectingConnection) Call(ctx context.Context, h MethodKey, arg []b
 func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg []byte, opts CallOptions) ([]byte, error) {
 
 	fmt.Println("callonce")
-	/*fmt.Println("callonce")
 	//extract lineage from context
 	lineage, err := antipode.GetLineage(ctx)
 	if err != nil {
@@ -402,7 +403,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	//i removed the msgHeaderSize contant
 	//does it still works?
-	var hdr []byte
+	/*var hdr []byte
 	copy(hdr[0:], h[:])
 	deadline, haveDeadline := ctx.Deadline()
 	if haveDeadline {
@@ -451,6 +452,9 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	// Send trace information in the header.
 	writeTraceContext(ctx, hdr[24:])
+
+	// Send len(lineage) in the header.
+	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
@@ -1117,6 +1121,8 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		ctx, span = c.opts.Tracer.Start(trace.ContextWithSpanContext(ctx, sc), methodName, trace.WithSpanKind(trace.SpanKindServer))
 		defer span.End()
 	}
+
+	fmt.Println("len of lineage", binary.LittleEndian.Uint64(msg[49:]))
 
 	// Add deadline information from the header to the context.
 	micros := binary.LittleEndian.Uint64(msg[16:])
