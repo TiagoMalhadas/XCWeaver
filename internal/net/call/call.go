@@ -465,6 +465,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		conn.endCall(rpc)
 		return nil, fmt.Errorf("%w: %s", CommunicationError, err)
 	}
+	fmt.Println("message sent")
 
 	if rc.opts.OptimisticSpinDuration > 0 {
 		// Optimistically spin, waiting for the results.
