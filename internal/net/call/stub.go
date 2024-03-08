@@ -16,7 +16,6 @@ package call
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/TiagoMalhadas/xcweaver/runtime/codegen"
 	"go.opentelemetry.io/otel/trace"
@@ -55,7 +54,7 @@ func (s *stub) Tracer() trace.Tracer {
 
 // Run implements the codegen.Stub interface.
 func (s *stub) Run(ctx context.Context, method int, args []byte, shardKey uint64) (result []byte, err error) {
-	m := s.methods[method]
+	/*m := s.methods[method]
 	opts := CallOptions{
 		Retry:    m.retry,
 		ShardKey: shardKey,
@@ -68,7 +67,7 @@ func (s *stub) Run(ctx context.Context, method int, args []byte, shardKey uint64
 		fmt.Println("aaaa")
 		result, err = s.conn.Call(ctx, m.key, args, opts)
 		// No backoff since these retries are fake ones injected for testing.
-	}
+	}*/
 	return
 }
 
