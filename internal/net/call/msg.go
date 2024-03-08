@@ -93,7 +93,7 @@ func writeMessage(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 // writeChunked writes the header, extra header, and the payload into w using
 // three different w.Write() calls.
 func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraHdr []byte, payload []byte) error {
-	fmt.Println("writeFlat")
+	fmt.Println("writeChunked")
 	// We use an iovec with up to three entries.
 	var vec [3][]byte
 

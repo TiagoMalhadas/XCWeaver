@@ -16,6 +16,7 @@ package call
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/TiagoMalhadas/xcweaver/runtime/codegen"
 	"go.opentelemetry.io/otel/trace"
@@ -64,6 +65,7 @@ func (s *stub) Run(ctx context.Context, method int, args []byte, shardKey uint64
 		n += s.injectRetries
 	}
 	for i := 0; i < n; i++ {
+		fmt.Println("aaaa")
 		result, err = s.conn.Call(ctx, m.key, args, opts)
 		// No backoff since these retries are fake ones injected for testing.
 	}
