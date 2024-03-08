@@ -456,7 +456,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	// Send len(lineage) in the header.
 	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
-	fmt.Println("callonce", uint64(len(lineageBytes)))
+	fmt.Println("callonce lineage len", len(lineageBytes))
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
@@ -1124,7 +1124,7 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		defer span.End()
 	}
 
-	fmt.Println("len of lineage", binary.LittleEndian.Uint64(msg[49:]))
+	fmt.Println("len of lineage", int(binary.LittleEndian.Uint64(msg[49:])))
 
 	// Add deadline information from the header to the context.
 	micros := binary.LittleEndian.Uint64(msg[16:])
