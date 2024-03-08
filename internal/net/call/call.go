@@ -460,6 +460,14 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
 	fmt.Println("callonce lineage len", len(lineageBytes))
 
+	var hdrLineage []byte
+
+	fmt.Println("1")
+	copy(hdrLineage[:], hdr[:])
+	fmt.Println("2")
+	copy(hdrLineage[msgHeaderSize:], lineageBytes[:])
+	fmt.Println("3")
+
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
 
