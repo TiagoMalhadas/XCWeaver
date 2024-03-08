@@ -476,7 +476,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	if err != nil {
 		return nil, err
 	}
-	if err := writeMessage(nc, &conn.wlock, requestMessage, rpc.id, hdrLineage[:], arg, rc.opts.WriteFlattenLimit); err != nil {
+	if err := writeMessage(nc, &conn.wlock, requestMessage, rpc.id, hdrLineage, arg, rc.opts.WriteFlattenLimit); err != nil {
 		conn.shutdown("client send request", err)
 		conn.endCall(rpc)
 		return nil, fmt.Errorf("%w: %s", CommunicationError, err)
