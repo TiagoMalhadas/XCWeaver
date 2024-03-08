@@ -69,7 +69,6 @@ import (
 	"bufio"
 	"context"
 	"encoding/binary"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -79,7 +78,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/TiagoMalhadas/xcweaver/internal/antipode"
 	"github.com/TiagoMalhadas/xcweaver/runtime/logging"
 	"github.com/TiagoMalhadas/xcweaver/runtime/retry"
 	"go.opentelemetry.io/otel/codes"
@@ -88,7 +86,8 @@ import (
 
 const (
 	// Size of the header included in each message.
-	msgHeaderSize = 16 + 8 + traceHeaderLen + 8 // handler_key + deadline + trace_context + lineage_len
+	//msgHeaderSize = 16 + 8 + traceHeaderLen + 8 // handler_key + deadline + trace_context + lineage_len
+	msgHeaderSize = 16 + 8 + traceHeaderLen // handler_key + deadline + trace_context
 )
 
 // Connection allows a client to send RPCs.
@@ -388,7 +387,7 @@ func (rc *reconnectingConnection) Call(ctx context.Context, h MethodKey, arg []b
 
 func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg []byte, opts CallOptions) ([]byte, error) {
 
-	fmt.Println("callonce")
+	/*fmt.Println("callonce")
 	//extract lineage from context
 	lineage, err := antipode.GetLineage(ctx)
 	if err != nil {
@@ -430,7 +429,27 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	hdr = append(hdr, aux...)
 
 	// Send lineage information in the header.
-	hdr = append(hdr, lineageBytes...)
+	hdr = append(hdr, lineageBytes...)*/
+
+	var hdr [msgHeaderSize]byte
+	copy(hdr[0:], h[:])
+	deadline, haveDeadline := ctx.Deadline()
+	if haveDeadline {
+		// Send the deadline in the header. We use the relative time instead
+		// of absolute in case there is significant clock skew. This does mean
+		// that we will not count transmission delay against the deadline.
+		micros := time.Until(deadline).Microseconds()
+		if micros <= 0 {
+			// Fail immediately without attempting to send a zero or negative
+			// deadline to the server which will be misinterpreted.
+			<-ctx.Done()
+			return nil, ctx.Err()
+		}
+		binary.LittleEndian.PutUint64(hdr[16:], uint64(micros))
+	}
+
+	// Send trace information in the header.
+	writeTraceContext(ctx, hdr[24:])
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
@@ -988,7 +1007,7 @@ func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, o
 
 // runHandler runs an application specified RPC handler at the server side.
 // The result (or error) from the handler is sent back to the client over c.
-func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
+/*func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	// Extract request header from front of payload.
 	if len(msg) < msgHeaderSize {
 		c.shutdown("server handler", fmt.Errorf("missing request header"))
@@ -1055,6 +1074,81 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 
 	// Call the handler passing it the payload.
 	payload := msg[msgHeaderSize+int(lineageSize):]
+	var err error
+	var result []byte
+	fn, ok := hmap.handlers[hkey]
+	if !ok {
+		err = fmt.Errorf("internal error: unknown function")
+	} else {
+		if err := c.startRequest(id, cancelFunc); err != nil {
+			logError(c.opts.Logger, "handle "+hmap.names[hkey], err)
+			return
+		}
+		cancelFunc = nil // endRequest() or cancellation will deal with it
+		defer c.endRequest(id)
+		result, err = fn(ctx, payload)
+	}
+
+	mt := responseMessage
+	if err != nil {
+		mt = responseError
+		result = encodeError(err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+	}
+
+	if err := writeMessage(c.c, &c.wlock, mt, id, nil, result, c.opts.WriteFlattenLimit); err != nil {
+		c.shutdown("server write "+hmap.names[hkey], err)
+	}
+}*/
+
+// runHandler runs an application specified RPC handler at the server side.
+// The result (or error) from the handler is sent back to the client over c.
+func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
+	// Extract request header from front of payload.
+	if len(msg) < msgHeaderSize {
+		c.shutdown("server handler", fmt.Errorf("missing request header"))
+		return
+	}
+
+	// Extract handler key.
+	var hkey MethodKey
+	copy(hkey[:], msg)
+
+	// Extract the method name
+	methodName := hmap.names[hkey]
+	if methodName == "" {
+		methodName = "handler"
+	} else {
+		methodName = logging.ShortenComponent(methodName)
+	}
+
+	// Extract trace context and create a new child span to trace the method
+	// call on the server.
+	ctx := context.Background()
+	span := trace.SpanFromContext(ctx) // noop span
+	if sc := readTraceContext(msg[24:]); sc.IsValid() {
+		ctx, span = c.opts.Tracer.Start(trace.ContextWithSpanContext(ctx, sc), methodName, trace.WithSpanKind(trace.SpanKindServer))
+		defer span.End()
+	}
+
+	// Add deadline information from the header to the context.
+	micros := binary.LittleEndian.Uint64(msg[16:])
+	var cancelFunc func()
+	if micros != 0 {
+		deadline := time.Now().Add(time.Microsecond * time.Duration(micros))
+		ctx, cancelFunc = context.WithDeadline(ctx, deadline)
+	} else {
+		ctx, cancelFunc = context.WithCancel(ctx)
+	}
+	defer func() {
+		if cancelFunc != nil {
+			cancelFunc()
+		}
+	}()
+
+	// Call the handler passing it the payload.
+	payload := msg[msgHeaderSize:]
 	var err error
 	var result []byte
 	fn, ok := hmap.handlers[hkey]

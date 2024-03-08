@@ -60,8 +60,6 @@ func deploy(ctx context.Context, args []string) error {
 		return fmt.Errorf("too many arguments")
 	}
 
-	fmt.Println("print1")
-
 	// Load the config file.
 	configFile := args[0]
 	bytes, err := os.ReadFile(configFile)
@@ -78,15 +76,12 @@ func deploy(ctx context.Context, args []string) error {
 		return fmt.Errorf("binary %q doesn't exist", appConfig.Binary)
 	}
 
-	fmt.Println("print2")
 	// Parse the multi section of the config.
 	multiConfig, err := config.GetDeployerConfig[MultiConfig, MultiConfig_ListenerOptions](configKey, shortConfigKey, appConfig)
 	if err != nil {
 		return err
 	}
 	multiConfig.App = appConfig
-
-	fmt.Println("print3")
 
 	// Check version compatibility.
 	versions, err := bin.ReadVersions(appConfig.Binary)
@@ -123,7 +118,6 @@ persists, please file an issue at https://github.com/TiagoMalhadas/xcweaver/issu
 			binary, versions.ModuleVersion, selfVersion)
 	}
 
-	fmt.Println("print4")
 	// Make temporary directory.
 	tmpDir, err := runtime.NewTempDir()
 	if err != nil {
@@ -132,7 +126,6 @@ persists, please file an issue at https://github.com/TiagoMalhadas/xcweaver/issu
 	defer os.RemoveAll(tmpDir)
 	runtime.OnExitSignal(func() { os.RemoveAll(tmpDir) })
 
-	fmt.Println("print5")
 	// Create the deployer.
 	deploymentId := uuid.New().String()
 	d, err := newDeployer(ctx, deploymentId, multiConfig, tmpDir)
@@ -140,7 +133,6 @@ persists, please file an issue at https://github.com/TiagoMalhadas/xcweaver/issu
 		return fmt.Errorf("create deployer: %w", err)
 	}
 
-	fmt.Println("print6")
 	// Run a status server.
 	lis, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
@@ -154,7 +146,6 @@ persists, please file an issue at https://github.com/TiagoMalhadas/xcweaver/issu
 		}
 	}()
 
-	fmt.Println("print7")
 	// Deploy main.
 	if err := d.startMain(); err != nil {
 		fmt.Println("print8")
