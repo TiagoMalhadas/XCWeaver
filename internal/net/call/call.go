@@ -397,6 +397,8 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		//return nil, err
 	}
 
+	lineage = append(lineage, antipode.WriteIdentifier{Dtstid: "datastore_ID", Key: "key", Version: "value"})
+
 	lineageBytes, err := json.Marshal(lineage)
 	if err != nil {
 		return nil, err
