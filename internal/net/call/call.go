@@ -88,8 +88,8 @@ import (
 
 const (
 	// Size of the header included in each message.
-	//msgHeaderSize = 16 + 8 + traceHeaderLen + 8 // handler_key + deadline + trace_context + lineage_len
-	msgHeaderSize = 16 + 8 + traceHeaderLen // handler_key + deadline + trace_context
+	msgHeaderSize = 16 + 8 + traceHeaderLen + 8 // handler_key + deadline + trace_context + lineage_len
+	//msgHeaderSize = 16 + 8 + traceHeaderLen // handler_key + deadline + trace_context
 )
 
 // Connection allows a client to send RPCs.
