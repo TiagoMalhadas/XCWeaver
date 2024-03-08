@@ -456,6 +456,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	// Send len(lineage) in the header.
 	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
+	fmt.Println("callonce", uint64(len(lineageBytes)))
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
