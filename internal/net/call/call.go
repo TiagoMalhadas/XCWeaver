@@ -476,7 +476,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	if err != nil {
 		return nil, err
 	}
-	if err := writeMessage(nc, &conn.wlock, requestMessage, rpc.id, hdr[:], arg, rc.opts.WriteFlattenLimit); err != nil {
+	if err := writeMessage(nc, &conn.wlock, requestMessage, rpc.id, hdrLineage[:], arg, rc.opts.WriteFlattenLimit); err != nil {
 		conn.shutdown("client send request", err)
 		conn.endCall(rpc)
 		return nil, fmt.Errorf("%w: %s", CommunicationError, err)
@@ -1134,7 +1134,18 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		defer span.End()
 	}
 
+	lineageLen := int(binary.LittleEndian.Uint64(msg[49:]))
 	fmt.Println("len of lineage", int(binary.LittleEndian.Uint64(msg[49:])))
+
+	lineageBytes := msg[msgHeaderSize : msgHeaderSize+lineageLen]
+	var lineage []antipode.WriteIdentifier
+	er := json.Unmarshal(lineageBytes, &lineage)
+	if er != nil {
+		fmt.Println(er)
+		//think on how to send the error
+		return
+	}
+	fmt.Println("lineage", lineage[0].Dtstid)
 
 	// Add deadline information from the header to the context.
 	micros := binary.LittleEndian.Uint64(msg[16:])
