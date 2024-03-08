@@ -121,6 +121,7 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 // writeFlat concatenates the header, extra header, and the payload into
 // a single flat byte slice, and writes it into w using a single w.Write() call.
 func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraHdr []byte, payload []byte) error {
+	fmt.Println("writeFlat")
 	nh, np := len(extraHdr), len(payload)
 	data := make([]byte, 16+nh+np)
 	binary.LittleEndian.PutUint64(data[0:], id)
