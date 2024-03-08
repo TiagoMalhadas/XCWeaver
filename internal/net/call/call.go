@@ -374,6 +374,7 @@ func (rc *reconnectingConnection) Close() {
 
 // Call makes an RPC over connection c, retrying it on network errors if retries are allowed.
 func (rc *reconnectingConnection) Call(ctx context.Context, h MethodKey, arg []byte, opts CallOptions) ([]byte, error) {
+	fmt.Println("Call")
 	if !opts.Retry {
 		return rc.callOnce(ctx, h, arg, opts)
 	}
