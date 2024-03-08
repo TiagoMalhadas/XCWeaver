@@ -393,7 +393,8 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	//extract lineage from context
 	lineage, err := antipode.GetLineage(ctx)
 	if err != nil {
-		return nil, err
+		lineage = []antipode.WriteIdentifier{}
+		//return nil, err
 	}
 
 	lineageBytes, err := json.Marshal(lineage)
