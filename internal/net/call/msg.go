@@ -96,8 +96,6 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 	// We use an iovec with up to three entries.
 	var vec [3][]byte
 
-	fmt.Println("writeChunked")
-
 	nh, np := len(extraHdr), len(payload)
 	var hdr [16]byte
 	binary.LittleEndian.PutUint64(hdr[0:], id)
@@ -123,7 +121,6 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 // writeFlat concatenates the header, extra header, and the payload into
 // a single flat byte slice, and writes it into w using a single w.Write() call.
 func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraHdr []byte, payload []byte) error {
-	fmt.Println("writeFlat")
 	nh, np := len(extraHdr), len(payload)
 	data := make([]byte, 16+nh+np)
 	binary.LittleEndian.PutUint64(data[0:], id)
@@ -139,7 +136,6 @@ func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraH
 	wlock.Lock()
 	defer wlock.Unlock()
 	n, err := w.Write(data)
-	fmt.Println(err)
 	if err == nil && n != len(data) {
 		err = fmt.Errorf("partial write")
 	}
@@ -152,7 +148,6 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	const headerSize = 16
 	var hdr [headerSize]byte
 	if _, err := io.ReadFull(r, hdr[:]); err != nil {
-		fmt.Println(err)
 		return 0, 0, nil, err
 	}
 
@@ -163,17 +158,14 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	dataLen := w2 >> 8
 	const maxSize = 100 << 20
 	if dataLen > maxSize {
-		fmt.Println("error2")
 		return 0, 0, nil, fmt.Errorf("overly large message length %d", dataLen)
 	}
 
 	// Read the payload.
 	msg := make([]byte, int(dataLen))
 	if _, err := io.ReadFull(r, msg); err != nil {
-		fmt.Println("error3")
 		return 0, 0, nil, err
 	}
-	fmt.Println("Read message")
 	return mt, id, msg, nil
 }
 

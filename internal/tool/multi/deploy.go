@@ -148,11 +148,8 @@ persists, please file an issue at https://github.com/TiagoMalhadas/xcweaver/issu
 
 	// Deploy main.
 	if err := d.startMain(); err != nil {
-		fmt.Println("print8")
 		return fmt.Errorf("start main process: %w", err)
 	}
-
-	fmt.Println("print9")
 
 	// Wait for the status server to become active.
 	client := status.NewClient(lis.Addr().String())

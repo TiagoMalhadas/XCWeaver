@@ -387,6 +387,7 @@ func (rc *reconnectingConnection) Call(ctx context.Context, h MethodKey, arg []b
 
 func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg []byte, opts CallOptions) ([]byte, error) {
 
+	fmt.Println("callonce")
 	/*fmt.Println("callonce")
 	//extract lineage from context
 	lineage, err := antipode.GetLineage(ctx)
@@ -454,35 +455,25 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
 
-	fmt.Println("1")
-
 	// TODO: Arrange to obey deadline in any reconnection done inside startCall.
 	conn, nc, err := rc.startCall(ctx, rpc, opts)
-	fmt.Println("2")
 	if err != nil {
-		fmt.Println("err1")
 		return nil, err
 	}
 	if err := writeMessage(nc, &conn.wlock, requestMessage, rpc.id, hdr[:], arg, rc.opts.WriteFlattenLimit); err != nil {
 		conn.shutdown("client send request", err)
 		conn.endCall(rpc)
-		fmt.Println("err2")
 		return nil, fmt.Errorf("%w: %s", CommunicationError, err)
 	}
-	fmt.Println("3")
 
 	if rc.opts.OptimisticSpinDuration > 0 {
-		fmt.Println("4")
 		// Optimistically spin, waiting for the results.
 		for start := time.Now(); time.Since(start) < rc.opts.OptimisticSpinDuration; {
 			if atomic.LoadUint32(&rpc.done) > 0 {
-				fmt.Println("err3")
 				return rpc.response, rpc.err
 			}
 		}
 	}
-
-	fmt.Println("5")
 
 	if cdone := ctx.Done(); cdone != nil {
 		select {
@@ -498,14 +489,12 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 					conn.shutdown("client send cancel", err)
 				}
 			}
-			fmt.Println("err4")
 
 			return nil, ctx.Err()
 		}
 	} else {
 		<-rpc.doneSignal
 	}
-	fmt.Println("callonce final")
 	return rpc.response, rpc.err
 }
 
@@ -586,27 +575,22 @@ func (rc *reconnectingConnection) updateEndpoints(ctx context.Context, endpoints
 // startCall registers a new in-progress call.
 // REQUIRES: rc.mu is not held.
 func (rc *reconnectingConnection) startCall(ctx context.Context, rpc *call, opts CallOptions) (*clientConnection, net.Conn, error) {
-	fmt.Println("startcall")
 	for r := retry.Begin(); r.Continue(ctx); {
-		fmt.Println("loop")
 		rc.mu.Lock()
 		if rc.closed {
 			rc.mu.Unlock()
-			fmt.Println("err1")
 			return nil, nil, fmt.Errorf("Call on closed Connection")
 		}
 
 		replica, ok := rc.opts.Balancer.Pick(opts)
 		if !ok {
 			rc.mu.Unlock()
-			fmt.Println("err1")
 			continue
 		}
 
 		c, ok := replica.(*clientConnection)
 		if !ok {
 			rc.mu.Unlock()
-			fmt.Println("err1")
 			return nil, nil, fmt.Errorf("internal error: wrong connection type %#v returned by load balancer", replica)
 		}
 
@@ -1105,6 +1089,7 @@ func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, o
 // runHandler runs an application specified RPC handler at the server side.
 // The result (or error) from the handler is sent back to the client over c.
 func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
+	fmt.Println("runHandler")
 	// Extract request header from front of payload.
 	if len(msg) < msgHeaderSize {
 		c.shutdown("server handler", fmt.Errorf("missing request header"))
