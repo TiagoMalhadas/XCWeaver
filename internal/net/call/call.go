@@ -465,7 +465,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	fmt.Println("1")
 	copy(hdrLineage[:], hdr[:])
 	fmt.Println("2")
-	copy(hdrLineage[msgHeaderSize:], lineageBytes[:])
+	hdrLineage = append(hdrLineage, lineageBytes...)
 	fmt.Println("3")
 
 	rpc := &call{}
