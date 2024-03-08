@@ -926,6 +926,7 @@ func (s *server) handlers(components []string) (*call.HandlerMap, error) {
 // waitUntilReady blocks until a successful call to the "ready" method is made
 // on the provided client.
 func waitUntilReady(ctx context.Context, client call.Connection) error {
+	fmt.Println("waitUntilReady")
 	for r := retry.Begin(); r.Continue(ctx); {
 		_, err := client.Call(ctx, readyMethodKey, nil, call.CallOptions{})
 		if err == nil || !errors.Is(err, call.Unreachable) {
