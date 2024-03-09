@@ -954,6 +954,7 @@ func (c *clientConnection) readAndProcessMessage() error {
 
 // readRequests runs on the server side reading messages sent over a connection by the client.
 func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, onDone func()) {
+	fmt.Println("readRequests")
 
 	for ctx.Err() == nil {
 		mt, id, msg, err := readMessage(c.cbuf)
