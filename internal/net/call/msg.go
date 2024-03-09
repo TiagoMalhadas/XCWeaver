@@ -125,6 +125,7 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraHdr []byte, payload []byte) error {
 	fmt.Println("writeFlat")
 	nh, np := len(extraHdr), len(payload)
+	fmt.Println("wF: ", nh+np)
 	data := make([]byte, 16+nh+np)
 	binary.LittleEndian.PutUint64(data[0:], id)
 	val := uint64(mt) | (uint64(nh+np) << 8)
@@ -164,7 +165,7 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 		return 0, 0, nil, fmt.Errorf("overly large message length %d", dataLen)
 	}
 
-	fmt.Println("datalen: ", dataLen)
+	fmt.Println("datalen: ", int(dataLen))
 
 	// Read the payload.
 	msg := make([]byte, int(dataLen))
