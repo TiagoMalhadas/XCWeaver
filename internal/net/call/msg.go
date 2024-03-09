@@ -160,7 +160,6 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	dataLen := w2 >> 8
 	const maxSize = 100 << 20
 	if dataLen > maxSize {
-		fmt.Println("error")
 		return 0, 0, nil, fmt.Errorf("overly large message length %d", dataLen)
 	}
 

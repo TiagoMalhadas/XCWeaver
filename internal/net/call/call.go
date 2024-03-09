@@ -467,7 +467,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	copy(hdrLineage[:], hdr[:])
 	fmt.Println("2")
 	hdrLineage = append(hdrLineage, lineageBytes...)
-	fmt.Println("3")
+	fmt.Println("3: ", len(hdrLineage)+len(arg))
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
