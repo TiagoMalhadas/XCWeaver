@@ -461,13 +461,13 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
 	fmt.Println("callonce lineage len", len(lineageBytes))
 
-	var hdrLineage []byte
+	/*var hdrLineage []byte
 
 	fmt.Println("1")
 	copy(hdrLineage[:], hdr[:])
 	fmt.Println("2")
 	hdrLineage = append(hdrLineage, lineageBytes...)
-	fmt.Println("3: ", len(hdrLineage)+len(arg))
+	fmt.Println("3: ", len(hdrLineage)+len(arg))*/
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
@@ -477,7 +477,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	if err != nil {
 		return nil, err
 	}
-	if err := writeMessage(nc, &conn.wlock, requestMessage, rpc.id, hdrLineage, arg, rc.opts.WriteFlattenLimit); err != nil {
+	if err := writeMessage(nc, &conn.wlock, requestMessage, rpc.id, hdr[:], arg, rc.opts.WriteFlattenLimit); err != nil {
 		conn.shutdown("client send request", err)
 		conn.endCall(rpc)
 		return nil, fmt.Errorf("%w: %s", CommunicationError, err)
