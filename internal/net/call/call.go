@@ -918,6 +918,7 @@ func (c *clientConnection) readAndProcessMessage() error {
 	// Do not hold mutex while reading from the network.
 	c.rc.mu.Unlock()
 	defer c.rc.mu.Lock()
+	fmt.Println("readAndPro")
 
 	mt, id, msg, err := readMessage(buf)
 	if err != nil {

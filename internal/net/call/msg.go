@@ -143,8 +143,10 @@ func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraH
 	wlock.Lock()
 	defer wlock.Unlock()
 	n, err := w.Write(data)
+	fmt.Println("error: ", err)
 	if err == nil && n != len(data) {
 		err = fmt.Errorf("partial write")
+		fmt.Println("error2: ", err)
 	}
 	return err
 }
