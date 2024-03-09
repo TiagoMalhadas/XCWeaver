@@ -98,6 +98,7 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 	var vec [3][]byte
 
 	nh, np := len(extraHdr), len(payload)
+	fmt.Println("wC: ", nh+np)
 	var hdr [16]byte
 	binary.LittleEndian.PutUint64(hdr[0:], id)
 	binary.LittleEndian.PutUint64(hdr[8:], uint64(mt)|(uint64(nh+np)<<8))
@@ -162,6 +163,8 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	if dataLen > maxSize {
 		return 0, 0, nil, fmt.Errorf("overly large message length %d", dataLen)
 	}
+
+	fmt.Println("datalen: ", dataLen)
 
 	// Read the payload.
 	msg := make([]byte, int(dataLen))
