@@ -911,6 +911,8 @@ func (c *clientConnection) exchangeVersions() error {
 // readAndProcessMessage reads and handles one message sent from the server.
 func (c *clientConnection) readAndProcessMessage() error {
 
+	fmt.Println("readAndProcessMessage")
+
 	buf := c.cbuf
 
 	// Do not hold mutex while reading from the network.
