@@ -124,6 +124,9 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 // a single flat byte slice, and writes it into w using a single w.Write() call.
 func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraHdr []byte, payload []byte) error {
 	fmt.Println("writeFlat")
+	if extraHdr == nil {
+		fmt.Println("nil")
+	}
 	nh, np := len(extraHdr), len(payload)
 	fmt.Println("wF: ", nh+np)
 	data := make([]byte, 16+nh+np)
