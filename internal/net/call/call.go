@@ -88,7 +88,7 @@ import (
 
 const (
 	// Size of the header included in each message.
-	msgHeaderSize = 16 + 8 + traceHeaderLen + 8 + 2 // handler_key + deadline + trace_context + lineage_len
+	msgHeaderSize = 16 + 8 + traceHeaderLen + 8 + 57 // handler_key + deadline + trace_context + lineage_len
 	//msgHeaderSize = 16 + 8 + traceHeaderLen // handler_key + deadline + trace_context
 )
 
@@ -464,7 +464,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	//copy(hdr[msgHeaderSize:], lineageBytes[:])
 
 	fmt.Println("lineagebytes real: ", lineageBytes)
-	fmt.Println("lineagebytes: ", hdr[msgHeaderSize-2:])
+	fmt.Println("lineagebytes: ", hdr[msgHeaderSize-57:])
 
 	fmt.Println("header: ", hdr[:])
 	rpc := &call{}
