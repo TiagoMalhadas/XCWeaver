@@ -1006,13 +1006,13 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	if er != nil {
 		fmt.Println(er)
 		//think on how to send the error
-		//return
+		return
 	}
 
 	ctx = antipode.InitCtx(ctx)
 
-	/*ctx, er = antipode.Transfer(ctx, lineage)
-	if er != nil {
+	ctx, er = antipode.Transfer(ctx, lineage)
+	/*if er != nil {
 		fmt.Println(er)
 		//think on how to send the error
 		return
