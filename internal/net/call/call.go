@@ -396,44 +396,10 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		//return nil, err
 	}
 
-	lineage = append(lineage, antipode.WriteIdentifier{Dtstid: "datastore_ID", Key: "key", Version: "value"})
-
 	lineageBytes, err := json.Marshal(lineage)
 	if err != nil {
 		return nil, err
 	}
-
-	//i removed the msgHeaderSize contant
-	//does it still works?
-	/*var hdr []byte
-	copy(hdr[0:], h[:])
-	deadline, haveDeadline := ctx.Deadline()
-	if haveDeadline {
-		// Send the deadline in the header. We use the relative time instead
-		// of absolute in case there is significant clock skew. This does mean
-		// that we will not count transmission delay against the deadline.
-		micros := time.Until(deadline).Microseconds()
-		if micros <= 0 {
-			// Fail immediately without attempting to send a zero or negative
-			// deadline to the server which will be misinterpreted.
-			<-ctx.Done()
-			return nil, ctx.Err()
-		}
-		binary.LittleEndian.PutUint64(hdr[16:], uint64(micros))
-	}
-
-	// Send trace information in the header.
-	var aux []byte
-	writeTraceContext(ctx, aux[:])
-	hdr = append(hdr, aux...)
-
-	// Send len(lineage) in the header.
-	var aux2 [8]byte
-	binary.LittleEndian.PutUint64(aux2[0:], uint64(len(lineageBytes)))
-	hdr = append(hdr, aux...)
-
-	// Send lineage information in the header.
-	hdr = append(hdr, lineageBytes...)*/
 
 	hdr := make([]byte, msgHeaderSize+len(lineageBytes))
 	copy(hdr[0:], h[:])
@@ -457,8 +423,8 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	// Send len(lineage) in the header.
 	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
-	//fmt.Println("callonce lineage len", len(lineageBytes))
 
+	// Send lineage in the header.
 	copy(hdr[msgHeaderSize:], lineageBytes[:])
 
 	rpc := &call{}
@@ -1000,103 +966,6 @@ func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, o
 
 // runHandler runs an application specified RPC handler at the server side.
 // The result (or error) from the handler is sent back to the client over c.
-/*func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
-	// Extract request header from front of payload.
-	if len(msg) < msgHeaderSize {
-		c.shutdown("server handler", fmt.Errorf("missing request header"))
-		return
-	}
-
-	// Extract handler key.
-	var hkey MethodKey
-	copy(hkey[:], msg)
-
-	// Extract the method name
-	methodName := hmap.names[hkey]
-	if methodName == "" {
-		methodName = "handler"
-	} else {
-		methodName = logging.ShortenComponent(methodName)
-	}
-
-	// Extract trace context and create a new child span to trace the method
-	// call on the server.
-	ctx := context.Background()
-	span := trace.SpanFromContext(ctx) // noop span
-	if sc := readTraceContext(msg[24:]); sc.IsValid() {
-		ctx, span = c.opts.Tracer.Start(trace.ContextWithSpanContext(ctx, sc), methodName, trace.WithSpanKind(trace.SpanKindServer))
-		defer span.End()
-	}
-
-	//extract lineage size.
-	lineageSize := binary.LittleEndian.Uint64(msg[49:])
-
-	//extract lineage information and add it to the context.
-	var lineageBytes []byte
-	limit := msgHeaderSize + int(lineageSize)
-	copy(lineageBytes[:], msg[57:limit])
-	var lineage []antipode.WriteIdentifier
-	er := json.Unmarshal(lineageBytes, &lineage)
-	if er != nil {
-		fmt.Println(er)
-		//think on how to send the error
-		return
-	}
-	ctx = antipode.InitCtx(ctx)
-	ctx, er = antipode.Transfer(ctx, lineage)
-	if er != nil {
-		fmt.Println(er)
-		//think on how to send the error
-		return
-	}
-
-	// Add deadline information from the header to the context.
-	micros := binary.LittleEndian.Uint64(msg[16:])
-	var cancelFunc func()
-	if micros != 0 {
-		deadline := time.Now().Add(time.Microsecond * time.Duration(micros))
-		ctx, cancelFunc = context.WithDeadline(ctx, deadline)
-	} else {
-		ctx, cancelFunc = context.WithCancel(ctx)
-	}
-	defer func() {
-		if cancelFunc != nil {
-			cancelFunc()
-		}
-	}()
-
-	// Call the handler passing it the payload.
-	payload := msg[msgHeaderSize+int(lineageSize):]
-	var err error
-	var result []byte
-	fn, ok := hmap.handlers[hkey]
-	if !ok {
-		err = fmt.Errorf("internal error: unknown function")
-	} else {
-		if err := c.startRequest(id, cancelFunc); err != nil {
-			logError(c.opts.Logger, "handle "+hmap.names[hkey], err)
-			return
-		}
-		cancelFunc = nil // endRequest() or cancellation will deal with it
-		defer c.endRequest(id)
-		result, err = fn(ctx, payload)
-	}
-
-	mt := responseMessage
-	if err != nil {
-		mt = responseError
-		result = encodeError(err)
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-	}
-
-	if err := writeMessage(c.c, &c.wlock, mt, id, nil, result, c.opts.WriteFlattenLimit); err != nil {
-		c.shutdown("server write "+hmap.names[hkey], err)
-	}
-}*/
-
-// runHandler runs an application specified RPC handler at the server side.
-// The result (or error) from the handler is sent back to the client over c.
 func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 
 	// Extract request header from front of payload.
@@ -1126,8 +995,10 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		defer span.End()
 	}
 
+	// Extract the lineage length
 	lineageLen := int(binary.LittleEndian.Uint64(msg[49:]))
 
+	// Extract the lineage information
 	lineageBytes := make([]byte, lineageLen)
 	copy(lineageBytes[:], msg[msgHeaderSize:])
 	var lineage []antipode.WriteIdentifier
@@ -1137,7 +1008,6 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		//think on how to send the error
 		return
 	}
-	fmt.Println("lineage", lineage[0].Dtstid)
 
 	// Add deadline information from the header to the context.
 	micros := binary.LittleEndian.Uint64(msg[16:])
