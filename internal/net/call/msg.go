@@ -144,6 +144,7 @@ func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraH
 
 // readMessage reads, parses, and returns the next message from r.
 func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
+	fmt.Println("readMessage")
 	// Read the header.
 	const headerSize = 16
 	var hdr [headerSize]byte
