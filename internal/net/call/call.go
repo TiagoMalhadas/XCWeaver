@@ -396,7 +396,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		//return nil, err
 	}
 
-	//lineage = append(lineage, antipode.WriteIdentifier{Dtstid: "datastore_ID", Key: "key", Version: "value"})
+	lineage = append(lineage, antipode.WriteIdentifier{Dtstid: "datastore_ID", Key: "key", Version: "value"})
 
 	lineageBytes, err := json.Marshal(lineage)
 	if err != nil {
@@ -464,7 +464,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	//copy(hdr[msgHeaderSize:], lineageBytes[:])
 
 	fmt.Println("lineagebytes real: ", lineageBytes)
-	fmt.Println("lineagebytes: ", hdr[msgHeaderSize:])
+	fmt.Println("lineagebytes: ", hdr[msgHeaderSize-2:])
 
 	fmt.Println("header: ", hdr[:])
 	rpc := &call{}
