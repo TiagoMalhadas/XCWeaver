@@ -988,7 +988,7 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 
 	// Extract trace context and create a new child span to trace the method
 	// call on the server.
-	ctx := antipode.InitCtx(context.Background())
+	ctx := context.Background()
 	span := trace.SpanFromContext(ctx) // noop span
 	if sc := readTraceContext(msg[24:]); sc.IsValid() {
 		ctx, span = c.opts.Tracer.Start(trace.ContextWithSpanContext(ctx, sc), methodName, trace.WithSpanKind(trace.SpanKindServer))
@@ -1009,12 +1009,14 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		return
 	}
 
-	ctx, er = antipode.Transfer(ctx, lineage)
+	ctx = antipode.InitCtx(ctx)
+
+	/*ctx, er = antipode.Transfer(ctx, lineage)
 	if er != nil {
 		fmt.Println(er)
 		//think on how to send the error
 		return
-	}
+	}*/
 
 	// Add deadline information from the header to the context.
 	micros := binary.LittleEndian.Uint64(msg[16:])
