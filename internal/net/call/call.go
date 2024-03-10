@@ -1162,7 +1162,7 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 
 	fmt.Println("aaaaaaaaaaaaaaaaaaaa")
 	// Call the handler passing it the payload.
-	payload := msg[msgHeaderSize:]
+	payload := msg[msgHeaderSize+2:]
 	fmt.Println("bbbbbbbbbbbbbbbbbbbbbbbbbb")
 	var err error
 	var result []byte
