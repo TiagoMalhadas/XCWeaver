@@ -372,7 +372,6 @@ func (rc *reconnectingConnection) Close() {
 
 // Call makes an RPC over connection c, retrying it on network errors if retries are allowed.
 func (rc *reconnectingConnection) Call(ctx context.Context, h MethodKey, arg []byte, opts CallOptions) ([]byte, error) {
-	fmt.Println("Call")
 	if !opts.Retry {
 		return rc.callOnce(ctx, h, arg, opts)
 	}
@@ -388,7 +387,6 @@ func (rc *reconnectingConnection) Call(ctx context.Context, h MethodKey, arg []b
 
 func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg []byte, opts CallOptions) ([]byte, error) {
 
-	fmt.Println("callonce")
 	//extract lineage from context
 	/*lineage, err := antipode.GetLineage(ctx)
 	if err != nil {
@@ -480,7 +478,6 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 		conn.endCall(rpc)
 		return nil, fmt.Errorf("%w: %s", CommunicationError, err)
 	}
-	fmt.Println("message sent")
 
 	if rc.opts.OptimisticSpinDuration > 0 {
 		// Optimistically spin, waiting for the results.
@@ -909,14 +906,11 @@ func (c *clientConnection) exchangeVersions() error {
 // readAndProcessMessage reads and handles one message sent from the server.
 func (c *clientConnection) readAndProcessMessage() error {
 
-	fmt.Println("readAndProcessMessage")
-
 	buf := c.cbuf
 
 	// Do not hold mutex while reading from the network.
 	c.rc.mu.Unlock()
 	defer c.rc.mu.Lock()
-	fmt.Println("readAndPro")
 
 	mt, id, msg, err := readMessage(buf)
 	if err != nil {
@@ -953,7 +947,6 @@ func (c *clientConnection) readAndProcessMessage() error {
 
 // readRequests runs on the server side reading messages sent over a connection by the client.
 func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, onDone func()) {
-	fmt.Println("readRequests")
 
 	for ctx.Err() == nil {
 		mt, id, msg, err := readMessage(c.cbuf)
@@ -1109,7 +1102,6 @@ func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, o
 // runHandler runs an application specified RPC handler at the server side.
 // The result (or error) from the handler is sent back to the client over c.
 func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
-	fmt.Println("runHandler")
 	// Extract request header from front of payload.
 	if len(msg) < msgHeaderSize {
 		c.shutdown("server handler", fmt.Errorf("missing request header"))

@@ -93,12 +93,10 @@ func writeMessage(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 // writeChunked writes the header, extra header, and the payload into w using
 // three different w.Write() calls.
 func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraHdr []byte, payload []byte) error {
-	fmt.Println("writeChunked")
 	// We use an iovec with up to three entries.
 	var vec [3][]byte
 
 	nh, np := len(extraHdr), len(payload)
-	fmt.Println("wC: ", nh+np)
 	var hdr [16]byte
 	binary.LittleEndian.PutUint64(hdr[0:], id)
 	binary.LittleEndian.PutUint64(hdr[8:], uint64(mt)|(uint64(nh+np)<<8))
@@ -123,12 +121,7 @@ func writeChunked(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, ext
 // writeFlat concatenates the header, extra header, and the payload into
 // a single flat byte slice, and writes it into w using a single w.Write() call.
 func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraHdr []byte, payload []byte) error {
-	fmt.Println("writeFlat")
-	if extraHdr == nil {
-		fmt.Println("nil")
-	}
 	nh, np := len(extraHdr), len(payload)
-	fmt.Println("wF: ", nh+np)
 	data := make([]byte, 16+nh+np)
 	binary.LittleEndian.PutUint64(data[0:], id)
 	val := uint64(mt) | (uint64(nh+np) << 8)
@@ -143,10 +136,8 @@ func writeFlat(w io.Writer, wlock *sync.Mutex, mt messageType, id uint64, extraH
 	wlock.Lock()
 	defer wlock.Unlock()
 	n, err := w.Write(data)
-	fmt.Println("error: ", err)
 	if err == nil && n != len(data) {
 		err = fmt.Errorf("partial write")
-		fmt.Println("error2: ", err)
 	}
 	return err
 }
@@ -157,7 +148,6 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	const headerSize = 16
 	var hdr [headerSize]byte
 	if _, err := io.ReadFull(r, hdr[:]); err != nil {
-		fmt.Println("readMessage", err)
 		return 0, 0, nil, err
 	}
 
@@ -170,8 +160,6 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 	if dataLen > maxSize {
 		return 0, 0, nil, fmt.Errorf("overly large message length %d", dataLen)
 	}
-
-	fmt.Println("datalen: ", int(dataLen))
 
 	// Read the payload.
 	msg := make([]byte, int(dataLen))
