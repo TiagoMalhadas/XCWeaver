@@ -85,7 +85,7 @@ func Transfer(ctx context.Context, lineage []WriteIdentifier) (context.Context, 
 	//extract lineage from ctx
 	oldLineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
 
-	if oldLineage != nil {
+	if oldLineage == nil {
 		err := fmt.Errorf("Lineage not found inside context")
 		return ctx, err
 	}
