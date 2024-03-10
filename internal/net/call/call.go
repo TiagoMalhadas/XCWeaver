@@ -988,7 +988,7 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 
 	// Extract trace context and create a new child span to trace the method
 	// call on the server.
-	ctx := context.Background()
+	ctx := antipode.InitCtx(context.Background())
 	span := trace.SpanFromContext(ctx) // noop span
 	if sc := readTraceContext(msg[24:]); sc.IsValid() {
 		ctx, span = c.opts.Tracer.Start(trace.ContextWithSpanContext(ctx, sc), methodName, trace.WithSpanKind(trace.SpanKindServer))
@@ -1003,6 +1003,13 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	copy(lineageBytes[:], msg[msgHeaderSize:])
 	var lineage []antipode.WriteIdentifier
 	er := json.Unmarshal(lineageBytes, &lineage)
+	if er != nil {
+		fmt.Println(er)
+		//think on how to send the error
+		return
+	}
+
+	ctx, er = antipode.Transfer(ctx, lineage)
 	if er != nil {
 		fmt.Println(er)
 		//think on how to send the error
