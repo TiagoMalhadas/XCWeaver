@@ -465,7 +465,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	fmt.Println("lineagebytes real: ", lineageBytes)
 	fmt.Println("lineagebytes: ", hdr[msgHeaderSize:])
 
-	fmt.Println("lineagebytes: ", hdr[:])
+	fmt.Println("header: ", hdr[:])
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
 
