@@ -436,7 +436,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	// Send lineage information in the header.
 	hdr = append(hdr, lineageBytes...)*/
 
-	hdr := make([]byte, msgHeaderSize)
+	hdr := make([]byte, msgHeaderSize+len(lineageBytes))
 	copy(hdr[0:], h[:])
 	deadline, haveDeadline := ctx.Deadline()
 	if haveDeadline {
@@ -460,13 +460,10 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
 	//fmt.Println("callonce lineage len", len(lineageBytes))
 
-	/*var hdrLineage []byte
+	copy(hdr[msgHeaderSize:], lineageBytes[:])
 
-	fmt.Println("1")
-	copy(hdrLineage[:], hdr[:])
-	fmt.Println("2")
-	hdrLineage = append(hdrLineage, lineageBytes...)
-	fmt.Println("3: ", len(hdrLineage)+len(arg))*/
+	fmt.Println("lineagebytes real: ", lineageBytes)
+	fmt.Println("lineagebytes: ", hdr[msgHeaderSize:])
 
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
@@ -1132,10 +1129,10 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		defer span.End()
 	}
 
-	//lineageLen := int(binary.LittleEndian.Uint64(msg[49:]))
-	fmt.Println("len of lineage", int(binary.LittleEndian.Uint64(msg[49:])))
+	lineageLen := int(binary.LittleEndian.Uint64(msg[49:]))
+	fmt.Println("len of lineage", lineageLen)
 
-	/*lineageBytes := msg[msgHeaderSize : msgHeaderSize+lineageLen]
+	lineageBytes := msg[msgHeaderSize : msgHeaderSize+lineageLen]
 	var lineage []antipode.WriteIdentifier
 	er := json.Unmarshal(lineageBytes, &lineage)
 	if er != nil {
@@ -1143,7 +1140,7 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		//think on how to send the error
 		return
 	}
-	fmt.Println("lineage", lineage[0].Dtstid)*/
+	fmt.Println("lineage", lineage[0].Dtstid)
 
 	// Add deadline information from the header to the context.
 	micros := binary.LittleEndian.Uint64(msg[16:])
