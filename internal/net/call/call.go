@@ -437,7 +437,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	hdr = append(hdr, lineageBytes...)*/
 
 	fmt.Println("lineageLen: ", len(lineageBytes))
-	hdr := make([]byte, msgHeaderSize)
+	hdr := make([]byte, msgHeaderSize+len(lineageBytes))
 	copy(hdr[0:], h[:])
 	deadline, haveDeadline := ctx.Deadline()
 	if haveDeadline {
