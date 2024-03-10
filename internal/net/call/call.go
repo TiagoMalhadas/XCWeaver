@@ -1135,7 +1135,7 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	lineageLen := int(binary.LittleEndian.Uint64(msg[49:]))
 	fmt.Println("len of lineage", lineageLen)
 
-	/*lineageBytes := msg[msgHeaderSize : msgHeaderSize+lineageLen]
+	lineageBytes := msg[msgHeaderSize : msgHeaderSize+lineageLen]
 	var lineage []antipode.WriteIdentifier
 	er := json.Unmarshal(lineageBytes, &lineage)
 	if er != nil {
@@ -1143,7 +1143,7 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		//think on how to send the error
 		return
 	}
-	fmt.Println("lineage", lineage[0].Dtstid)*/
+	fmt.Println("lineage", lineage[0].Dtstid)
 
 	// Add deadline information from the header to the context.
 	micros := binary.LittleEndian.Uint64(msg[16:])
