@@ -1106,7 +1106,8 @@ func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, o
 func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	fmt.Println("runHandler")
 	// Extract request header from front of payload.
-	if len(msg) < msgHeaderSize+2 {
+	if len(msg) < msgHeaderSize {
+		fmt.Println("errrrrrrrr")
 		c.shutdown("server handler", fmt.Errorf("missing request header"))
 		return
 	}
