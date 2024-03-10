@@ -1012,11 +1012,11 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	ctx = antipode.InitCtx(ctx)
 
 	ctx, er = antipode.Transfer(ctx, lineage)
-	/*if er != nil {
+	if er != nil {
 		fmt.Println(er)
 		//think on how to send the error
 		return
-	}*/
+	}
 
 	// Add deadline information from the header to the context.
 	micros := binary.LittleEndian.Uint64(msg[16:])
