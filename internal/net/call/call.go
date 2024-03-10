@@ -1136,9 +1136,8 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	fmt.Println("len of lineage", lineageLen)
 
 	lineageBytes := make([]byte, lineageLen)
-	fmt.Println(lineageBytes)
-	/*copy(lineageBytes[:], msg[msgHeaderSize:])
-	var lineage []antipode.WriteIdentifier
+	copy(lineageBytes[:], msg[msgHeaderSize:])
+	/*var lineage []antipode.WriteIdentifier
 	er := json.Unmarshal(lineageBytes, &lineage)
 	if er != nil {
 		fmt.Println(er)
