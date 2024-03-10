@@ -437,7 +437,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	hdr = append(hdr, lineageBytes...)*/
 
 	fmt.Println("lineageLen: ", len(lineageBytes))
-	hdr := make([]byte, msgHeaderSize)
+	hdr := make([]byte, msgHeaderSize+2)
 	copy(hdr[0:], h[:])
 	deadline, haveDeadline := ctx.Deadline()
 	if haveDeadline {
@@ -1104,8 +1104,9 @@ func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, o
 // runHandler runs an application specified RPC handler at the server side.
 // The result (or error) from the handler is sent back to the client over c.
 func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
+	fmt.Println("runHandler")
 	// Extract request header from front of payload.
-	if len(msg) < msgHeaderSize {
+	if len(msg) < msgHeaderSize+2 {
 		c.shutdown("server handler", fmt.Errorf("missing request header"))
 		return
 	}
@@ -1160,7 +1161,7 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	}()
 
 	// Call the handler passing it the payload.
-	payload := msg[msgHeaderSize:]
+	payload := msg[msgHeaderSize+2:]
 	var err error
 	var result []byte
 	fn, ok := hmap.handlers[hkey]
