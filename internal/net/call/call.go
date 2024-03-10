@@ -88,7 +88,7 @@ import (
 
 const (
 	// Size of the header included in each message.
-	msgHeaderSize = 16 + 8 + traceHeaderLen + 8 + 57 // handler_key + deadline + trace_context + lineage_len
+	msgHeaderSize = 16 + 8 + traceHeaderLen + 8 // handler_key + deadline + trace_context + lineage_len
 	//msgHeaderSize = 16 + 8 + traceHeaderLen // handler_key + deadline + trace_context
 )
 
@@ -437,7 +437,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	hdr = append(hdr, lineageBytes...)*/
 
 	fmt.Println("lineageLen: ", len(lineageBytes))
-	hdr := make([]byte, msgHeaderSize+2)
+	hdr := make([]byte, msgHeaderSize+len(lineageBytes))
 	copy(hdr[0:], h[:])
 	deadline, haveDeadline := ctx.Deadline()
 	if haveDeadline {
@@ -1160,10 +1160,8 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		}
 	}()
 
-	fmt.Println("aaaaaaaaaaaaaaaaaaaa")
 	// Call the handler passing it the payload.
-	payload := msg[msgHeaderSize+2:]
-	fmt.Println("bbbbbbbbbbbbbbbbbbbbbbbbbb")
+	payload := msg[msgHeaderSize+lineageLen:]
 	var err error
 	var result []byte
 	fn, ok := hmap.handlers[hkey]
