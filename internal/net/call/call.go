@@ -69,6 +69,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -78,6 +79,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/TiagoMalhadas/xcweaver/internal/antipode"
 	"github.com/TiagoMalhadas/xcweaver/runtime/logging"
 	"github.com/TiagoMalhadas/xcweaver/runtime/retry"
 	"go.opentelemetry.io/otel/codes"
@@ -86,8 +88,8 @@ import (
 
 const (
 	// Size of the header included in each message.
-	//msgHeaderSize = 16 + 8 + traceHeaderLen + 8 // handler_key + deadline + trace_context + lineage_len
-	msgHeaderSize = 16 + 8 + traceHeaderLen // handler_key + deadline + trace_context
+	msgHeaderSize = 16 + 8 + traceHeaderLen + 8 // handler_key + deadline + trace_context + lineage_len
+	//msgHeaderSize = 16 + 8 + traceHeaderLen // handler_key + deadline + trace_context
 )
 
 // Connection allows a client to send RPCs.
@@ -388,18 +390,19 @@ func (rc *reconnectingConnection) Call(ctx context.Context, h MethodKey, arg []b
 func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg []byte, opts CallOptions) ([]byte, error) {
 
 	//extract lineage from context
-	/*lineage, err := antipode.GetLineage(ctx)
+	lineage, err := antipode.GetLineage(ctx)
 	if err != nil {
 		lineage = []antipode.WriteIdentifier{}
 		//return nil, err
 	}
 
-	lineage = append(lineage, antipode.WriteIdentifier{Dtstid: "datastore_ID", Key: "key", Version: "value"})
+	//lineage = append(lineage, antipode.WriteIdentifier{Dtstid: "datastore_ID", Key: "key", Version: "value"})
 
 	lineageBytes, err := json.Marshal(lineage)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
-	}*/
+	}
 
 	//i removed the msgHeaderSize contant
 	//does it still works?
@@ -454,7 +457,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	writeTraceContext(ctx, hdr[24:])
 
 	// Send len(lineage) in the header.
-	//binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
+	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
 	//fmt.Println("callonce lineage len", len(lineageBytes))
 
 	/*var hdrLineage []byte
@@ -1129,10 +1132,10 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 		defer span.End()
 	}
 
-	/*lineageLen := int(binary.LittleEndian.Uint64(msg[49:]))
+	//lineageLen := int(binary.LittleEndian.Uint64(msg[49:]))
 	fmt.Println("len of lineage", int(binary.LittleEndian.Uint64(msg[49:])))
 
-	lineageBytes := msg[msgHeaderSize : msgHeaderSize+lineageLen]
+	/*lineageBytes := msg[msgHeaderSize : msgHeaderSize+lineageLen]
 	var lineage []antipode.WriteIdentifier
 	er := json.Unmarshal(lineageBytes, &lineage)
 	if er != nil {
