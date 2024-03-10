@@ -461,7 +461,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	binary.LittleEndian.PutUint64(hdr[49:], uint64(len(lineageBytes)))
 	//fmt.Println("callonce lineage len", len(lineageBytes))
 
-	//copy(hdr[msgHeaderSize:], lineageBytes[:])
+	copy(hdr[msgHeaderSize:], lineageBytes[:])
 
 	fmt.Println("lineagebytes real: ", lineageBytes)
 	fmt.Println("lineagebytes: ", hdr[msgHeaderSize-57:])
