@@ -436,7 +436,7 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	// Send lineage information in the header.
 	hdr = append(hdr, lineageBytes...)*/
 
-	var hdr [msgHeaderSize]byte
+	hdr := make([]byte, msgHeaderSize)
 	copy(hdr[0:], h[:])
 	deadline, haveDeadline := ctx.Deadline()
 	if haveDeadline {
