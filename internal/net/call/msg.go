@@ -164,6 +164,7 @@ func readMessage(r io.Reader) (messageType, uint64, []byte, error) {
 
 	// Read the payload.
 	msg := make([]byte, int(dataLen))
+	fmt.Println("msg", msg)
 	if _, err := io.ReadFull(r, msg); err != nil {
 		return 0, 0, nil, err
 	}
