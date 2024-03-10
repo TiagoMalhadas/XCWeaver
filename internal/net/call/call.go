@@ -400,7 +400,6 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	lineageBytes, err := json.Marshal(lineage)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -436,7 +435,6 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 	// Send lineage information in the header.
 	hdr = append(hdr, lineageBytes...)*/
 
-	fmt.Println("lineageLen: ", len(lineageBytes))
 	hdr := make([]byte, msgHeaderSize+len(lineageBytes))
 	copy(hdr[0:], h[:])
 	deadline, haveDeadline := ctx.Deadline()
@@ -463,10 +461,6 @@ func (rc *reconnectingConnection) callOnce(ctx context.Context, h MethodKey, arg
 
 	copy(hdr[msgHeaderSize:], lineageBytes[:])
 
-	fmt.Println("lineagebytes real: ", lineageBytes)
-	fmt.Println("lineagebytes: ", hdr[msgHeaderSize-57:])
-
-	fmt.Println("header: ", hdr[:])
 	rpc := &call{}
 	rpc.doneSignal = make(chan struct{})
 
@@ -1104,7 +1098,7 @@ func (c *serverConnection) readRequests(ctx context.Context, hmap *HandlerMap, o
 // runHandler runs an application specified RPC handler at the server side.
 // The result (or error) from the handler is sent back to the client over c.
 func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
-	fmt.Println("runHandler")
+
 	// Extract request header from front of payload.
 	if len(msg) < msgHeaderSize {
 		c.shutdown("server handler", fmt.Errorf("missing request header"))
@@ -1133,7 +1127,6 @@ func (c *serverConnection) runHandler(hmap *HandlerMap, id uint64, msg []byte) {
 	}
 
 	lineageLen := int(binary.LittleEndian.Uint64(msg[49:]))
-	fmt.Println("len of lineage", lineageLen)
 
 	lineageBytes := make([]byte, lineageLen)
 	copy(lineageBytes[:], msg[msgHeaderSize:])
