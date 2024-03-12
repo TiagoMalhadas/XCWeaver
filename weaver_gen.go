@@ -19,10 +19,10 @@ func init() {
 		Iface: reflect.TypeOf((*deployerControl)(nil)).Elem(),
 		Impl:  reflect.TypeOf(localDeployerControl{}),
 		LocalStubFn: func(impl any, caller string, tracer trace.Tracer) any {
-			return deployerControl_local_stub{impl: impl.(deployerControl), tracer: tracer, activateComponentMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ActivateComponent", Remote: false}), exportListenerMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ExportListener", Remote: false}), getListenerAddressMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetListenerAddress", Remote: false}), getSelfCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetSelfCertificate", Remote: false}), handleTraceSpansMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "HandleTraceSpans", Remote: false}), logBatchMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "LogBatch", Remote: false}), verifyClientCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyClientCertificate", Remote: false}), verifyServerCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyServerCertificate", Remote: false})}
+			return deployerControl_local_stub{impl: impl.(deployerControl), tracer: tracer, activateComponentMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ActivateComponent", Remote: false}), exportListenerMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ExportListener", Remote: false}), getListenerAddressMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetListenerAddress", Remote: false}), getAntipodeAgentInfoMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetAntipodeAgentInfo", Remote: false}), getSelfCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetSelfCertificate", Remote: false}), handleTraceSpansMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "HandleTraceSpans", Remote: false}), logBatchMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "LogBatch", Remote: false}), verifyClientCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyClientCertificate", Remote: false}), verifyServerCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyServerCertificate", Remote: false})}
 		},
 		ClientStubFn: func(stub codegen.Stub, caller string) any {
-			return deployerControl_client_stub{stub: stub, activateComponentMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ActivateComponent", Remote: true}), exportListenerMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ExportListener", Remote: true}), getListenerAddressMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetListenerAddress", Remote: true}), getSelfCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetSelfCertificate", Remote: true}), handleTraceSpansMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "HandleTraceSpans", Remote: true}), logBatchMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "LogBatch", Remote: true}), verifyClientCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyClientCertificate", Remote: true}), verifyServerCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyServerCertificate", Remote: true})}
+			return deployerControl_client_stub{stub: stub, activateComponentMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ActivateComponent", Remote: true}), exportListenerMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "ExportListener", Remote: true}), getListenerAddressMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetListenerAddress", Remote: true}), getAntipodeAgentInfoMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetAntipodeAgentInfo", Remote: true}), getSelfCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "GetSelfCertificate", Remote: true}), handleTraceSpansMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "HandleTraceSpans", Remote: true}), logBatchMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "LogBatch", Remote: true}), verifyClientCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyClientCertificate", Remote: true}), verifyServerCertificateMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/TiagoMalhadas/xcweaver/deployerControl", Method: "VerifyServerCertificate", Remote: true})}
 		},
 		ServerStubFn: func(impl any, addLoad func(uint64, float64)) codegen.Server {
 			return deployerControl_server_stub{impl: impl.(deployerControl), addLoad: addLoad}
@@ -68,6 +68,7 @@ type deployerControl_local_stub struct {
 	activateComponentMetrics       *codegen.MethodMetrics
 	exportListenerMetrics          *codegen.MethodMetrics
 	getListenerAddressMetrics      *codegen.MethodMetrics
+	getAntipodeAgentInfoMetrics    *codegen.MethodMetrics
 	getSelfCertificateMetrics      *codegen.MethodMetrics
 	handleTraceSpansMetrics        *codegen.MethodMetrics
 	logBatchMetrics                *codegen.MethodMetrics
@@ -136,6 +137,26 @@ func (s deployerControl_local_stub) GetListenerAddress(ctx context.Context, a0 *
 	}
 
 	return s.impl.GetListenerAddress(ctx, a0)
+}
+
+func (s deployerControl_local_stub) GetAntipodeAgentInfo(ctx context.Context, a0 *protos.GetAntipodeAgentInfoRequest) (r0 *protos.GetAntipodeAgentInfoReply, err error) {
+	// Update metrics.
+	begin := s.getAntipodeAgentInfoMetrics.Begin()
+	defer func() { s.getAntipodeAgentInfoMetrics.End(begin, err != nil, 0, 0) }()
+	span := trace.SpanFromContext(ctx)
+	if span.SpanContext().IsValid() {
+		// Create a child span for this method.
+		ctx, span = s.tracer.Start(ctx, "xcweaver.deployerControl.GetAntipodeAgentInfo", trace.WithSpanKind(trace.SpanKindInternal))
+		defer func() {
+			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
+			}
+			span.End()
+		}()
+	}
+
+	return s.impl.GetAntipodeAgentInfo(ctx, a0)
 }
 
 func (s deployerControl_local_stub) GetSelfCertificate(ctx context.Context, a0 *protos.GetSelfCertificateRequest) (r0 *protos.GetSelfCertificateReply, err error) {
@@ -400,6 +421,7 @@ type deployerControl_client_stub struct {
 	activateComponentMetrics       *codegen.MethodMetrics
 	exportListenerMetrics          *codegen.MethodMetrics
 	getListenerAddressMetrics      *codegen.MethodMetrics
+	getAntipodeAgentInfoMetrics    *codegen.MethodMetrics
 	getSelfCertificateMetrics      *codegen.MethodMetrics
 	handleTraceSpansMetrics        *codegen.MethodMetrics
 	logBatchMetrics                *codegen.MethodMetrics
@@ -559,6 +581,57 @@ func (s deployerControl_client_stub) GetListenerAddress(ctx context.Context, a0 
 	// Decode the results.
 	dec := codegen.NewDecoder(results)
 	r0 = serviceweaver_dec_ptr_GetListenerAddressReply_8bfe2caa(dec)
+	err = dec.Error()
+	return
+}
+
+func (s deployerControl_client_stub) GetAntipodeAgentInfo(ctx context.Context, a0 *protos.GetAntipodeAgentInfoRequest) (r0 *protos.GetAntipodeAgentInfoReply, err error) {
+	// Update metrics.
+	var requestBytes, replyBytes int
+	begin := s.getAntipodeAgentInfoMetrics.Begin()
+	defer func() { s.getAntipodeAgentInfoMetrics.End(begin, err != nil, requestBytes, replyBytes) }()
+
+	span := trace.SpanFromContext(ctx)
+	if span.SpanContext().IsValid() {
+		// Create a child span for this method.
+		ctx, span = s.stub.Tracer().Start(ctx, "xcweaver.deployerControl.GetAntipodeAgentInfo", trace.WithSpanKind(trace.SpanKindClient))
+	}
+
+	defer func() {
+		// Catch and return any panics detected during encoding/decoding/rpc.
+		if err == nil {
+			err = codegen.CatchPanics(recover())
+			if err != nil {
+				err = errors.Join(RemoteCallError, err)
+			}
+		}
+
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+
+	}()
+
+	// Encode arguments.
+	enc := codegen.NewEncoder()
+	serviceweaver_enc_ptr_GetAntipodeAgentInfoRequest_5a58feb0(enc, a0)
+	var shardKey uint64
+
+	// Call the remote method.
+	requestBytes = len(enc.Data())
+	var results []byte
+	results, err = s.stub.Run(ctx, 2, enc.Data(), shardKey)
+	replyBytes = len(results)
+	if err != nil {
+		err = errors.Join(RemoteCallError, err)
+		return
+	}
+
+	// Decode the results.
+	dec := codegen.NewDecoder(results)
+	r0 = serviceweaver_dec_ptr_GetAntipodeAgentInfoReply_8bfe2caa(dec)
 	err = dec.Error()
 	return
 }
@@ -1229,6 +1302,8 @@ func (s deployerControl_server_stub) GetStubFn(method string) func(ctx context.C
 		return s.exportListener
 	case "GetListenerAddress":
 		return s.getListenerAddress
+	case "GetAntipodeAgentInfo":
+		return s.getAntipodeAgentInfo
 	case "GetSelfCertificate":
 		return s.getSelfCertificate
 	case "HandleTraceSpans":
@@ -1315,6 +1390,31 @@ func (s deployerControl_server_stub) getListenerAddress(ctx context.Context, arg
 	// Encode the results.
 	enc := codegen.NewEncoder()
 	serviceweaver_enc_ptr_GetListenerAddressReply_8bfe2caa(enc, r0)
+	enc.Error(appErr)
+	return enc.Data(), nil
+}
+
+func (s deployerControl_server_stub) getAntipodeAgentInfo(ctx context.Context, args []byte) (res []byte, err error) {
+	// Catch and return any panics detected during encoding/decoding/rpc.
+	defer func() {
+		if err == nil {
+			err = codegen.CatchPanics(recover())
+		}
+	}()
+
+	// Decode arguments.
+	dec := codegen.NewDecoder(args)
+	var a0 *protos.GetAntipodeAgentInfoRequest
+	a0 = serviceweaver_dec_ptr_GetAntipodeAgentInfoRequest_5a58feb0(dec)
+
+	// TODO(rgrandl): The deferred function above will recover from panics in the
+	// user code: fix this.
+	// Call the local method.
+	r0, appErr := s.impl.GetAntipodeAgentInfo(ctx, a0)
+
+	// Encode the results.
+	enc := codegen.NewEncoder()
+	serviceweaver_enc_ptr_GetAntipodeAgentInfoReply_8bfe2caa(enc, r0)
 	enc.Error(appErr)
 	return enc.Data(), nil
 }
@@ -1671,6 +1771,11 @@ func (s deployerControl_reflect_stub) GetListenerAddress(ctx context.Context, a0
 	return
 }
 
+func (s deployerControl_reflect_stub) GetAntipodeAgentInfo(ctx context.Context, a0 *protos.GetAntipodeAgentInfoRequest) (r0 *protos.GetAntipodeAgentInfoReply, err error) {
+	err = s.caller("GetAntipodeAgentInfo", ctx, []any{a0}, []any{&r0})
+	return
+}
+
 func (s deployerControl_reflect_stub) GetSelfCertificate(ctx context.Context, a0 *protos.GetSelfCertificateRequest) (r0 *protos.GetSelfCertificateReply, err error) {
 	err = s.caller("GetSelfCertificate", ctx, []any{a0}, []any{&r0})
 	return
@@ -1844,6 +1949,42 @@ func serviceweaver_dec_ptr_GetListenerAddressReply_8bfe2caa(dec *codegen.Decoder
 		return nil
 	}
 	var res protos.GetListenerAddressReply
+	dec.DecodeProto(&res)
+	return &res
+}
+
+func serviceweaver_enc_ptr_GetAntipodeAgentInfoRequest_5a58feb0(enc *codegen.Encoder, arg *protos.GetAntipodeAgentInfoRequest) {
+	if arg == nil {
+		enc.Bool(false)
+	} else {
+		enc.Bool(true)
+		enc.EncodeProto(arg)
+	}
+}
+
+func serviceweaver_dec_ptr_GetAntipodeAgentInfoRequest_5a58feb0(dec *codegen.Decoder) *protos.GetAntipodeAgentInfoRequest {
+	if !dec.Bool() {
+		return nil
+	}
+	var res protos.GetAntipodeAgentInfoRequest
+	dec.DecodeProto(&res)
+	return &res
+}
+
+func serviceweaver_enc_ptr_GetAntipodeAgentInfoReply_8bfe2caa(enc *codegen.Encoder, arg *protos.GetAntipodeAgentInfoReply) {
+	if arg == nil {
+		enc.Bool(false)
+	} else {
+		enc.Bool(true)
+		enc.EncodeProto(arg)
+	}
+}
+
+func serviceweaver_dec_ptr_GetAntipodeAgentInfoReply_8bfe2caa(dec *codegen.Decoder) *protos.GetAntipodeAgentInfoReply {
+	if !dec.Bool() {
+		return nil
+	}
+	var res protos.GetAntipodeAgentInfoReply
 	dec.DecodeProto(&res)
 	return &res
 }
