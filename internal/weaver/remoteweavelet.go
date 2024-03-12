@@ -27,6 +27,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/TiagoMalhadas/xcweaver/internal/antipode"
 	"github.com/TiagoMalhadas/xcweaver/internal/config"
 	"github.com/TiagoMalhadas/xcweaver/internal/control"
 	"github.com/TiagoMalhadas/xcweaver/internal/net/call"
@@ -90,8 +91,9 @@ type RemoteWeavelet struct {
 	componentsByImpl map[reflect.Type]*component // component impl type -> component
 	redirects        map[string]redirect         // component redirects
 
-	lismu     sync.Mutex           // guards listeners
-	listeners map[string]*listener // listeners, by name
+	lismu          sync.Mutex                         // guards listeners
+	listeners      map[string]*listener               // listeners, by name
+	antipodeAgents map[string]antipode.Datastore_type // antipodeAgents, by name
 }
 
 var _ control.WeaveletControl = (*RemoteWeavelet)(nil)
@@ -189,6 +191,7 @@ func NewRemoteWeavelet(ctx context.Context, regs []*codegen.Registration, bootst
 		componentsByImpl: map[reflect.Type]*component{},
 		redirects:        map[string]redirect{},
 		listeners:        map[string]*listener{},
+		antipodeAgents:   map[string]antipode.Datastore_type{},
 	}
 
 	info := bootstrap.Args
@@ -477,6 +480,14 @@ func (w *RemoteWeavelet) createComponent(ctx context.Context, reg *codegen.Regis
 			return nil, "", err
 		}
 		return lis.lis, lis.proxyAddr, nil
+	}); err != nil {
+		return nil, err
+	}
+
+	// Fill antipode agent fields.
+	if err := FillAntipodeAgents(obj, func(name string) (antipode.Datastore_type, string, error) {
+		antipode, datastoreId, err := w.antipodeAgent(ctx, name)
+		return antipode, datastoreId, err
 	}); err != nil {
 		return nil, err
 	}
@@ -829,6 +840,47 @@ func (w *RemoteWeavelet) getListenerAddress(ctx context.Context, name string) (s
 		return "", err
 	}
 	return reply.Address, nil
+}
+
+// antipodeAgent returns the datastore type with the provided name.
+//
+// REQUIRES: w.mu is held.
+func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipode.Datastore_type, string, error) {
+
+	//Get antipode agent information
+	reply, err := w.getAntipodeAgentInfo(ctx, name)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if antipodeAgent, ok := w.antipodeAgents[name]; ok {
+		// The antipode agent already exists.
+		return antipodeAgent, reply.Datastore, nil
+	}
+
+	// Create the datastore type.
+	var antipodeAgent antipode.Datastore_type
+	switch reply.DatastoreType {
+	case "Redis":
+		antipodeAgent = antipode.CreateRedis(reply.Host, reply.Port, reply.Password)
+	case "RabbitMQ":
+		antipodeAgent = antipode.CreateRabbitMQ(reply.Host, reply.Port, reply.User, reply.Password, reply.Queue)
+	default:
+		return nil, "", fmt.Errorf("%s is not a datastore type supported", reply.DatastoreType)
+	}
+
+	// Store the antipode agent.
+	w.antipodeAgents[name] = antipodeAgent
+	return antipodeAgent, reply.Datastore, nil
+}
+
+func (w *RemoteWeavelet) getAntipodeAgentInfo(ctx context.Context, name string) (*protos.GetAntipodeAgentInfoReply, error) {
+	request := &protos.GetAntipodeAgentInfoRequest{Name: name}
+	reply, err := w.deployer.GetAntipodeAgentInfo(ctx, request)
+	if err != nil {
+		return &protos.GetAntipodeAgentInfoReply{}, err
+	}
+	return reply, nil
 }
 
 func (w *RemoteWeavelet) getSelfCertificate() (*tls.Certificate, error) {

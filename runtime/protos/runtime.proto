@@ -354,6 +354,30 @@ message GetListenerAddressReply {
   string address = 1;  // address to listen on
 }
 
+// GetAntipodeAgentInfoRequest is a request from a weavelet for the information the
+// weavelet needs to initialize an antipode agent.
+message GetAntipodeAgentInfoRequest {
+  string name = 1;           // antipode agent name
+}
+
+// GetAntipodeAgentInfoReply is a reply to a GetAntipodeAgentInfoRequest.
+message GetAntipodeAgentInfoReply {
+  // the type of the datastore e.g. "redis"
+  string datastoreType = 1;
+  // the datastore host
+  string host = 2;
+  // the datastore port
+  string port = 3;
+  // the datastore user
+  string user = 4;
+  // the datastore password
+  string password = 5;
+  // the datastore name
+  string datastore = 6;
+  // the datastore queue
+  string queue = 7;
+}
+
 // ExportListenerRequest is a request from a weavelet to export the provided
 // listener. Exporting a listener typically, but not always, involves running a
 // proxy that forwards traffic to the provided address.

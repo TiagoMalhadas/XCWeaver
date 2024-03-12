@@ -555,6 +555,25 @@ func (d *deployer) GetListenerAddress(context.Context, *protos.GetListenerAddres
 	return &protos.GetListenerAddressReply{Address: "localhost:0"}, nil
 }
 
+// GetAntipodeAgentInfo implements the control.DeployerControl interface.
+func (d *deployer) GetAntipodeAgentInfo(_ context.Context, request *protos.GetAntipodeAgentInfoRequest) (*protos.GetAntipodeAgentInfoReply, error) {
+	name := request.Name
+	if antipodeAgent, ok := d.config.AntipodeAgents[name]; !ok {
+		// The antipode agent name does not exist.
+		return nil, fmt.Errorf("The antipode agent %s does not exist", name)
+	} else {
+		datastoreType := antipodeAgent.DatastoreType
+		switch datastoreType {
+		case "Redis":
+			return &protos.GetAntipodeAgentInfoReply{DatastoreType: datastoreType, Host: antipodeAgent.Host, Port: antipodeAgent.Port, Password: antipodeAgent.Password, Datastore: antipodeAgent.Datastore}, nil
+		case "RabbitMQ":
+			return &protos.GetAntipodeAgentInfoReply{DatastoreType: antipodeAgent.DatastoreType, Host: antipodeAgent.Host, Port: antipodeAgent.Port, User: antipodeAgent.User, Password: antipodeAgent.Password, Queue: antipodeAgent.Queue, Datastore: antipodeAgent.Datastore}, nil
+		default:
+			return nil, fmt.Errorf("The datastore type %s does not exist", datastoreType)
+		}
+	}
+}
+
 // ExportListener implements the control.DeployerControl interface.
 func (d *deployer) ExportListener(_ context.Context, req *protos.ExportListenerRequest) (*protos.ExportListenerReply, error) {
 	d.mu.Lock()

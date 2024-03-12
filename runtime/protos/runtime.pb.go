@@ -1924,6 +1924,152 @@ func (x *GetListenerAddressReply) GetAddress() string {
 	return ""
 }
 
+// GetAntipodeAgentInfoRequest is a request from a weavelet for the information the
+// weavelet needs to initialize an antipode agent.
+type GetAntipodeAgentInfoRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"` // listener name
+}
+
+func (x *GetAntipodeAgentInfoRequest) Reset() {
+	*x = GetAntipodeAgentInfoRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_runtime_protos_runtime_proto_msgTypes[25]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetAntipodeAgentInfoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAntipodeAgentInfoRequest) ProtoMessage() {}
+
+func (x *GetAntipodeAgentInfoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_runtime_protos_runtime_proto_msgTypes[25]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAntipodeAgentInfoRequest.ProtoReflect.Descriptor instead.
+func (*GetAntipodeAgentInfoRequest) Descriptor() ([]byte, []int) {
+	return file_runtime_protos_runtime_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *GetAntipodeAgentInfoRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+
+// GetAntipodeAgentInfoReply is a reply to a GetAntipodeAgentInfoRequest.
+type GetAntipodeAgentInfoReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	DatastoreType string `protobuf:"bytes,1,opt,name=datastoreType,proto3" json:"datastoreType,omitempty"` // address to listen on
+	Host string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"` // address to listen on
+	Port string `protobuf:"bytes,1,opt,name=port,proto3" json:"port,omitempty"` // address to listen on
+	User string `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"` // address to listen on
+	Password string `protobuf:"bytes,1,opt,password=address,proto3" json:"password,omitempty"` // address to listen on
+	Datastore string `protobuf:"bytes,1,opt,name=datastore,proto3" json:"datastore,omitempty"` // address to listen on
+	Queue string `protobuf:"bytes,1,opt,name=queue,proto3" json:"queue,omitempty"` // address to listen on
+}
+
+func (x *GetAntipodeAgentInfoReply) Reset() {
+	*x = GetAntipodeAgentInfoReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_runtime_protos_runtime_proto_msgTypes[26]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetAntipodeAgentInfoReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAntipodeAgentInfoReply) ProtoMessage() {}
+
+func (x *GetAntipodeAgentInfoReply) ProtoReflect() protoreflect.Message {
+	mi := &file_runtime_protos_runtime_proto_msgTypes[26]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAntipodeAgentInfoReply.ProtoReflect.Descriptor instead.
+func (*GetAntipodeAgentInfoReply) Descriptor() ([]byte, []int) {
+	return file_runtime_protos_runtime_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *GetAntipodeAgentInfoReply) GetDatastoreType() string {
+	if x != nil {
+		return x.DatastoreType
+	}
+	return ""
+}
+
+func (x *GetAntipodeAgentInfoReply) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *GetAntipodeAgentInfoReply) GetPort() string {
+	if x != nil {
+		return x.Port
+	}
+	return ""
+}
+
+func (x *GetAntipodeAgentInfoReply) GetUser() string {
+	if x != nil {
+		return x.User
+	}
+	return ""
+}
+
+func (x *GetAntipodeAgentInfoReply) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *GetAntipodeAgentInfoReply) GetDatastore() string {
+	if x != nil {
+		return x.Datastore
+	}
+	return ""
+}
+
+func (x *GetAntipodeAgentInfoReply) GetQueue() string {
+	if x != nil {
+		return x.Queue
+	}
+	return ""
+}
+
 // ExportListenerRequest is a request from a weavelet to export the provided
 // listener. Exporting a listener typically, but not always, involves running a
 // proxy that forwards traffic to the provided address.
