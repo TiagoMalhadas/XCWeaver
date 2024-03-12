@@ -48,6 +48,7 @@ type MultiConfig struct {
 	// one another?
 	Mtls      bool                                    `protobuf:"varint,2,opt,name=mtls,proto3" json:"mtls,omitempty"`
 	Listeners map[string]*MultiConfig_ListenerOptions `protobuf:"bytes,3,rep,name=listeners,proto3" json:"listeners,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	AntipodeAgents map[string]*MultiConfig_AntipodeAgentOptions `protobuf:"bytes,5,rep,name=antipodeAgents,proto3" json:"antipodeAgents,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (x *MultiConfig) Reset() {
@@ -103,6 +104,13 @@ func (x *MultiConfig) GetListeners() map[string]*MultiConfig_ListenerOptions {
 	return nil
 }
 
+func (x *MultiConfig) GetAntipodeAgents() map[string]*MultiConfig_AntipodeAgentOptions {
+	if x != nil {
+		return x.AntipodeAgents
+	}
+	return nil
+}
+
 // Options for the application listeners, keyed by listener name.
 // If a listener isn't specified in the map, default options will be used.
 type MultiConfig_ListenerOptions struct {
@@ -150,6 +158,99 @@ func (*MultiConfig_ListenerOptions) Descriptor() ([]byte, []int) {
 func (x *MultiConfig_ListenerOptions) GetAddress() string {
 	if x != nil {
 		return x.Address
+	}
+	return ""
+}
+
+// Options for the application antipode agents, keyed by antipode agents name.
+// If an antipode agent isn't specified in the map, default options will be used.
+type MultiConfig_AntipodeAgentOptions struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Info of the antipode agent.
+	DatastoreType string `protobuf:"bytes,1,opt,name=datastoreType,proto3" json:"datastoreType,omitempty"`
+	Host string `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"`
+	Port string `protobuf:"bytes,3,opt,name=port,proto3" json:"port,omitempty"`
+	User string `protobuf:"bytes,4,opt,name=user,proto3" json:"user,omitempty"`
+	Password string `protobuf:"bytes,5,opt,name=password,proto3" json:"password,omitempty"`
+	Datastore string `protobuf:"bytes,6,opt,name=datastore,proto3" json:"datastore,omitempty"`
+	Queue string `protobuf:"bytes,7,opt,name=queue,proto3" json:"queue,omitempty"`
+}
+
+func (x *MultiConfig_AntipodeAgentOptions) Reset() {
+	*x = MultiConfig_AntipodeAgentOptions{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_internal_tool_multi_multi_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MultiConfig_AntipodeAgentOptions) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MultiConfig_AntipodeAgentOptions) ProtoMessage() {}
+
+func (x *MultiConfig_AntipodeAgentOptions) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_tool_multi_multi_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *MultiConfig_AntipodeAgentOptions) GetDatastoreType() string {
+	if x != nil {
+		return x.DatastoreType
+	}
+	return ""
+}
+
+func (x *MultiConfig_AntipodeAgentOptions) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *MultiConfig_AntipodeAgentOptions) GetPort() string {
+	if x != nil {
+		return x.Port
+	}
+	return ""
+}
+
+func (x *MultiConfig_AntipodeAgentOptions) GetUser() string {
+	if x != nil {
+		return x.User
+	}
+	return ""
+}
+
+func (x *MultiConfig_AntipodeAgentOptions) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *MultiConfig_AntipodeAgentOptions) GetDatastore() string {
+	if x != nil {
+		return x.Datastore
+	}
+	return ""
+}
+
+func (x *MultiConfig_AntipodeAgentOptions) GetQueue() string {
+	if x != nil {
+		return x.Queue
 	}
 	return ""
 }

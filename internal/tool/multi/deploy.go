@@ -83,6 +83,8 @@ func deploy(ctx context.Context, args []string) error {
 	}
 	multiConfig.App = appConfig
 
+	fmt.Println("antipode agent:", multiConfig.GetAntipodeAgents()["client"].DatastoreType)
+
 	// Check version compatibility.
 	versions, err := bin.ReadVersions(appConfig.Binary)
 	if err != nil {

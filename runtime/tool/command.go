@@ -96,7 +96,6 @@ func Run(tool string, commands map[string]*Command) {
 		}
 		args = cmd.Flags.Args()
 	}
-	fmt.Println("run command")
 
 	// Run command.
 	ctx := antipode.InitCtx(context.Background())

@@ -95,6 +95,13 @@ func (x *SingleConfig) GetListeners() map[string]*SingleConfig_ListenerOptions {
 	return nil
 }
 
+func (x *SingleConfig) GetAntipodeAgents() map[string]*SingleConfig_AntipodeAgentOptions {
+	if x != nil {
+		return x.AntipodeAgents
+	}
+	return nil
+}
+
 // Options for the application listeners, keyed by listener name.
 // If a listener isn't specified in the map, default options will be used.
 type SingleConfig_ListenerOptions struct {
