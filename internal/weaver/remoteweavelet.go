@@ -877,6 +877,7 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 func (w *RemoteWeavelet) getAntipodeAgentInfo(ctx context.Context, name string) (*protos.GetAntipodeAgentInfoReply, error) {
 	request := &protos.GetAntipodeAgentInfoRequest{Name: name}
 	reply, err := w.deployer.GetAntipodeAgentInfo(ctx, request)
+	fmt.Println("datastoreType: ", reply.DatastoreType)
 	if err != nil {
 		return &protos.GetAntipodeAgentInfoReply{}, err
 	}
