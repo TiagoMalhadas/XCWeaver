@@ -599,6 +599,7 @@ func (a Antipode) String() string {
 }
 
 type Lineage struct {
+	AutoMarshal
 	WriteIdentifiers []byte
 }
 
@@ -621,7 +622,7 @@ func (a Antipode) Read(ctx context.Context, key string) (string, Lineage, error)
 		return "", Lineage{}, err
 	}
 
-	lineage := Lineage{lineageBytes}
+	lineage := Lineage{WriteIdentifiers: lineageBytes}
 
 	return value, lineage, nil
 }
@@ -654,7 +655,7 @@ func GetLineage(ctx context.Context) (Lineage, error) {
 		return Lineage{}, err
 	}
 
-	lineage := Lineage{lineageBytes}
+	lineage := Lineage{WriteIdentifiers: lineageBytes}
 
 	return lineage, nil
 }
