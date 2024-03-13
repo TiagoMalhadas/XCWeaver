@@ -93,6 +93,7 @@ type RemoteWeavelet struct {
 
 	lismu          sync.Mutex                         // guards listeners
 	listeners      map[string]*listener               // listeners, by name
+	antimu         sync.Mutex                         // guards antipode agents
 	antipodeAgents map[string]antipode.Datastore_type // antipodeAgents, by name
 }
 
@@ -842,10 +843,10 @@ func (w *RemoteWeavelet) getListenerAddress(ctx context.Context, name string) (s
 	return reply.Address, nil
 }
 
-// antipodeAgent returns the datastore type with the provided name.
-//
-// REQUIRES: w.mu is held.
+// antipodeAgent returns the datastore type and the datastore id with the provided name.
 func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipode.Datastore_type, string, error) {
+	w.antimu.Lock()
+	defer w.antimu.Unlock()
 
 	//Get antipode agent information
 	reply, err := w.getAntipodeAgentInfo(ctx, name)
@@ -871,7 +872,6 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 
 	// Store the antipode agent.
 	w.antipodeAgents[name] = antipodeAgent
-	fmt.Println("datastoreId antipode agent: ", reply.Datastore)
 	return antipodeAgent, reply.Datastore, nil
 }
 
@@ -879,17 +879,8 @@ func (w *RemoteWeavelet) getAntipodeAgentInfo(ctx context.Context, name string) 
 	request := &protos.GetAntipodeAgentInfoRequest{Name: name}
 	reply, err := w.deployer.GetAntipodeAgentInfo(ctx, request)
 	if err != nil {
-		fmt.Println("error: ", err)
 		return &protos.GetAntipodeAgentInfoReply{}, err
 	}
-	fmt.Println("datastoreType getAntipodeAgentInfo: ", reply.DatastoreType)
-	fmt.Println("host getAntipodeAgentInfo: ", reply.Host)
-	fmt.Println("port getAntipodeAgentInfo: ", reply.Port)
-	fmt.Println("password getAntipodeAgentInfo: ", reply.Password)
-	fmt.Println("user getAntipodeAgentInfo: ", reply.User)
-	fmt.Println("datastoreId getAntipodeAgentInfo: ", reply.Datastore)
-	fmt.Println("queue getAntipodeAgentInfo: ", reply.Queue)
-
 	return reply, nil
 }
 
