@@ -882,7 +882,14 @@ func (w *RemoteWeavelet) getAntipodeAgentInfo(ctx context.Context, name string) 
 		fmt.Println("error: ", err)
 		return &protos.GetAntipodeAgentInfoReply{}, err
 	}
-	fmt.Println("datastoreId getAntipodeAgentInfo: ", reply.DatastoreType)
+	fmt.Println("datastoreType getAntipodeAgentInfo: ", reply.DatastoreType)
+	fmt.Println("host getAntipodeAgentInfo: ", reply.Host)
+	fmt.Println("port getAntipodeAgentInfo: ", reply.Port)
+	fmt.Println("password getAntipodeAgentInfo: ", reply.Password)
+	fmt.Println("user getAntipodeAgentInfo: ", reply.User)
+	fmt.Println("datastoreId getAntipodeAgentInfo: ", reply.Datastore)
+	fmt.Println("queue getAntipodeAgentInfo: ", reply.Queue)
+
 	return reply, nil
 }
 
