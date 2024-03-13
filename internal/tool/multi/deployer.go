@@ -562,16 +562,9 @@ func (d *deployer) GetAntipodeAgentInfo(_ context.Context, request *protos.GetAn
 		// The antipode agent name does not exist.
 		return nil, fmt.Errorf("The antipode agent %s does not exist", name)
 	} else {
-		datastoreType := antipodeAgent.DatastoreType
-		switch datastoreType {
-		case "Redis":
-			fmt.Println("deplyer datastoreId: ", antipodeAgent.Datastore)
-			return &protos.GetAntipodeAgentInfoReply{DatastoreType: datastoreType, Host: antipodeAgent.Host, Port: antipodeAgent.Port, Password: antipodeAgent.Password, Datastore: antipodeAgent.Datastore}, nil
-		case "RabbitMQ":
-			return &protos.GetAntipodeAgentInfoReply{DatastoreType: antipodeAgent.DatastoreType, Host: antipodeAgent.Host, Port: antipodeAgent.Port, User: antipodeAgent.User, Password: antipodeAgent.Password, Queue: antipodeAgent.Queue, Datastore: antipodeAgent.Datastore}, nil
-		default:
-			return nil, fmt.Errorf("The datastore type %s does not exist", datastoreType)
-		}
+		reply := &protos.GetAntipodeAgentInfoReply{DatastoreType: antipodeAgent.DatastoreType, Host: antipodeAgent.Host, Port: antipodeAgent.Port, User: antipodeAgent.User, Password: antipodeAgent.Password, Datastore: antipodeAgent.Datastore, Queue: antipodeAgent.Queue}
+		fmt.Println("deployer datastoreID: ", reply.Datastore)
+		return reply, nil
 	}
 }
 
