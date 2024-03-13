@@ -1980,13 +1980,13 @@ type GetAntipodeAgentInfoReply struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DatastoreType string `protobuf:"bytes,1,opt,name=datastoreType,proto3" json:"datastoreType,omitempty"` // address to listen on
-	Host string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"` // address to listen on
-	Port string `protobuf:"bytes,1,opt,name=port,proto3" json:"port,omitempty"` // address to listen on
-	User string `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"` // address to listen on
-	Password string `protobuf:"bytes,1,opt,password=address,proto3" json:"password,omitempty"` // address to listen on
-	Datastore string `protobuf:"bytes,1,opt,name=datastore,proto3" json:"datastore,omitempty"` // address to listen on
-	Queue string `protobuf:"bytes,1,opt,name=queue,proto3" json:"queue,omitempty"` // address to listen on
+	DatastoreType string `protobuf:"bytes,1,opt,name=datastoreType,proto3" json:"datastoreType,omitempty"` // datastore type
+	Host string `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"` // datastore host
+	Port string `protobuf:"bytes,3,opt,name=port,proto3" json:"port,omitempty"` // datastore port
+	User string `protobuf:"bytes,4,opt,name=user,proto3" json:"user,omitempty"` // datastore user
+	Password string `protobuf:"bytes,5,opt,password=address,proto3" json:"password,omitempty"` // datastore password
+	Datastore string `protobuf:"bytes,6,opt,name=datastore,proto3" json:"datastore,omitempty"` // datastore id
+	Queue string `protobuf:"bytes,7,opt,name=queue,proto3" json:"queue,omitempty"` // datastore queue
 }
 
 func (x *GetAntipodeAgentInfoReply) Reset() {
