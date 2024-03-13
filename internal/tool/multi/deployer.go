@@ -558,11 +558,13 @@ func (d *deployer) GetListenerAddress(context.Context, *protos.GetListenerAddres
 // GetAntipodeAgentInfo implements the control.DeployerControl interface.
 func (d *deployer) GetAntipodeAgentInfo(_ context.Context, request *protos.GetAntipodeAgentInfoRequest) (*protos.GetAntipodeAgentInfoReply, error) {
 	name := request.Name
+	fmt.Println("antipode agent name: ", name)
 	if antipodeAgent, ok := d.config.AntipodeAgents[name]; !ok {
 		// The antipode agent name does not exist.
 		return nil, fmt.Errorf("The antipode agent %s does not exist", name)
 	} else {
 		datastoreType := antipodeAgent.DatastoreType
+		fmt.Println("datastoreType: ", datastoreType)
 		switch datastoreType {
 		case "Redis":
 			return &protos.GetAntipodeAgentInfoReply{DatastoreType: datastoreType, Host: antipodeAgent.Host, Port: antipodeAgent.Port, Password: antipodeAgent.Password, Datastore: antipodeAgent.Datastore}, nil
