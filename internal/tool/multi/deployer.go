@@ -565,6 +565,7 @@ func (d *deployer) GetAntipodeAgentInfo(_ context.Context, request *protos.GetAn
 		datastoreType := antipodeAgent.DatastoreType
 		switch datastoreType {
 		case "Redis":
+			fmt.Println("deplyer datastoreId: ", antipodeAgent.Datastore)
 			return &protos.GetAntipodeAgentInfoReply{DatastoreType: datastoreType, Host: antipodeAgent.Host, Port: antipodeAgent.Port, Password: antipodeAgent.Password, Datastore: antipodeAgent.Datastore}, nil
 		case "RabbitMQ":
 			return &protos.GetAntipodeAgentInfoReply{DatastoreType: antipodeAgent.DatastoreType, Host: antipodeAgent.Host, Port: antipodeAgent.Port, User: antipodeAgent.User, Password: antipodeAgent.Password, Queue: antipodeAgent.Queue, Datastore: antipodeAgent.Datastore}, nil
