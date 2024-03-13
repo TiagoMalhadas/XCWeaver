@@ -231,8 +231,6 @@ func fillAntipodeAgents(impl any, get func(string) (antipode.Datastore_type, str
 			return fmt.Errorf("FillAntipodeAgents: setting field %v.%s: %w", s.Type(), t.Name, err)
 		}
 
-		fmt.Println("datastoreId fill: ", datastoreId)
-
 		// Set the antipode agent. We have to use UnsafePointer because the field may
 		// not be exported.
 		antipode := (*Antipode)(f.Addr().UnsafePointer())

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Weaver deploys and manages Weaver applications. Run "weaver -help" for
+// XCWeaver deploys and manages Weaver applications. Run "weaver -help" for
 // more information.
 package main
 
@@ -36,23 +36,23 @@ import (
 
 const usage = `USAGE
 
-  weaver generate                 // weaver code generator
-  weaver version                  // show weaver version
-  weaver single    <command> ...  // for single process deployments
-  weaver multi     <command> ...  // for multiprocess deployments
-  weaver ssh       <command> ...  // for multimachine deployments
-  weaver gke       <command> ...  // for GKE deployments
-  weaver gke-local <command> ...  // for simulated GKE deployments
-  weaver kube      <command> ...  // for vanilla Kubernetes deployments
+  xcweaver generate                 // weaver code generator
+  xcweaver version                  // show weaver version
+  xcweaver single    <command> ...  // for single process deployments
+  xcweaver multi     <command> ...  // for multiprocess deployments
+  xcweaver ssh       <command> ...  // for multimachine deployments
+  xcweaver gke       <command> ...  // for GKE deployments
+  xcweaver gke-local <command> ...  // for simulated GKE deployments
+  xcweaver kube      <command> ...  // for vanilla Kubernetes deployments
 
 DESCRIPTION
 
-  Use the "weaver" command to deploy and manage Weaver applications.
+  Use the "xcweaver" command to deploy and manage XCWeaver applications.
 
-  The "weaver generate", "weaver version", "weaver single", "weaver multi", and
-  "weaver ssh" subcommands are baked in, but all other subcommands of the form
-  "weaver <deployer>" dispatch to a binary called "weaver-<deployer>".
-  "weaver gke status", for example, dispatches to "weaver-gke status".
+  The "xcweaver generate", "xcweaver version", "xcweaver single", "xcweaver multi", and
+  "xcweaver ssh" subcommands are baked in, but all other subcommands of the form
+  "xcweaver <deployer>" dispatch to a binary called "xcweaver-<deployer>".
+  "xcweaver gke status", for example, dispatches to "xcweaver-gke status".
 `
 
 func main() {
@@ -85,7 +85,7 @@ func main() {
 		return
 
 	case "version":
-		cmd := itool.VersionCmd("weaver")
+		cmd := itool.VersionCmd("xcweaver")
 		if err := cmd.Fn(context.Background(), flag.Args()[1:]); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -96,13 +96,13 @@ func main() {
 		const usage = `Generate component callgraphs.
 
 Usage:
-  weaver callgraph <binary>
+  xcweaver callgraph <binary>
 
 Flags:
   -h, --help           Print this help message.
 
 Description:
-  "weaver callgraph <file>" outputs a component callgraph in mermaid format
+  "xcweaver callgraph <file>" outputs a component callgraph in mermaid format
   [1]. These graphs can be included in GitHub README files [2].
 
 [1]: https://mermaid.js.org/
@@ -122,7 +122,7 @@ Description:
 
 	case "single", "multi", "ssh":
 		os.Args = os.Args[1:]
-		tool.Run("weaver "+flag.Arg(0), internals[flag.Arg(0)])
+		tool.Run("xcweaver "+flag.Arg(0), internals[flag.Arg(0)])
 		return
 
 	case "help":
@@ -137,7 +137,7 @@ Description:
 			fmt.Fprintln(os.Stdout, generate.Usage)
 		case n == 2 && internals[command] != nil:
 			// weaver help <command>
-			fmt.Fprintln(os.Stdout, tool.MainHelp("weaver "+command, internals[command]))
+			fmt.Fprintln(os.Stdout, tool.MainHelp("xcweaver "+command, internals[command]))
 		case n == 2:
 			// weaver help <external>
 			code, err := run(command, []string{"--help"})
@@ -146,7 +146,7 @@ Description:
 				os.Exit(code)
 			}
 		case n > 2:
-			fmt.Fprintf(os.Stderr, "help: too many arguments. Try 'weaver %s %s --help'\n", command, strings.Join(flag.Args()[2:], " "))
+			fmt.Fprintf(os.Stderr, "help: too many arguments. Try 'xcweaver %s %s --help'\n", command, strings.Join(flag.Args()[2:], " "))
 		}
 		return
 	}
@@ -164,7 +164,7 @@ Description:
 func run(deployer string, args []string) (int, error) {
 	binary := "weaver-" + deployer
 	if _, err := exec.LookPath(binary); err != nil {
-		msg := fmt.Sprintf(`"weaver %s" is not a weaver command. See "weaver --help". If you're trying to invoke a custom deployer, the %q binary was not found. You may need to install the %q binary or add it to your PATH.`, deployer, binary, binary)
+		msg := fmt.Sprintf(`"xcweaver %s" is not a xcweaver command. See "xcweaver --help". If you're trying to invoke a custom deployer, the %q binary was not found. You may need to install the %q binary or add it to your PATH.`, deployer, binary, binary)
 		return 1, fmt.Errorf(wrap(msg, 80))
 	}
 	cmd := exec.Command(binary, args...)
