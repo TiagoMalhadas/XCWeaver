@@ -871,13 +871,13 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 
 	// Store the antipode agent.
 	w.antipodeAgents[name] = antipodeAgent
+	fmt.Println("datastoreId: ", reply.Datastore)
 	return antipodeAgent, reply.Datastore, nil
 }
 
 func (w *RemoteWeavelet) getAntipodeAgentInfo(ctx context.Context, name string) (*protos.GetAntipodeAgentInfoReply, error) {
 	request := &protos.GetAntipodeAgentInfoRequest{Name: name}
 	reply, err := w.deployer.GetAntipodeAgentInfo(ctx, request)
-	fmt.Println("datastoreType: ", reply.DatastoreType)
 	if err != nil {
 		return &protos.GetAntipodeAgentInfoReply{}, err
 	}
