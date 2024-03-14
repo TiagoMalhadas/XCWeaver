@@ -598,11 +598,6 @@ func (a Antipode) String() string {
 	return a.Datastore_ID
 }
 
-type Lineage struct {
-	AutoMarshal
-	WriteIdentifiers []byte
-}
-
 // TO-DO
 // Test this method with values as string, bool, int and struct
 func (a Antipode) Write(ctx context.Context, key string, value string) (context.Context, error) {
@@ -610,21 +605,19 @@ func (a Antipode) Write(ctx context.Context, key string, value string) (context.
 	return antipode.Write(ctx, a.Datastore_type, a.Datastore_ID, key, value)
 }
 
-func (a Antipode) Read(ctx context.Context, key string) (string, Lineage, error) {
+func (a Antipode) Read(ctx context.Context, key string) (string, []byte, error) {
 
 	value, line, err := antipode.Read(ctx, a.Datastore_type, key)
 	if err != nil {
-		return "", Lineage{}, err
+		return "", []byte{}, err
 	}
 
 	lineageBytes, err := json.Marshal(line)
 	if err != nil {
-		return "", Lineage{}, err
+		return "", []byte{}, err
 	}
 
-	lineage := Lineage{WriteIdentifiers: lineageBytes}
-
-	return value, lineage, nil
+	return value, lineageBytes, nil
 }
 
 func (a Antipode) Barrier(ctx context.Context) error {
@@ -632,10 +625,10 @@ func (a Antipode) Barrier(ctx context.Context) error {
 	return antipode.Barrier(ctx, a.Datastore_type, a.Datastore_ID)
 }
 
-func Transfer(ctx context.Context, lineage Lineage) (context.Context, error) {
+func Transfer(ctx context.Context, lineage []byte) (context.Context, error) {
 
 	var line []antipode.WriteIdentifier
-	err := json.Unmarshal(lineage.WriteIdentifiers, &line)
+	err := json.Unmarshal(lineage, &line)
 	if err != nil {
 		return nil, err
 	}
@@ -643,21 +636,19 @@ func Transfer(ctx context.Context, lineage Lineage) (context.Context, error) {
 	return antipode.Transfer(ctx, line)
 }
 
-func GetLineage(ctx context.Context) (Lineage, error) {
+func GetLineage(ctx context.Context) ([]byte, error) {
 
 	line, err := antipode.GetLineage(ctx)
 	if err != nil {
-		return Lineage{}, err
+		return []byte{}, err
 	}
 
 	lineageBytes, err := json.Marshal(line)
 	if err != nil {
-		return Lineage{}, err
+		return []byte{}, err
 	}
 
-	lineage := Lineage{WriteIdentifiers: lineageBytes}
-
-	return lineage, nil
+	return lineageBytes, nil
 }
 
 // to remove
