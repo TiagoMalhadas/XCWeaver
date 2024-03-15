@@ -91,10 +91,10 @@ type RemoteWeavelet struct {
 	componentsByImpl map[reflect.Type]*component // component impl type -> component
 	redirects        map[string]redirect         // component redirects
 
-	lismu          sync.Mutex                         // guards listeners
-	listeners      map[string]*listener               // listeners, by name
-	antimu         sync.Mutex                         // guards antipode agents
-	antipodeAgents map[string]antipode.Datastore_type // antipodeAgents, by name
+	lismu          sync.Mutex               // guards listeners
+	listeners      map[string]*listener     // listeners, by name
+	antimu         sync.Mutex               // guards antipode agents
+	antipodeAgents map[string]antipodeAgent // antipodeAgents, by name
 }
 
 var _ control.WeaveletControl = (*RemoteWeavelet)(nil)
@@ -142,6 +142,17 @@ type component struct {
 type listener struct {
 	lis       net.Listener
 	proxyAddr string
+}
+
+// antipodeAgent contains the information necessary to implement xcweaver.Antipode
+type antipodeAgent struct {
+	datastoreType string
+	host          string
+	port          string
+	user          string
+	password      string
+	datastore     string
+	queue         string
 }
 
 // NewRemoteWeavelet returns a new RemoteWeavelet that hosts the components
@@ -192,7 +203,7 @@ func NewRemoteWeavelet(ctx context.Context, regs []*codegen.Registration, bootst
 		componentsByImpl: map[reflect.Type]*component{},
 		redirects:        map[string]redirect{},
 		listeners:        map[string]*listener{},
-		antipodeAgents:   map[string]antipode.Datastore_type{},
+		antipodeAgents:   map[string]antipodeAgent{},
 	}
 
 	info := bootstrap.Args
@@ -848,31 +859,41 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 	w.antimu.Lock()
 	defer w.antimu.Unlock()
 
+	if antipodeAgent, ok := w.antipodeAgents[name]; ok {
+		// The antipode agent already exists.
+		var datastoreType antipode.Datastore_type
+		switch antipodeAgent.datastoreType {
+		case "Redis":
+			datastoreType = antipode.CreateRedis(antipodeAgent.host, antipodeAgent.port, antipodeAgent.password)
+		case "RabbitMQ":
+			datastoreType = antipode.CreateRabbitMQ(antipodeAgent.host, antipodeAgent.port, antipodeAgent.user, antipodeAgent.password, antipodeAgent.queue)
+		default:
+			return nil, "", fmt.Errorf("%s is not a datastore type supported", antipodeAgent.datastoreType)
+		}
+
+		return datastoreType, antipodeAgent.datastore, nil
+	}
+
 	//Get antipode agent information
 	reply, err := w.getAntipodeAgentInfo(ctx, name)
 	if err != nil {
 		return nil, "", err
 	}
 
-	if antipodeAgent, ok := w.antipodeAgents[name]; ok {
-		// The antipode agent already exists.
-		return antipodeAgent, reply.Datastore, nil
-	}
-
 	// Create the datastore type.
-	var antipodeAgent antipode.Datastore_type
+	var datastoreType antipode.Datastore_type
 	switch reply.DatastoreType {
 	case "Redis":
-		antipodeAgent = antipode.CreateRedis(reply.Host, reply.Port, reply.Password)
+		datastoreType = antipode.CreateRedis(reply.Host, reply.Port, reply.Password)
 	case "RabbitMQ":
-		antipodeAgent = antipode.CreateRabbitMQ(reply.Host, reply.Port, reply.User, reply.Password, reply.Queue)
+		datastoreType = antipode.CreateRabbitMQ(reply.Host, reply.Port, reply.User, reply.Password, reply.Queue)
 	default:
 		return nil, "", fmt.Errorf("%s is not a datastore type supported", reply.DatastoreType)
 	}
 
 	// Store the antipode agent.
-	w.antipodeAgents[name] = antipodeAgent
-	return antipodeAgent, reply.Datastore, nil
+	w.antipodeAgents[name] = antipodeAgent{reply.DatastoreType, reply.Host, reply.Port, reply.User, reply.Password, reply.Datastore, reply.Queue}
+	return datastoreType, reply.Datastore, nil
 }
 
 func (w *RemoteWeavelet) getAntipodeAgentInfo(ctx context.Context, name string) (*protos.GetAntipodeAgentInfoReply, error) {
