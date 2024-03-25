@@ -50,6 +50,8 @@ message SingleConfig {
     string datastore = 6;
     // the datastore queue
     string queue = 7;
+    // the mondoDB collection name
+    string collection = 8;
   }
   map<string, AntipodeAgentOptions> antipodeAgents = 5;
 }
