@@ -30,14 +30,21 @@ func CreateMongoDB(host string, port string, database string, collection string)
 // devo verificar primeiro se já existe essa key?
 func (m MongoDB) write(ctx context.Context, key string, obj AntiObj) error {
 
+	fmt.Println("write")
+
 	client, err := mongo.Connect(ctx, m.clientOptions)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
 	mongoObj := MongoDBObject{key, obj}
 
+	fmt.Println("middle")
+
 	_, err = client.Database(m.database).Collection(m.collection).InsertOne(ctx, mongoObj)
+
+	fmt.Println(err)
 
 	return err
 }
