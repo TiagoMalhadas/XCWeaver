@@ -2,7 +2,7 @@ package antipode
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,9 +15,9 @@ type MongoDB struct {
 	collection    string
 }
 
-type MongoDBObject struct {
-	key   string
-	value AntiObj
+type Document struct {
+	key   string  `bson:"key"`
+	value AntiObj `bson:"value"`
 }
 
 func CreateMongoDB(host string, port string, database string, collection string) MongoDB {
@@ -27,24 +27,18 @@ func CreateMongoDB(host string, port string, database string, collection string)
 	}
 }
 
-// devo verificar primeiro se já existe essa key?
+// devo verificar primeiro se já existe essa key? E caso exista fazer update?
+// falta fechar a conecção
 func (m MongoDB) write(ctx context.Context, key string, obj AntiObj) error {
-
-	fmt.Println("write")
 
 	client, err := mongo.Connect(ctx, m.clientOptions)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
-	mongoObj := MongoDBObject{key, obj}
-
-	fmt.Println("middle")
+	mongoObj := Document{key, obj}
 
 	_, err = client.Database(m.database).Collection(m.collection).InsertOne(ctx, mongoObj)
-
-	fmt.Println(err)
 
 	return err
 }
@@ -59,21 +53,10 @@ func (m MongoDB) read(ctx context.Context, key string) (AntiObj, error) {
 
 	filter := bson.D{{"key", key}}
 
-	cursor, err := client.Database(m.database).Collection(m.collection).Find(ctx, filter)
-	if err != nil {
-		return AntiObj{}, err
-	}
+	var result Document
+	err = client.Database(m.database).Collection(m.collection).FindOne(context.Background(), filter).Decode(&result)
 
-	var results []MongoDBObject
-	if err = cursor.All(ctx, &results); err != nil {
-		return AntiObj{}, err
-	}
-
-	if len(results) != 1 {
-		return AntiObj{}, fmt.Errorf("The key %s does not exist.", key)
-	}
-
-	return results[0].value, err
+	return result.value, err
 }
 
 func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
@@ -88,20 +71,15 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 			for {
 				filter := bson.D{{"key", writeIdentifier.Key}}
 
-				cursor, err := client.Database(m.database).Collection(m.collection).Find(ctx, filter)
-				if err != nil {
-					return err
-				}
+				var result Document
+				err = client.Database(m.database).Collection(m.collection).FindOne(context.Background(), filter).Decode(&result)
 
-				var results []MongoDBObject
-				if err = cursor.All(ctx, &results); err != nil {
+				if !errors.Is(err, mongo.ErrNoDocuments) && err != nil {
 					return err
-				}
-
-				if len(results) == 0 {
+				} else if errors.Is(err, mongo.ErrNoDocuments) { //the version replication process is not yet completed
 					continue
 				} else {
-					if results[0].value.Version == writeIdentifier.Version { //the version replication process is already completed
+					if result.value.Version == writeIdentifier.Version { //the version replication process is already completed
 						break
 					} else { //the version replication process is not yet completed
 						continue
