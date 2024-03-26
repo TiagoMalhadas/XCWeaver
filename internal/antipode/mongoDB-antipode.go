@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,7 +38,17 @@ func (m MongoDB) write(ctx context.Context, key string, obj AntiObj) error {
 		return err
 	}
 
-	mongoObj := Document{key, obj}
+	// Disconnect from MongoDB when the function returns
+	defer func() {
+		if err := client.Disconnect(ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	mongoObj := Document{
+		Key:   key,
+		Value: obj,
+	}
 
 	fmt.Println("key: ", key)
 
@@ -54,6 +65,13 @@ func (m MongoDB) read(ctx context.Context, key string) (AntiObj, error) {
 		return AntiObj{}, err
 	}
 
+	// Disconnect from MongoDB when the function returns
+	defer func() {
+		if err := client.Disconnect(ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	fmt.Println("key read: ", key)
 
 	filter := bson.D{{"key", key}}
@@ -61,7 +79,11 @@ func (m MongoDB) read(ctx context.Context, key string) (AntiObj, error) {
 	var result Document
 	err = client.Database(m.database).Collection(m.collection).FindOne(context.Background(), filter).Decode(&result)
 
-	return result.Value, err
+	if err != nil {
+		return AntiObj{}, err
+	}
+
+	return result.Value, nil
 }
 
 func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
