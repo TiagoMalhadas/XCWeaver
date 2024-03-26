@@ -3,7 +3,6 @@ package antipode
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -50,8 +49,6 @@ func (m MongoDB) write(ctx context.Context, key string, obj AntiObj) error {
 		Value: obj,
 	}
 
-	fmt.Println("key: ", key)
-
 	_, err = client.Database(m.database).Collection(m.collection).InsertOne(ctx, mongoObj)
 
 	return err
@@ -72,8 +69,6 @@ func (m MongoDB) read(ctx context.Context, key string) (AntiObj, error) {
 		}
 	}()
 
-	fmt.Println("key read: ", key)
-
 	filter := bson.D{{"key", key}}
 
 	var result Document
@@ -92,6 +87,13 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 	if err != nil {
 		return err
 	}
+
+	// Disconnect from MongoDB when the function returns
+	defer func() {
+		if err := client.Disconnect(ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	for _, writeIdentifier := range lineage {
 		if writeIdentifier.Dtstid == datastoreID {
