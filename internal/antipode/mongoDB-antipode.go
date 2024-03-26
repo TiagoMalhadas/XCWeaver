@@ -3,6 +3,7 @@ package antipode
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -38,6 +39,8 @@ func (m MongoDB) write(ctx context.Context, key string, obj AntiObj) error {
 
 	mongoObj := Document{key, obj}
 
+	fmt.Println("key: ", key)
+
 	_, err = client.Database(m.database).Collection(m.collection).InsertOne(ctx, mongoObj)
 
 	return err
@@ -50,6 +53,8 @@ func (m MongoDB) read(ctx context.Context, key string) (AntiObj, error) {
 	if err != nil {
 		return AntiObj{}, err
 	}
+
+	fmt.Println("key read: ", key)
 
 	filter := bson.D{{"key", key}}
 
