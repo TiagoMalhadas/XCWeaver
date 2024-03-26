@@ -17,8 +17,8 @@ type MongoDB struct {
 }
 
 type Document struct {
-	key   string  `bson:"key"`
-	value AntiObj `bson:"value"`
+	Key   string  `bson:"key"`
+	Value AntiObj `bson:"value"`
 }
 
 func CreateMongoDB(host string, port string, database string, collection string) MongoDB {
@@ -61,7 +61,7 @@ func (m MongoDB) read(ctx context.Context, key string) (AntiObj, error) {
 	var result Document
 	err = client.Database(m.database).Collection(m.collection).FindOne(context.Background(), filter).Decode(&result)
 
-	return result.value, err
+	return result.Value, err
 }
 
 func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
@@ -84,7 +84,7 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 				} else if errors.Is(err, mongo.ErrNoDocuments) { //the version replication process is not yet completed
 					continue
 				} else {
-					if result.value.Version == writeIdentifier.Version { //the version replication process is already completed
+					if result.Value.Version == writeIdentifier.Version { //the version replication process is already completed
 						break
 					} else { //the version replication process is not yet completed
 						continue
