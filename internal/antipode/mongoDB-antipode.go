@@ -3,6 +3,7 @@ package antipode
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -100,17 +101,22 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 			for {
 				filter := bson.D{{"key", writeIdentifier.Key}}
 
+				fmt.Println("key: ", writeIdentifier.Key)
+
 				var result Document
 				err = client.Database(m.database).Collection(m.collection).FindOne(context.Background(), filter).Decode(&result)
 
 				if !errors.Is(err, mongo.ErrNoDocuments) && err != nil {
 					return err
 				} else if errors.Is(err, mongo.ErrNoDocuments) { //the version replication process is not yet completed
+					fmt.Println("replication in progress")
 					continue
 				} else {
 					if result.Value.Version == writeIdentifier.Version { //the version replication process is already completed
+						fmt.Println("replication done: ", result.Value.Version)
 						break
 					} else { //the version replication process is not yet completed
+						fmt.Println("replication of the new version in progress")
 						continue
 					}
 				}
