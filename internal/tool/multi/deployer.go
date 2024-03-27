@@ -570,6 +570,7 @@ func (d *deployer) GetAntipodeAgentInfo(_ context.Context, request *protos.GetAn
 			Password:      antipodeAgent.Password,
 			Datastore:     antipodeAgent.Datastore,
 			Queue:         antipodeAgent.Queue,
+			Collection:    antipodeAgent.Collection,
 		}
 		return reply, nil
 	}

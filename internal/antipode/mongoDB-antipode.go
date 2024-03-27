@@ -84,6 +84,8 @@ func (m MongoDB) read(ctx context.Context, key string) (AntiObj, error) {
 
 func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
 
+	fmt.Println("start barrier")
+
 	client, err := mongo.Connect(ctx, m.clientOptions)
 	if err != nil {
 		return err
@@ -97,6 +99,7 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 	}()
 
 	for _, writeIdentifier := range lineage {
+		fmt.Println("key after for: ", writeIdentifier.Key)
 		if writeIdentifier.Dtstid == datastoreID {
 			for {
 				filter := bson.D{{"key", writeIdentifier.Key}}

@@ -153,6 +153,7 @@ type antipodeAgent struct {
 	password      string
 	datastore     string
 	queue         string
+	collection    string
 }
 
 // NewRemoteWeavelet returns a new RemoteWeavelet that hosts the components
@@ -867,6 +868,8 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 			datastoreType = antipode.CreateRedis(antipodeAgent.host, antipodeAgent.port, antipodeAgent.password)
 		case "RabbitMQ":
 			datastoreType = antipode.CreateRabbitMQ(antipodeAgent.host, antipodeAgent.port, antipodeAgent.user, antipodeAgent.password, antipodeAgent.queue)
+		case "MongoDB":
+			datastoreType = antipode.CreateMongoDB(antipodeAgent.host, antipodeAgent.port, antipodeAgent.datastore, antipodeAgent.collection)
 		default:
 			return nil, "", fmt.Errorf("%s is not a datastore type supported", antipodeAgent.datastoreType)
 		}
@@ -887,12 +890,14 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 		datastoreType = antipode.CreateRedis(reply.Host, reply.Port, reply.Password)
 	case "RabbitMQ":
 		datastoreType = antipode.CreateRabbitMQ(reply.Host, reply.Port, reply.User, reply.Password, reply.Queue)
+	case "MongoDB":
+		datastoreType = antipode.CreateMongoDB(reply.Host, reply.Port, reply.Datastore, reply.Collection)
 	default:
 		return nil, "", fmt.Errorf("%s is not a datastore type supported", reply.DatastoreType)
 	}
 
 	// Store the antipode agent.
-	w.antipodeAgents[name] = antipodeAgent{reply.DatastoreType, reply.Host, reply.Port, reply.User, reply.Password, reply.Datastore, reply.Queue}
+	w.antipodeAgents[name] = antipodeAgent{reply.DatastoreType, reply.Host, reply.Port, reply.User, reply.Password, reply.Datastore, reply.Queue, reply.Collection}
 	return datastoreType, reply.Datastore, nil
 }
 
