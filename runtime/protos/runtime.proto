@@ -370,6 +370,7 @@ message GetAntipodeAgentInfoReply {
   string datastore = 6;       // the datastore name
   string queue = 7;           // the datastore queue
   string collection = 8;      // the mondoDB collection name
+  string table = 9;           // the mysql table name
 }
 
 // ExportListenerRequest is a request from a weavelet to export the provided
