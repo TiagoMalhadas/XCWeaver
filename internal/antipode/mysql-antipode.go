@@ -40,6 +40,7 @@ func (m MySQL) write(ctx context.Context, key string, obj AntiObj) error {
 
 	// Prepare the statement and execute the query
 	query := fmt.Sprintf("INSERT INTO %s VALUES (?, ?)", m.table)
+	fmt.Println(query)
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return err
