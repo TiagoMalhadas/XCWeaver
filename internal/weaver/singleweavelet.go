@@ -369,6 +369,7 @@ func (w *SingleWeavelet) antipodeAgent(name string) (antipode.Datastore_type, er
 	var queue string
 	var collection string
 	var database string
+	var table string
 	if opts, ok := w.config.AntipodeAgents[name]; ok {
 		datastoreType = opts.DatastoreType
 		host = opts.Host
@@ -378,6 +379,7 @@ func (w *SingleWeavelet) antipodeAgent(name string) (antipode.Datastore_type, er
 		queue = opts.Queue
 		collection = opts.Collection
 		database = opts.Datastore
+		table = opts.Table
 	}
 
 	var antipodeAgent antipode.Datastore_type
@@ -388,6 +390,8 @@ func (w *SingleWeavelet) antipodeAgent(name string) (antipode.Datastore_type, er
 		antipodeAgent = antipode.CreateRabbitMQ(host, port, user, password, queue)
 	case "MongoDB":
 		antipodeAgent = antipode.CreateMongoDB(host, port, database, collection)
+	case "MySQL":
+		antipodeAgent = antipode.CreateMySQL(host, port, user, password, database, table)
 	default:
 		return nil, fmt.Errorf("%s is not a datastore type supported", datastoreType)
 	}
