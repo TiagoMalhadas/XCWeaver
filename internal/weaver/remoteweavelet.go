@@ -153,8 +153,6 @@ type antipodeAgent struct {
 	password      string
 	datastore     string
 	queue         string
-	collection    string
-	table         string
 }
 
 // NewRemoteWeavelet returns a new RemoteWeavelet that hosts the components
@@ -870,9 +868,9 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 		case "RabbitMQ":
 			datastoreType = antipode.CreateRabbitMQ(antipodeAgent.host, antipodeAgent.port, antipodeAgent.user, antipodeAgent.password, antipodeAgent.queue)
 		case "MongoDB":
-			datastoreType = antipode.CreateMongoDB(antipodeAgent.host, antipodeAgent.port, antipodeAgent.datastore, antipodeAgent.collection)
+			datastoreType = antipode.CreateMongoDB(antipodeAgent.host, antipodeAgent.port, antipodeAgent.datastore)
 		case "MySQL":
-			datastoreType = antipode.CreateMySQL(antipodeAgent.host, antipodeAgent.port, antipodeAgent.user, antipodeAgent.password, antipodeAgent.datastore, antipodeAgent.table)
+			datastoreType = antipode.CreateMySQL(antipodeAgent.host, antipodeAgent.port, antipodeAgent.user, antipodeAgent.password, antipodeAgent.datastore)
 		default:
 			return nil, "", fmt.Errorf("%s is not a datastore type supported", antipodeAgent.datastoreType)
 		}
@@ -894,15 +892,15 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 	case "RabbitMQ":
 		datastoreType = antipode.CreateRabbitMQ(reply.Host, reply.Port, reply.User, reply.Password, reply.Queue)
 	case "MongoDB":
-		datastoreType = antipode.CreateMongoDB(reply.Host, reply.Port, reply.Datastore, reply.Collection)
+		datastoreType = antipode.CreateMongoDB(reply.Host, reply.Port, reply.Datastore)
 	case "MySQL":
-		datastoreType = antipode.CreateMySQL(reply.Host, reply.Port, reply.User, reply.Password, reply.Datastore, reply.Table)
+		datastoreType = antipode.CreateMySQL(reply.Host, reply.Port, reply.User, reply.Password, reply.Datastore)
 	default:
 		return nil, "", fmt.Errorf("%s is not a datastore type supported", reply.DatastoreType)
 	}
 
 	// Store the antipode agent.
-	w.antipodeAgents[name] = antipodeAgent{reply.DatastoreType, reply.Host, reply.Port, reply.User, reply.Password, reply.Datastore, reply.Queue, reply.Collection, reply.Table}
+	w.antipodeAgents[name] = antipodeAgent{reply.DatastoreType, reply.Host, reply.Port, reply.User, reply.Password, reply.Datastore, reply.Queue}
 	return datastoreType, reply.Datastore, nil
 }
 

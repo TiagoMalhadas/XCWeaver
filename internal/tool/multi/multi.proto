@@ -54,10 +54,6 @@ message MultiConfig {
     string datastore = 6;
     // the datastore queue
     string queue = 7;
-    // the mondoDB collection name
-    string collection = 8;
-    // the mysql table name
-    string table = 9;
   }
   map<string, AntipodeAgentOptions> antipodeAgents = 5;
 }

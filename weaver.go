@@ -600,14 +600,14 @@ func (a Antipode) String() string {
 
 // TO-DO
 // Test this method with values as string, bool, int and struct
-func (a Antipode) Write(ctx context.Context, key string, value string) (context.Context, error) {
+func (a Antipode) Write(ctx context.Context, table string, key string, value string) (context.Context, error) {
 
-	return antipode.Write(ctx, a.Datastore_type, a.Datastore_ID, key, value)
+	return antipode.Write(ctx, a.Datastore_type, a.Datastore_ID, table, key, value)
 }
 
-func (a Antipode) Read(ctx context.Context, key string) (string, []byte, error) {
+func (a Antipode) Read(ctx context.Context, table string, key string) (string, []byte, error) {
 
-	value, line, err := antipode.Read(ctx, a.Datastore_type, key)
+	value, line, err := antipode.Read(ctx, a.Datastore_type, table, key)
 	if err != nil {
 		return "", []byte{}, err
 	}

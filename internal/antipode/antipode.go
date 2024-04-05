@@ -6,8 +6,8 @@ import (
 )
 
 type Datastore_type interface {
-	write(context.Context, string, AntiObj) error
-	read(context.Context, string) (AntiObj, error)
+	write(context.Context, string, string, AntiObj) error
+	read(context.Context, string, string) (AntiObj, error)
 	barrier(context.Context, []WriteIdentifier, string) error
 }
 
@@ -25,17 +25,7 @@ type WriteIdentifier struct {
 
 type contextKey string
 
-func Write(ctx context.Context, datastoreType Datastore_type, datastore_ID string, key string, value string) (context.Context, error) {
-
-	//span := trace.SpanFromContext(ctx)
-	//if span.SpanContext().IsValid() {
-
-	//	var lineage []string
-
-	// Add the array attribute to the span
-	//	span.SetAttributes(attribute.StringSlice("lineage", lineage))
-
-	//}
+func Write(ctx context.Context, datastoreType Datastore_type, datastore_ID string, table string, key string, value string) (context.Context, error) {
 
 	//extract lineage from ctx
 	lineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
@@ -51,11 +41,9 @@ func Write(ctx context.Context, datastoreType Datastore_type, datastore_ID strin
 	//initialize AntiObj
 	obj := AntiObj{value, lineage}
 
-	err := datastoreType.write(ctx, key, obj)
+	err := datastoreType.write(ctx, table, key, obj)
 
 	if err != nil {
-		//To-Do
-		//remove the last write identifier
 		return ctx, err
 	}
 
@@ -65,9 +53,9 @@ func Write(ctx context.Context, datastoreType Datastore_type, datastore_ID strin
 	return ctx, nil
 }
 
-func Read(ctx context.Context, datastoreType Datastore_type, key string) (string, []WriteIdentifier, error) {
+func Read(ctx context.Context, datastoreType Datastore_type, table string, key string) (string, []WriteIdentifier, error) {
 
-	obj, err := datastoreType.read(ctx, key)
+	obj, err := datastoreType.read(ctx, table, key)
 
 	return obj.Version, obj.Lineage, err
 }

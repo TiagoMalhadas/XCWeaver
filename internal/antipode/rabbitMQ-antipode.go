@@ -27,7 +27,7 @@ func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, 
 	return RabbitMQ{conn, queue}
 }
 
-func (r RabbitMQ) write(ctx context.Context, key string, obj AntiObj) error {
+func (r RabbitMQ) write(ctx context.Context, _ string, key string, obj AntiObj) error {
 
 	jsonAntiObj, err := json.Marshal(obj)
 	if err != nil {
@@ -68,7 +68,7 @@ func (r RabbitMQ) write(ctx context.Context, key string, obj AntiObj) error {
 	return err
 }
 
-func (r RabbitMQ) read(ctx context.Context, key string) (AntiObj, error) {
+func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, error) {
 
 	channel, err := r.connection.Channel()
 	if err != nil {

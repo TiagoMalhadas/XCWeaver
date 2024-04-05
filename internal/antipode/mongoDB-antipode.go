@@ -14,7 +14,6 @@ import (
 type MongoDB struct {
 	clientOptions *options.ClientOptions
 	database      string
-	collection    string
 }
 
 type Document struct {
@@ -22,26 +21,15 @@ type Document struct {
 	Value AntiObj `bson:"value"`
 }
 
-func CreateMongoDB(host string, port string, database string, collection string) MongoDB {
+func CreateMongoDB(host string, port string, database string) MongoDB {
 	return MongoDB{options.Client().ApplyURI("mongodb://" + host + ":" + port),
 		database,
-		collection,
 	}
 }
 
 // devo verificar primeiro se já existe essa key? E caso exista fazer update?
 // falta fechar a conecção
-func (m MongoDB) write(ctx context.Context, key string, obj AntiObj) error {
-
-	//update the write identifier with the collection name
-	lineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
-
-	if lineage == nil {
-		err := fmt.Errorf("Lineage not found inside context")
-		return err
-	}
-
-	lineage[len(lineage)-1].TableId = m.collection
+func (m MongoDB) write(ctx context.Context, collection string, key string, obj AntiObj) error {
 
 	client, err := mongo.Connect(ctx, m.clientOptions)
 	if err != nil {
@@ -60,13 +48,13 @@ func (m MongoDB) write(ctx context.Context, key string, obj AntiObj) error {
 		Value: obj,
 	}
 
-	_, err = client.Database(m.database).Collection(m.collection).InsertOne(ctx, mongoObj)
+	_, err = client.Database(m.database).Collection(collection).InsertOne(ctx, mongoObj)
 
 	return err
 }
 
 // posso assumir que não há mais do que um objeto com a mesma key?
-func (m MongoDB) read(ctx context.Context, key string) (AntiObj, error) {
+func (m MongoDB) read(ctx context.Context, collection string, key string) (AntiObj, error) {
 
 	client, err := mongo.Connect(ctx, m.clientOptions)
 	if err != nil {
@@ -83,7 +71,7 @@ func (m MongoDB) read(ctx context.Context, key string) (AntiObj, error) {
 	filter := bson.D{{"key", key}}
 
 	var result Document
-	err = client.Database(m.database).Collection(m.collection).FindOne(context.Background(), filter).Decode(&result)
+	err = client.Database(m.database).Collection(collection).FindOne(context.Background(), filter).Decode(&result)
 
 	if err != nil {
 		return AntiObj{}, err
@@ -117,7 +105,7 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 				fmt.Println("key: ", writeIdentifier.Key)
 
 				var result Document
-				err = client.Database(m.database).Collection(m.collection).FindOne(context.Background(), filter).Decode(&result)
+				err = client.Database(m.database).Collection(writeIdentifier.TableId).FindOne(context.Background(), filter).Decode(&result)
 
 				if !errors.Is(err, mongo.ErrNoDocuments) && err != nil {
 					return err

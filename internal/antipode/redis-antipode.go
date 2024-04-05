@@ -20,7 +20,7 @@ func CreateRedis(redis_host string, redis_port string, redis_password string) Re
 	})}
 }
 
-func (r Redis) write(ctx context.Context, key string, obj AntiObj) error {
+func (r Redis) write(ctx context.Context, _ string, key string, obj AntiObj) error {
 
 	jsonAntiObj, err := json.Marshal(obj)
 	if err != nil {
@@ -32,7 +32,7 @@ func (r Redis) write(ctx context.Context, key string, obj AntiObj) error {
 	return err
 }
 
-func (r Redis) read(ctx context.Context, key string) (AntiObj, error) {
+func (r Redis) read(ctx context.Context, _ string, key string) (AntiObj, error) {
 
 	jsonAntiObj, err := r.client.Get(ctx, key).Bytes()
 
