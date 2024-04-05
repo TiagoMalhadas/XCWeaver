@@ -26,6 +26,16 @@ func CreateMySQL(host string, port string, user string, password string, datasto
 
 func (m MySQL) write(ctx context.Context, key string, obj AntiObj) error {
 
+	//update the write identifier with the table name
+	lineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
+
+	if lineage == nil {
+		err := fmt.Errorf("Lineage not found inside context")
+		return err
+	}
+
+	lineage[len(lineage)-1].TableId = m.table
+
 	// Connect to MySQL database
 	db, err := sql.Open("mysql", m.dsn)
 	if err != nil {

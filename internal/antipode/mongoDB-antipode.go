@@ -33,6 +33,16 @@ func CreateMongoDB(host string, port string, database string, collection string)
 // falta fechar a conecção
 func (m MongoDB) write(ctx context.Context, key string, obj AntiObj) error {
 
+	//update the write identifier with the collection name
+	lineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
+
+	if lineage == nil {
+		err := fmt.Errorf("Lineage not found inside context")
+		return err
+	}
+
+	lineage[len(lineage)-1].TableId = m.collection
+
 	client, err := mongo.Connect(ctx, m.clientOptions)
 	if err != nil {
 		return err

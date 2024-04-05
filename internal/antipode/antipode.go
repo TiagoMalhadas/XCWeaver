@@ -18,6 +18,7 @@ type AntiObj struct {
 
 type WriteIdentifier struct {
 	Dtstid  string
+	TableId string
 	Key     string
 	Version string
 }
@@ -53,6 +54,8 @@ func Write(ctx context.Context, datastoreType Datastore_type, datastore_ID strin
 	err := datastoreType.write(ctx, key, obj)
 
 	if err != nil {
+		//To-Do
+		//remove the last write identifier
 		return ctx, err
 	}
 
