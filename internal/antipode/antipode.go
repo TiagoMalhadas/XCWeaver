@@ -36,7 +36,7 @@ func Write(ctx context.Context, datastoreType Datastore_type, datastore_ID strin
 	}
 
 	//update lineage
-	lineage = append(lineage, WriteIdentifier{Dtstid: datastore_ID, Key: key, Version: value})
+	lineage = append(lineage, WriteIdentifier{Dtstid: datastore_ID, Key: key, Version: value, TableId: table})
 
 	//initialize AntiObj
 	obj := AntiObj{value, lineage}
