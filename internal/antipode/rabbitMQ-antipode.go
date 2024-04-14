@@ -15,6 +15,7 @@ type RabbitMQ struct {
 }
 
 // How can I close the connection?
+// É má prática manter a conexão sempre aberta?
 func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, rabbit_password string, queue string) RabbitMQ {
 
 	conn, err := amqp.Dial("amqp://" + rabbit_user + ":" + rabbit_password + "@" + rabbit_host + ":" + rabbit_port + "/")

@@ -1,0 +1,101 @@
+# --------
+# Services
+# --------
+
+["socialnetwork/pkg/services/ComposePostService"]
+redis_address       = "compose-post-redis-eu"
+rabbitmq_address    = "write-home-timeline-rabbitmq-eu"
+redis_port          = 6379
+rabbitmq_port       = 5672
+region              = "europe-west3"
+regions             = ["europe-west3", "us-central1"]
+
+["socialnetwork/pkg/services/HomeTimelineService"]
+redis_address       = "home-timeline-redis-eu"
+redis_port          = 6379
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/PostStorageService"]
+mongodb_address     = "post-storage-mongodb-eu"
+memcached_address   = "post-storage-memcached-eu"
+mongodb_port        = 27017
+memcached_port      = 11211
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/SocialGraphService"]
+mongodb_address     = "post-storage-mongodb-eu"
+redis_address       = "social-graph-redis-eu"
+redis_port          = 6379
+mongodb_port        = 27017
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/UrlShortenService"]
+mongodb_address     = "post-storage-mongodb-eu"
+memcached_address   = "url-shorten-memcached-eu"
+mongodb_port        = 27017
+memcached_port      = 11211
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/UserService"]
+mongodb_address     = "post-storage-mongodb-eu"
+memcached_address   = "user-memcached-eu"
+mongodb_port        = 27017
+memcached_port      = 11211
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/UserMentionService"]
+# uses UserService cache (memcached)
+mongodb_address     = "post-storage-mongodb-eu"
+memcached_address   = "user-memcached-eu"
+mongodb_port        = 27017
+memcached_port      = 11211
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/UserTimelineService"]
+mongodb_address     = "post-storage-mongodb-eu"
+redis_address       = "user-timeline-redis-eu"
+mongodb_port        = 27017
+redis_port          = 6379
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/WriteHomeTimelineService"]
+# uses HomeTimelineService cache (redis)
+rabbitmq_address    = "write-home-timeline-rabbitmq-eu"
+mongodb_address     = "post-storage-mongodb-eu"
+redis_address       = "home-timeline-redis-eu"
+mongodb_port        = 27017
+redis_port          = 6379
+rabbitmq_port       = 5672
+num_workers         = 16
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/MediaService"]
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/TextService"]
+region              = "europe-west3"
+
+["socialnetwork/pkg/services/UniqueIdService"]
+region              = "europe-west3"
+
+# wrk2 api
+["github.com/ServiceWeaver/weaver/Main"]
+region              = "europe-west3"
+
+# ----------
+# Deployment
+# ----------
+
+[single]
+listeners.wrk2 = {address = "0.0.0.0:9000"}
+
+[multi]
+listeners.wrk2 = {address = "0.0.0.0:9000"}
+
+[serviceweaver]
+binary = "./socialnetwork"
+name = "socialnetwork-eu"
+
+[gke]
+regions = ["europe-west3"]
+listeners.wrk2 = {public_hostname = "weaver.dsb.socialnetwork.eu"}

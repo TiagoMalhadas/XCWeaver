@@ -1,0 +1,296 @@
+version: '3.9'
+services:
+  # ------------
+  # CACHE: REDIS
+  # ------------
+  compose-post-redis-eu:
+    image: redis:7.2.4
+    hostname: compose-post-redis-eu
+    ports:
+      - 6381:6379
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  compose-post-redis-us:
+    image: redis:7.2.4
+    hostname: compose-post-redis-eu
+    ports:
+      - 6385:6379
+    command: 'redis-server --slaveof compose-post-redis-eu 6379 --replica-read-only no'
+    restart: 'no'
+    links:
+      - compose-post-redis-eu
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  home-timeline-redis-eu:
+    image: redis:7.2.4
+    hostname: home-timeline-redis-eu
+    ports:
+      - 6382:6379
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  home-timeline-redis-us:
+    image: redis:7.2.4
+    hostname: home-timeline-redis-eu
+    command: 'redis-server --slaveof home-timeline-redis-eu 6379 --replica-read-only no'
+    ports:
+      - 6386:6379
+    restart: 'no'
+    links:
+      - home-timeline-redis-eu
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-us]
+    networks:
+      - deathstarbench_network
+  user-timeline-redis-eu:
+    image: redis:7.2.4
+    hostname: user-timeline-redis-eu
+    ports:
+      - 6383:6379
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  user-timeline-redis-us:
+    image: redis:7.2.4
+    hostname: user-timeline-redis-us
+    ports:
+      - 6387:6379
+    command: 'redis-server --slaveof user-timeline-redis-eu 6379 --replica-read-only no'
+    restart: 'no'
+    links:
+      - user-timeline-redis-eu
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-us]
+    networks:
+      - deathstarbench_network
+  social-graph-redis-eu:
+    image: redis:7.2.4
+    hostname: social-graph-redis-eu
+    ports:
+      - 6384:6379
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  social-graph-redis-us:
+    image: redis:7.2.4
+    hostname: social-graph-redis-us
+    ports:
+      - 6388:6379
+    command: 'redis-server --slaveof social-graph-redis-eu 6379 --replica-read-only no'
+    restart: 'no'
+    links:
+      - social-graph-redis-eu
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-us]
+    networks:
+      - deathstarbench_network
+
+  # ----------------
+  # CACHE: MEMCACHED
+  # ----------------
+  post-storage-memcached-eu:
+    image: memcached:1.6.23
+    hostname: post-storage-memcached-eu
+    command: memcached -m 1024
+    ports:
+      - 11212:11211
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  post-storage-memcached-us:
+    image: memcached:1.6.23
+    hostname: post-storage-memcached-eu
+    command: memcached -m 1024
+    ports:
+      - 11215:11211
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  url-shorten-memcached-eu:
+    image: memcached:1.6.23
+    hostname: url-shorten-memcached-eu
+    command: memcached -m 1024
+    ports:
+      - 11213:11211
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  url-shorten-memcached-us:
+    image: memcached:1.6.23
+    hostname: url-shorten-memcached-us
+    command: memcached -m 1024
+    ports:
+    - 11216:11211
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-us]
+    networks:
+      - deathstarbench_network
+  user-memcached-eu:
+    image: memcached:1.6.23
+    hostname: user-memcached-eu
+    command: memcached -m 1024
+    ports:
+      - 11214:11211
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  user-memcached-us:
+    image: memcached:1.6.23
+    hostname: user-memcached-us
+    command: memcached -m 1024
+    ports:
+      - 11217:11211
+    restart: 'no'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-us]
+    networks:
+      - deathstarbench_network
+
+  # ------------------
+  # DATABASE: MONGODB
+  # ------------------
+  post-storage-mongodb-setup:
+    image: mongodb-setup:4.4.6
+    restart: 'always'
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-manager]
+      restart_policy:
+        condition: on-failure
+        delay: 1s
+        max_attempts: 3
+    networks:
+      - deathstarbench_network
+  post-storage-mongodb-eu:
+    image: mongodb-delayed:4.4.6
+    ports:
+      - 27017:27017
+    cap_add:
+      - NET_ADMIN
+    hostname: post-storage-mongodb-eu
+    command: bash -c "mongod --bind_ip 0.0.0.0 --slowms 999999 --dbpath /ramdata --syncdelay 0 --journalCommitInterval 500 --wiredTigerCacheSizeGB 1 --replSet rs0 --oplogSize 128"
+    volumes:
+      - type: tmpfs
+        target: /ramdata
+        tmpfs:
+          size: 3000000000
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  post-storage-mongodb-us:
+    image: mongodb-delayed:4.4.6
+    ports:
+      - 27018:27017
+    cap_add:
+      - NET_ADMIN
+    hostname: post-storage-mongodb-us
+    command: bash -c "mongod --bind_ip 0.0.0.0 --slowms 999999 --dbpath /ramdata --syncdelay 0 --journalCommitInterval 500 --wiredTigerCacheSizeGB 1 --replSet rs0 --oplogSize 128"
+    volumes:
+      - type: tmpfs
+        target: /ramdata
+        tmpfs:
+          size: 3000000000
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-us]
+    networks:
+      - deathstarbench_network
+
+  # ---------------
+  # QUEUE: RABBITMQ
+  # ---------------
+  write-home-timeline-rabbitmq-setup:
+    image: rabbitmq-setup:3.8
+    restart: 'no'
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "WRITE-HOME-TIMELINE-RABBITMQ"
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-manager]
+      restart_policy:
+        condition: on-failure
+        delay: 1s
+        max_attempts: 3
+    networks:
+      - deathstarbench_network
+  write-home-timeline-rabbitmq-eu:
+    image: rabbitmq:3.8-management
+    hostname: write-home-timeline-rabbitmq-eu
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "WRITE-HOME-TIMELINE-RABBITMQ"
+      RABBITMQ_DEFAULT_VHOST: "/"
+      RABBITMQ_ENABLED_PLUGINS_FILE: "/etc/rabbitmq/enabled_plugins"
+    ports:
+      - 15672:15672
+      - 5672:5672
+    restart: 'no'
+    volumes:
+      - ./docker/config/rabbitmq/write-home-timeline-rabbitmq-eu-definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./docker/config/rabbitmq/write-home-timeline-rabbitmq-eu.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./docker/config/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-eu]
+    networks:
+      - deathstarbench_network
+  write-home-timeline-rabbitmq-us:
+    image: rabbitmq:3.8-management
+    hostname: write-home-timeline-rabbitmq-us
+    environment:
+      RABBITMQ_DEFAULT_VHOST: "/"
+      RABBITMQ_ENABLED_PLUGINS_FILE: "/etc/rabbitmq/enabled_plugins"
+      RABBITMQ_ERLANG_COOKIE: "WRITE-HOME-TIMELINE-RABBITMQ"
+    ports:
+      - 15673:15672
+      - 5673:5672
+    restart: 'no'
+    volumes:
+      - ./docker/config/rabbitmq/write-home-timeline-rabbitmq-us-definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./docker/config/rabbitmq/write-home-timeline-rabbitmq-us.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./docker/config/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-dsb-db-us]
+    networks:
+      - deathstarbench_network
+      
+networks:
+  deathstarbench_network:
+    driver: bridge
+  

@@ -1,0 +1,27 @@
+Running 1s test @ http://localhost:9000/wrk2-api/post/compose
+  1 threads and 1 connections
+  Thread Stats   Avg      Stdev     99%   +/- Stdev
+    Latency     2.24ms    0.00us   2.24ms    0.00%
+    Req/Sec       -nan      -nan   0.00      0.00%
+  Latency Distribution (HdrHistogram - Recorded Latency)
+ 50.000%    2.24ms
+ 75.000%    2.24ms
+ 90.000%    2.24ms
+ 99.000%    2.24ms
+ 99.900%    2.24ms
+ 99.990%    2.24ms
+ 99.999%    2.24ms
+100.000%    2.24ms
+
+  Detailed Percentile spectrum:
+       Value   Percentile   TotalCount 1/(1-Percentile)
+
+       2.237     0.000000            1         1.00
+       2.237     1.000000            1          inf
+#[Mean    =        2.237, StdDeviation   =        0.000]
+#[Max     =        2.236, Total count    =            1]
+#[Buckets =           27, SubBuckets     =         2048]
+----------------------------------------------------------
+  2 requests in 1.11s, 846.00B read
+Requests/sec:      1.80
+Transfer/sec:     762.60B
