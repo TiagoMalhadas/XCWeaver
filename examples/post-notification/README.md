@@ -24,32 +24,30 @@ chmod +x rabbitMQ.sh
 Deploy eu_deployment:
 
 ``` zsh
-go generate
-go build
-weaver multi deploy weaver.toml
+cd eu_deployment
+docker build -t eu_deployment .
+docker run -it --rm --net rabbits -p 12345:12345 eu_deployment
 ```
 
 Deploy us_deployment:
 
 ``` zsh
-./manager.py init-social-graph --local
+cd ../eu_deployment
+docker build -t us_deployment .
+docker run -it --rm --net rabbits us_deployment
 ```
 
 Run benchmark:
 
 ``` zsh
-./manager.py wrk2 --local
+cd ..
+chmod +x test.sh
+./test.sh
 ```
 
 Gather metrics:
 ``` zsh
-./manager.py metrics --local
-```
-
-Clean datastores:
-
-``` zsh
-./manager.py storage-clean --local
+TO-DO
 ```
 
 ### Additional
