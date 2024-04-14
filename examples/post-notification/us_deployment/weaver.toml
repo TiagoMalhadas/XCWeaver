@@ -1,0 +1,13 @@
+[serviceweaver]
+binary = "./us_deployment"
+
+[single]
+antipodeAgents.clientRedis = {datastoreType = "MySQL", host = "mysql-1", port = "3306", user = "root", password = "password", datastore = "posts"}
+antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "rabbit-2", port = "5672", user = "guest", password = "guest", datastore = "rabbitMQ", queue = "notifications"}
+
+[multi]
+antipodeAgents.clientRedis = {datastoreType = "MySQL", host = "mysql-1", port = "3306", user = "root", password = "password", datastore = "posts"}
+antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "rabbit-2", port = "5672", user = "guest", password = "guest", datastore = "rabbitMQ", queue = "notifications"}
+
+[gke]
+regions = ["us-west4"]

@@ -1,0 +1,16 @@
+[serviceweaver]
+binary = "./eu_deployment"
+
+[single]
+listeners.post_notification = {address = "0.0.0.0:12345"}
+antipodeAgents.clientRedis = {datastoreType = "MySQL", host = "mysql-1", port = "3306", user = "root", password = "password", datastore = "posts"}
+antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "rabbit-1", port = "5672", user = "guest", password = "guest", datastore = "rabbitMQ", queue = "notifications"}
+
+[multi]
+listeners.post_notification = {address = "0.0.0.0:12345"}
+antipodeAgents.clientRedis = {datastoreType = "MySQL", host = "mysql-1", port = "3306", user = "root", password = "password", datastore = "posts"}
+antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "rabbit-1", port = "5672", user = "guest", password = "guest", datastore = "rabbitMQ", queue = "notifications"}
+
+[gke]
+regions = ["europe-west6"]
+listeners.post_notification = {public_hostname = "hello.com"}
