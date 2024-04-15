@@ -27,7 +27,7 @@ func init() {
 		ReflectStubFn: func(caller func(string, context.Context, []any, []any) error) any {
 			return main_reflect_stub{caller: caller}
 		},
-		RefData: "⟦47d0f0ac:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/ComposePostService⟧\n⟦442fac84:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/HomeTimelineService⟧\n⟦d3f503b6:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/UserTimelineService⟧\n⟦57223aea:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/TextService⟧\n⟦4240eae5:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/MediaService⟧\n⟦08ddd9e0:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/UniqueIdService⟧\n⟦7b74cfdf:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/UserService⟧\n⟦76c02703:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/SocialGraphService⟧\n⟦a3be7cf4:wEaVeRlIsTeNeRs:github.com/ServiceWeaver/weaver/Main→wrk2⟧\n",
+		RefData: "⟦442fac84:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/HomeTimelineService⟧\n⟦d3f503b6:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/UserTimelineService⟧\n⟦57223aea:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/TextService⟧\n⟦4240eae5:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/MediaService⟧\n⟦08ddd9e0:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/UniqueIdService⟧\n⟦7b74cfdf:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/UserService⟧\n⟦76c02703:wEaVeReDgE:github.com/ServiceWeaver/weaver/Main→socialnetwork/pkg/services/SocialGraphService⟧\n⟦a3be7cf4:wEaVeRlIsTeNeRs:github.com/ServiceWeaver/weaver/Main→wrk2⟧\n",
 	})
 }
 
@@ -61,7 +61,7 @@ var _ weaver.Main = (*main_client_stub)(nil)
 // you run "go build" or "go run".
 var _ codegen.LatestVersion = codegen.Version[[0][20]struct{}](`
 
-ERROR: You generated this file with 'weaver generate' v0.21.2 (codegen
+ERROR: You generated this file with 'weaver generate' v0.22.1-0.20231019162801-c2294d1ae0e8 (codegen
 version v0.20.0). The generated code is incompatible with the version of the
 github.com/ServiceWeaver/weaver module that you're using. The weaver module
 version can be found in your go.mod file or by running the following command.

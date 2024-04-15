@@ -292,5 +292,6 @@ services:
       
 networks:
   deathstarbench_network:
-    driver: bridge
+    external:
+      name: deathstarbench_network
   

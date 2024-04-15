@@ -23,7 +23,7 @@ import (
 // you run "go build" or "go run".
 var _ codegen.LatestVersion = codegen.Version[[0][20]struct{}](`
 
-ERROR: You generated this file with 'weaver generate' v0.21.2 (codegen
+ERROR: You generated this file with 'weaver generate' v0.22.1-0.20231019162801-c2294d1ae0e8 (codegen
 version v0.20.0). The generated code is incompatible with the version of the
 github.com/ServiceWeaver/weaver module that you're using. The weaver module
 version can be found in your go.mod file or by running the following command.
@@ -167,16 +167,15 @@ var _ codegen.AutoMarshal = (*Post)(nil)
 
 type __is_Post[T ~struct {
 	weaver.AutoMarshal
-	PostID        int64         "bson:\"post_id\""
-	ReqID         int64         "bson:\"req_id\""
-	Creator       Creator       "bson:\"creator\""
-	Text          string        "bson:\"text\""
-	UserMentions  []UserMention "bson:\"user_mentions\""
-	Media         []Media       "bson:\"media\""
-	URLs          []URL         "bson:\"urls\""
-	Timestamp     int64         "bson:\"timestamp\""
-	EditTimestmap int64         "bson:\"edit_timestamp\""
-	PostType      PostType      "bson:\"post_type\""
+	PostID       int64         "bson:\"post_id\""
+	ReqID        int64         "bson:\"req_id\""
+	Creator      Creator       "bson:\"creator\""
+	Text         string        "bson:\"text\""
+	UserMentions []UserMention "bson:\"user_mentions\""
+	Media        []Media       "bson:\"media\""
+	URLs         []URL         "bson:\"urls\""
+	Timestamp    int64         "bson:\"timestamp\""
+	PostType     PostType      "bson:\"posttype\""
 }] struct{}
 
 var _ __is_Post[Post]
@@ -193,7 +192,6 @@ func (x *Post) WeaverMarshal(enc *codegen.Encoder) {
 	serviceweaver_enc_slice_Media_d3cc456b(enc, x.Media)
 	serviceweaver_enc_slice_URL_0b7470c4(enc, x.URLs)
 	enc.Int64(x.Timestamp)
-	enc.Int64(x.EditTimestmap)
 	enc.Int((int)(x.PostType))
 }
 
@@ -209,7 +207,6 @@ func (x *Post) WeaverUnmarshal(dec *codegen.Decoder) {
 	x.Media = serviceweaver_dec_slice_Media_d3cc456b(dec)
 	x.URLs = serviceweaver_dec_slice_URL_0b7470c4(dec)
 	x.Timestamp = dec.Int64()
-	x.EditTimestmap = dec.Int64()
 	*(*int)(&x.PostType) = dec.Int()
 }
 
