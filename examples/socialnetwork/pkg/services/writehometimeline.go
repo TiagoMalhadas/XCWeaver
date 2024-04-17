@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -43,6 +43,7 @@ type writeHomeTimelineService struct {
 	redisClient        *redis.Client
 	//amqClientPool      *storage.RabbitMQClientPool
 	rabbitClientWriteHomeTL xcweaver.Antipode
+	mongoClientWriteHomeTL  xcweaver.Antipode
 }
 
 func (w *writeHomeTimelineService) Init(ctx context.Context) error {
@@ -85,12 +86,20 @@ func (w *writeHomeTimelineService) WriteHomeTimeline(ctx context.Context, msg mo
 	regionLabel := sn_metrics.RegionLabel{Region: w.Config().Region}
 	sn_metrics.QueueDurationMs.Get(regionLabel).Put(float64(time.Now().UnixMilli() - msg.NotificationSendTs))
 
-	db := w.mongoClient.Database("post-storage")
+	postIDStr := strconv.FormatInt(msg.PostID, 10)
+
+	result, _, err := w.mongoClientWriteHomeTL.Read(ctx, "posts", postIDStr)
+	if err != nil {
+		logger.Error("error reading post from mongo", "msg", err.Error())
+		return err
+	}
+
+	/*db := w.mongoClient.Database("post-storage")
 	collection := db.Collection("posts")
 
 	var post model.Post
 	filter := bson.D{{Key: "post_id", Value: msg.PostID}}
-	err := collection.FindOne(ctx, filter, nil).Decode(&post)
+	err := collection.FindOne(ctx, filter, nil).Decode(&post)*/
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			trace.SpanFromContext(ctx).SetAttributes(
@@ -103,6 +112,14 @@ func (w *writeHomeTimelineService) WriteHomeTimeline(ctx context.Context, msg mo
 			logger.Error("error reading post from mongodb", "msg", err.Error())
 			return err
 		}
+	}
+
+	var post model.Post
+	err = json.Unmarshal([]byte(result), &post)
+	if err != nil {
+		errMsg := fmt.Sprintf("post_id: %s not found in mongodb", postIDStr)
+		logger.Warn(errMsg)
+		return fmt.Errorf(errMsg)
 	}
 
 	trace.SpanFromContext(ctx).SetAttributes(
@@ -196,10 +213,17 @@ func (w *writeHomeTimelineService) workerThread(ctx context.Context, workerid in
 				logger.Error("error transfering the lineage to context", "workerid", workerid, "msg", err.Error())
 				return err
 			}
-			/*err = w.onReceivedWorker(ctx, workerid, []byte(msg))
+
+			err = w.mongoClientWriteHomeTL.Barrier(ctx)
+			if err != nil {
+				logger.Error("error on barrier", "workerid", workerid, "msg", err.Error())
+				return err
+			}
+
+			err = w.onReceivedWorker(ctx, workerid, []byte(msg))
 			if err != nil {
 				logger.Warn("error in worker thread", "msg", err.Error())
-			}*/
+			}
 		}
 	}()
 	<-forever

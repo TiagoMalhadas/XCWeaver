@@ -268,11 +268,24 @@ func (c *composePostService) composeAndUpload(ctx context.Context, reqID int64) 
 	regionLabel := sn_metrics.RegionLabel{Region: c.Config().Region}
 	sn_metrics.ComposedPosts.Get(regionLabel).Inc()
 
-	err := c.postStorageService.Get().StorePost(ctx, reqID, post)
+	lineage, err := c.postStorageService.Get().StorePost(ctx, reqID, post)
 	if err != nil {
 		logger.Warn("error calling post storage service", "msg", err.Error())
 		return err
 	}
+
+	lineageBefore, err := xcweaver.GetLineage(ctx)
+	logger.Debug("Lenage before transfer", "lineage", lineageBefore)
+
+	//replace by ReplaceLineage
+	ctx, err = xcweaver.Transfer(ctx, lineage)
+	if err != nil {
+		logger.Error("error transfering the lineage to context", "msg", err.Error())
+		return err
+	}
+
+	lineageAfter, err := xcweaver.GetLineage(ctx)
+	logger.Debug("Lenage after transfer", "lineage", lineageAfter)
 
 	trace.SpanFromContext(ctx).SetAttributes(
 		attribute.Int64("post_id", postID),

@@ -117,7 +117,7 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 						fmt.Println("replication done: ", result.Value.Version)
 						break
 					} else { //the version replication process is not yet completed
-						fmt.Println("replication of the new version in progress")
+						fmt.Println("replication of the new version in progress! Old Version: ", result.Value.Version, " new version: ", writeIdentifier.Version)
 						continue
 					}
 				}

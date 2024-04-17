@@ -220,7 +220,7 @@ func init() {
 		Name:           "socialnetwork/pkg/services/WriteHomeTimelineService",
 		Iface:          reflect.TypeOf((*WriteHomeTimelineService)(nil)).Elem(),
 		Impl:           reflect.TypeOf(writeHomeTimelineService{}),
-		AntipodeAgents: []string{"rabbitClientWriteHomeTL"},
+		AntipodeAgents: []string{"mongoClientWriteHomeTL", "rabbitClientWriteHomeTL"},
 		LocalStubFn: func(impl any, caller string, tracer trace.Tracer) any {
 			return writeHomeTimelineService_local_stub{impl: impl.(WriteHomeTimelineService), tracer: tracer, writeHomeTimelineMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "socialnetwork/pkg/services/WriteHomeTimelineService", Method: "WriteHomeTimeline", Remote: false})}
 		},
@@ -233,7 +233,7 @@ func init() {
 		ReflectStubFn: func(caller func(string, context.Context, []any, []any) error) any {
 			return writeHomeTimelineService_reflect_stub{caller: caller}
 		},
-		RefData: "⟦f239ee88:wEaVeReDgE:socialnetwork/pkg/services/WriteHomeTimelineService→socialnetwork/pkg/services/SocialGraphService⟧\n⟦3a82191d:wEaVeRaNtIpOdEaGeNtS:socialnetwork/pkg/services/WriteHomeTimelineService→rabbitClientWriteHomeTL⟧\n",
+		RefData: "⟦f239ee88:wEaVeReDgE:socialnetwork/pkg/services/WriteHomeTimelineService→socialnetwork/pkg/services/SocialGraphService⟧\n⟦257fb772:wEaVeRaNtIpOdEaGeNtS:socialnetwork/pkg/services/WriteHomeTimelineService→mongoClientWriteHomeTL,rabbitClientWriteHomeTL⟧\n",
 	})
 }
 
@@ -510,7 +510,7 @@ func (s postStorageService_local_stub) ReadPosts(ctx context.Context, a0 int64, 
 	return s.impl.ReadPosts(ctx, a0, a1)
 }
 
-func (s postStorageService_local_stub) StorePost(ctx context.Context, a0 int64, a1 model.Post) (err error) {
+func (s postStorageService_local_stub) StorePost(ctx context.Context, a0 int64, a1 model.Post) (r0 []byte, err error) {
 	// Update metrics.
 	begin := s.storePostMetrics.Begin()
 	defer func() { s.storePostMetrics.End(begin, err != nil, 0, 0) }()
@@ -1619,7 +1619,7 @@ func (s postStorageService_client_stub) ReadPosts(ctx context.Context, a0 int64,
 	return
 }
 
-func (s postStorageService_client_stub) StorePost(ctx context.Context, a0 int64, a1 model.Post) (err error) {
+func (s postStorageService_client_stub) StorePost(ctx context.Context, a0 int64, a1 model.Post) (r0 []byte, err error) {
 	// Update metrics.
 	var requestBytes, replyBytes int
 	begin := s.storePostMetrics.Begin()
@@ -1666,6 +1666,7 @@ func (s postStorageService_client_stub) StorePost(ctx context.Context, a0 int64,
 
 	// Decode the results.
 	dec := codegen.NewDecoder(results)
+	r0 = serviceweaver_dec_slice_byte_87461245(dec)
 	err = dec.Error()
 	return
 }
@@ -2958,7 +2959,7 @@ func (s writeHomeTimelineService_client_stub) WriteHomeTimeline(ctx context.Cont
 // you run "go build" or "go run".
 var _ codegen.LatestVersion = codegen.Version[[0][20]struct{}](`
 
-ERROR: You generated this file with 'xcweaver generate' v0.5.19 (codegen
+ERROR: You generated this file with 'xcweaver generate' v0.5.20 (codegen
 version v0.20.0). The generated code is incompatible with the version of the
 github.com/TiagoMalhadas/xcweaver module that you're using. The xcweaver module
 version can be found in your go.mod file or by running the following command.
@@ -3353,10 +3354,11 @@ func (s postStorageService_server_stub) storePost(ctx context.Context, args []by
 	// TODO(rgrandl): The deferred function above will recover from panics in the
 	// user code: fix this.
 	// Call the local method.
-	appErr := s.impl.StorePost(ctx, a0, a1)
+	r0, appErr := s.impl.StorePost(ctx, a0, a1)
 
 	// Encode the results.
 	enc := codegen.NewEncoder()
+	serviceweaver_enc_slice_byte_87461245(enc, r0)
 	enc.Error(appErr)
 	return enc.Data(), nil
 }
@@ -4195,8 +4197,8 @@ func (s postStorageService_reflect_stub) ReadPosts(ctx context.Context, a0 int64
 	return
 }
 
-func (s postStorageService_reflect_stub) StorePost(ctx context.Context, a0 int64, a1 model.Post) (err error) {
-	err = s.caller("StorePost", ctx, []any{a0, a1}, []any{})
+func (s postStorageService_reflect_stub) StorePost(ctx context.Context, a0 int64, a1 model.Post) (r0 []byte, err error) {
+	err = s.caller("StorePost", ctx, []any{a0, a1}, []any{&r0})
 	return
 }
 
@@ -4497,6 +4499,29 @@ func serviceweaver_dec_slice_int64_a8f7f092(dec *codegen.Decoder) []int64 {
 	res := make([]int64, n)
 	for i := 0; i < n; i++ {
 		res[i] = dec.Int64()
+	}
+	return res
+}
+
+func serviceweaver_enc_slice_byte_87461245(enc *codegen.Encoder, arg []byte) {
+	if arg == nil {
+		enc.Len(-1)
+		return
+	}
+	enc.Len(len(arg))
+	for i := 0; i < len(arg); i++ {
+		enc.Byte(arg[i])
+	}
+}
+
+func serviceweaver_dec_slice_byte_87461245(dec *codegen.Decoder) []byte {
+	n := dec.Len()
+	if n == -1 {
+		return nil
+	}
+	res := make([]byte, n)
+	for i := 0; i < n; i++ {
+		res[i] = dec.Byte()
 	}
 	return res
 }

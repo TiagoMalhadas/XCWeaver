@@ -21,7 +21,7 @@ import (
 )
 
 type PostStorageService interface {
-	StorePost(ctx context.Context, reqID int64, post model.Post) error
+	StorePost(ctx context.Context, reqID int64, post model.Post) ([]byte, error)
 	ReadPost(ctx context.Context, reqID int64, postID int64) (model.Post, error)
 	ReadPosts(ctx context.Context, reqID int64, postIDs []int64) ([]model.Post, error)
 }
@@ -69,7 +69,7 @@ func (p *postStorageService) Init(ctx context.Context) error {
 	return nil
 }
 
-func (p *postStorageService) StorePost(ctx context.Context, reqID int64, post model.Post) error {
+func (p *postStorageService) StorePost(ctx context.Context, reqID int64, post model.Post) ([]byte, error) {
 	logger := p.Logger(ctx)
 	logger.Info("entering StorePost", "reqid", reqID, "post", post)
 
@@ -83,7 +83,7 @@ func (p *postStorageService) StorePost(ctx context.Context, reqID int64, post mo
 	postJSON, err := json.Marshal(post)
 	if err != nil {
 		logger.Debug("error converting post to JSON", "post", post, "msg", err.Error())
-		return err
+		return nil, err
 	}
 	postStr := string(postJSON)
 
@@ -93,6 +93,7 @@ func (p *postStorageService) StorePost(ctx context.Context, reqID int64, post mo
 	r, err := collection.InsertOne(ctx, post)*/
 	if err != nil {
 		logger.Error("error writing post", "msg", err.Error())
+		return nil, err
 	}
 	logger.Debug("write post done!", "key", postIDStr, "post", postStr)
 	regionLabel := sn_metrics.RegionLabel{Region: p.Config().Region}
@@ -102,7 +103,13 @@ func (p *postStorageService) StorePost(ctx context.Context, reqID int64, post mo
 	sn_metrics.WritePostDurationMs.Get(regionLabel).Put(float64(time.Now().UnixMilli() - writePostStartMs))
 	//logger.Debug("inserted post", "objectid", r.InsertedID)
 
-	return nil
+	lineage, err := xcweaver.GetLineage(ctx)
+	if err != nil {
+		logger.Error("error getting lineage from context", "msg", err.Error())
+		return nil, err
+	}
+
+	return lineage, nil
 }
 
 func (p *postStorageService) ReadPost(ctx context.Context, reqID int64, postID int64) (model.Post, error) {
