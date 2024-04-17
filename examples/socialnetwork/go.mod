@@ -3,7 +3,7 @@ module socialnetwork
 go 1.21.1
 
 require (
-	github.com/TiagoMalhadas/xcweaver v0.5.20
+	github.com/TiagoMalhadas/xcweaver v0.5.21
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/rabbitmq/amqp091-go v1.9.0

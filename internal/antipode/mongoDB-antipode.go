@@ -29,7 +29,7 @@ func CreateMongoDB(host string, port string, database string) MongoDB {
 
 // devo verificar primeiro se já existe essa key? E caso exista fazer update?
 // falta fechar a conecção
-func (m MongoDB) write(ctx context.Context, collection string, key string, obj AntiObj) error {
+func (m MongoDB) write(ctx context.Context, collectionName string, key string, obj AntiObj) error {
 
 	client, err := mongo.Connect(ctx, m.clientOptions)
 	if err != nil {
@@ -43,12 +43,23 @@ func (m MongoDB) write(ctx context.Context, collection string, key string, obj A
 		}
 	}()
 
-	mongoObj := Document{
+	collection := client.Database(m.database).Collection(collectionName)
+
+	filter := bson.D{{"key", key}}
+
+	replacement := Document{
 		Key:   key,
 		Value: obj,
 	}
 
-	_, err = client.Database(m.database).Collection(collection).InsertOne(ctx, mongoObj)
+	_, err = collection.ReplaceOne(context.Background(), filter, replacement, options.Replace().SetUpsert(true))
+
+	/*mongoObj := Document{
+		Key:   key,
+		Value: obj,
+	}
+
+	_, err = client.Database(m.database).Collection(collection).InsertOne(ctx, mongoObj)*/
 
 	return err
 }
