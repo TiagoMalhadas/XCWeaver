@@ -9,7 +9,7 @@ import (
 	"socialnetwork/pkg/model"
 	"socialnetwork/pkg/utils"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 )
 
 type UniqueIdService interface {
@@ -17,13 +17,13 @@ type UniqueIdService interface {
 }
 
 type uniqueIdOptions struct {
-	Region    string `toml:"region"`
+	Region string `toml:"region"`
 }
 
 type uniqueIdService struct {
-	weaver.Implements[UniqueIdService]
-	weaver.WithConfig[uniqueIdOptions]
-	composePostService weaver.Ref[ComposePostService]
+	xcweaver.Implements[UniqueIdService]
+	xcweaver.WithConfig[uniqueIdOptions]
+	composePostService xcweaver.Ref[ComposePostService]
 	currentTimestamp   int64
 	counter            int64
 	machineID          string

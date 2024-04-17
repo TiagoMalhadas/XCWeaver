@@ -8,7 +8,7 @@ import (
 
 	"socialnetwork/pkg/storage"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,19 +25,19 @@ type SocialGraphService interface {
 }
 
 type socialGraphService struct {
-	weaver.Implements[SocialGraphService]
-	weaver.WithConfig[socialGraphServiceOptions]
-	userService weaver.Ref[UserService]
+	xcweaver.Implements[SocialGraphService]
+	xcweaver.WithConfig[socialGraphServiceOptions]
+	userService xcweaver.Ref[UserService]
 	mongoClient *mongo.Client
 	redisClient *redis.Client
 }
 
 type socialGraphServiceOptions struct {
-	MongoDBAddr string 	`toml:"mongodb_address"`
-	RedisAddr   string 	`toml:"redis_address"`
-	MongoDBPort int    	`toml:"mongodb_port"`
-	RedisPort   int    	`toml:"redis_port"`
-	Region 	 	string 	`toml:"region"`
+	MongoDBAddr string `toml:"mongodb_address"`
+	RedisAddr   string `toml:"redis_address"`
+	MongoDBPort int    `toml:"mongodb_port"`
+	RedisPort   int    `toml:"redis_port"`
+	Region      string `toml:"region"`
 }
 
 type FollowerInfo struct {

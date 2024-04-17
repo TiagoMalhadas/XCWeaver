@@ -12,28 +12,28 @@ import (
 	"sync"
 	"time"
 
+	sn_metrics "socialnetwork/pkg/metrics"
 	"socialnetwork/pkg/model"
 	"socialnetwork/pkg/services"
-	sn_metrics "socialnetwork/pkg/metrics"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 )
 
 type server struct {
-	weaver.Implements[weaver.Main]
-	weaver.WithConfig[serverOptions]
-	homeTimelineService weaver.Ref[services.HomeTimelineService]
-	userTimelineService weaver.Ref[services.UserTimelineService]
-	textService         weaver.Ref[services.TextService]
-	mediaService        weaver.Ref[services.MediaService]
-	uniqueIdService     weaver.Ref[services.UniqueIdService]
-	userService         weaver.Ref[services.UserService]
-	socialGraphService  weaver.Ref[services.SocialGraphService]
-	lis                 weaver.Listener `weaver:"wrk2"`
+	xcweaver.Implements[xcweaver.Main]
+	xcweaver.WithConfig[serverOptions]
+	homeTimelineService xcweaver.Ref[services.HomeTimelineService]
+	userTimelineService xcweaver.Ref[services.UserTimelineService]
+	textService         xcweaver.Ref[services.TextService]
+	mediaService        xcweaver.Ref[services.MediaService]
+	uniqueIdService     xcweaver.Ref[services.UniqueIdService]
+	userService         xcweaver.Ref[services.UserService]
+	socialGraphService  xcweaver.Ref[services.SocialGraphService]
+	lis                 xcweaver.Listener `xcweaver:"wrk2"`
 }
 
 type serverOptions struct {
-	Region    		string `toml:"region"`
+	Region string `toml:"region"`
 }
 
 func Serve(ctx context.Context, s *server) error {
@@ -66,7 +66,7 @@ func instrument(label string, fn func(http.ResponseWriter, *http.Request), metho
 		}
 		fn(w, r)
 	}
-	return weaver.InstrumentHandlerFunc(label, handler)
+	return xcweaver.InstrumentHandlerFunc(label, handler)
 }
 
 func genReqID() int64 {
@@ -361,7 +361,7 @@ func validateComposePostParams(logger *slog.Logger, r *http.Request) (*ComposePo
 		mediaTypesStr = strings.TrimSuffix(mediaTypesStr, "]")
 		params.mediaTypes = strings.Split(mediaTypesStr, ",")
 	}
-	if mediaIDsStr != "" && mediaIDsStr != "[]"  {
+	if mediaIDsStr != "" && mediaIDsStr != "[]" {
 		mediaIDsStr = strings.TrimPrefix(mediaIDsStr, "[")
 		mediaIDsStr = strings.TrimSuffix(mediaIDsStr, "]")
 		mediaIDsStrSlice := strings.Split(mediaIDsStr, ",")

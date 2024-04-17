@@ -1,9 +1,9 @@
 package metrics
 
-import "github.com/ServiceWeaver/weaver/metrics"
+import "github.com/TiagoMalhadas/xcweaver/metrics"
 
 type RegionLabel struct {
-    Region string
+	Region string
 }
 
 var (

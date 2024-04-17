@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"socialnetwork/pkg/model"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 )
 
 type MediaService interface {
@@ -13,13 +13,13 @@ type MediaService interface {
 }
 
 type mediaService struct {
-	weaver.Implements[MediaService]
-	weaver.WithConfig[mediaServiceOptions]
-	composePostService   weaver.Ref[ComposePostService]
+	xcweaver.Implements[MediaService]
+	xcweaver.WithConfig[mediaServiceOptions]
+	composePostService xcweaver.Ref[ComposePostService]
 }
 
 type mediaServiceOptions struct {
-	Region    string `toml:"region"`
+	Region string `toml:"region"`
 }
 
 func (m *mediaService) Init(ctx context.Context) error {
@@ -38,8 +38,8 @@ func (m *mediaService) UploadMedia(ctx context.Context, reqID int64, mediaTypes 
 	}
 	var medias []model.Media
 	for i := range mediaIDs {
-		medias = append(medias, model.Media {
-			MediaID: mediaIDs[i],
+		medias = append(medias, model.Media{
+			MediaID:   mediaIDs[i],
 			MediaType: mediaTypes[i],
 		})
 	}

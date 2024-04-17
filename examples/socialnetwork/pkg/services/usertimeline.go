@@ -8,7 +8,7 @@ import (
 	"socialnetwork/pkg/model"
 	"socialnetwork/pkg/storage"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,17 +21,17 @@ type UserTimelineService interface {
 }
 
 type userTimelineServiceOptions struct {
-	MongoDBAddr string 	`toml:"mongodb_address"`
-	RedisAddr   string 	`toml:"redis_address"`
-	MongoDBPort int    	`toml:"mongodb_port"`
-	RedisPort   int    	`toml:"redis_port"`
-	Region 		string 	`toml:"region"`
+	MongoDBAddr string `toml:"mongodb_address"`
+	RedisAddr   string `toml:"redis_address"`
+	MongoDBPort int    `toml:"mongodb_port"`
+	RedisPort   int    `toml:"redis_port"`
+	Region      string `toml:"region"`
 }
 
 type userTimelineService struct {
-	weaver.Implements[UserTimelineService]
-	weaver.WithConfig[userTimelineServiceOptions]
-	postStorageService weaver.Ref[PostStorageService]
+	xcweaver.Implements[UserTimelineService]
+	xcweaver.WithConfig[userTimelineServiceOptions]
+	postStorageService xcweaver.Ref[PostStorageService]
 	mongoClient        *mongo.Client
 	redisClient        *redis.Client
 }
@@ -53,7 +53,6 @@ func (u *userTimelineService) Init(ctx context.Context) error {
 	)
 	return nil
 }
-
 
 // WriteUserTimeline adds the post to the user (the post's writer) timeline
 func (u *userTimelineService) WriteUserTimeline(ctx context.Context, reqID int64, postID int64, userID int64, timestamp int64) error {

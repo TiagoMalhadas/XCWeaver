@@ -7,7 +7,7 @@ import (
 	"socialnetwork/pkg/model"
 	"socialnetwork/pkg/storage"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/bradfitz/gomemcache/memcache"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -20,20 +20,20 @@ type UrlShortenService interface {
 }
 
 type urlShortenService struct {
-	weaver.Implements[UrlShortenService]
-	weaver.WithConfig[urlShortenServiceOptions]
-	composePostService weaver.Ref[ComposePostService]
+	xcweaver.Implements[UrlShortenService]
+	xcweaver.WithConfig[urlShortenServiceOptions]
+	composePostService xcweaver.Ref[ComposePostService]
 	mongoClient        *mongo.Client
 	memCachedClient    *memcache.Client
 	hostname           string
 }
 
 type urlShortenServiceOptions struct {
-	MongoDBAddr 	string 	`toml:"mongodb_address"`
-	MemCachedAddr 	string 	`toml:"memcached_address"`
-	MongoDBPort 	int    	`toml:"mongodb_port"`
-	MemCachedPort 	int    	`toml:"memcached_port"`
-	Region    		string  `toml:"region"`
+	MongoDBAddr   string `toml:"mongodb_address"`
+	MemCachedAddr string `toml:"memcached_address"`
+	MongoDBPort   int    `toml:"mongodb_port"`
+	MemCachedPort int    `toml:"memcached_port"`
+	Region        string `toml:"region"`
 }
 
 func (u *urlShortenService) genRandomStr(length int) string {

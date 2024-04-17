@@ -98,9 +98,16 @@ region              = "europe-west3"
 
 [single]
 listeners.wrk2 = {address = "127.0.0.1:9000"}
+antipodeAgents.rabbitClientWriteHomeTL = {datastoreType = "RabbitMQ", host = "localhost", port = "5673", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "write-home-timeline"}
+antipodeAgents.rabbitClientCompose = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "write-home-timeline"}
+antipodeAgents.mongoClientPostStorage = {datastoreType = "MongoDB", host = "localhost", port = "27017", datastore = "post-storage"}
 
 [multi]
 listeners.wrk2 = {address = "127.0.0.1:9000"}
+antipodeAgents.rabbitClientWriteHomeTL = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "write-home-timeline"}
+antipodeAgents.rabbitClientCompose = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "write-home-timeline"}
+antipodeAgents.mongoClientPostStorage = {datastoreType = "MongoDB", host = "localhost", port = "27017", datastore = "post-storage"}
+
 
 [serviceweaver]
 binary = "./socialnetwork"

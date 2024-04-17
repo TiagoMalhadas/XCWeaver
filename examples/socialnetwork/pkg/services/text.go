@@ -8,7 +8,7 @@ import (
 
 	"socialnetwork/pkg/model"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 )
 
 type TextService interface {
@@ -16,15 +16,15 @@ type TextService interface {
 }
 
 type textServiceOptions struct {
-	Region    string `toml:"region"`
+	Region string `toml:"region"`
 }
 
 type textService struct {
-	weaver.Implements[TextService]
-	weaver.WithConfig[textServiceOptions]
-	composePostService   weaver.Ref[ComposePostService]
-	urlShortenService    weaver.Ref[UrlShortenService]
-	userMentionService   weaver.Ref[UserMentionService]
+	xcweaver.Implements[TextService]
+	xcweaver.WithConfig[textServiceOptions]
+	composePostService xcweaver.Ref[ComposePostService]
+	urlShortenService  xcweaver.Ref[UrlShortenService]
+	userMentionService xcweaver.Ref[UserMentionService]
 }
 
 func (t *textService) Init(ctx context.Context) error {
@@ -57,7 +57,7 @@ func (t *textService) UploadText(ctx context.Context, reqID int64, text string) 
 		shortenUrlErr = t.urlShortenService.Get().UploadUrls(ctx, reqID, url_strings)
 	}()
 	// --
-	
+
 	// -- user mention service rpc
 	userMentionWg.Add(1)
 	go func() {
@@ -66,7 +66,6 @@ func (t *textService) UploadText(ctx context.Context, reqID int64, text string) 
 	}()
 	// --
 
-	
 	shortenUrlWg.Wait()
 	if shortenUrlErr != nil {
 		logger.Error("error uploading urls to url shorten service", "msg", shortenUrlErr.Error())

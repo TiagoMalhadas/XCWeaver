@@ -162,7 +162,7 @@ def gen_weaver_config_gcp(public_ip_db_eu, public_ip_db_us):
 #╰───────────────────┴────────────────────┴───────────────────────┴───────╯
 
 def metrics(deployment_type='gke', timestamp=None, local=True):
-  from plumbum.cmd import weaver, grep
+  from plumbum.cmd import xcweaver, grep
   import re
 
   primary_region = 'europe-west3'
@@ -172,7 +172,7 @@ def metrics(deployment_type='gke', timestamp=None, local=True):
 
   def get_filter_metrics(deployment_type, metric_name, region):
     #return (weaver[deployment_type, 'metrics', metric_name] | grep[region])()
-    return weaver[deployment_type, 'metrics', metric_name]()
+    return xcweaver[deployment_type, 'metrics', metric_name]()
 
   # wkr2 api
   compose_post_duration_metrics = get_filter_metrics(deployment_type, 'sn_compose_post_duration_ms', primary_region)
@@ -192,7 +192,7 @@ def metrics(deployment_type='gke', timestamp=None, local=True):
   received_notifications_metrics = get_filter_metrics(deployment_type, 'sn_received_notifications', secondary_region)
   received_notifications_count = sum(int(value) for value in pattern.findall(received_notifications_metrics))
   inconsitencies_metrics = get_filter_metrics(deployment_type, 'sn_inconsistencies', secondary_region)
-  inconsitencies_metrics = weaver[deployment_type, 'metrics', 'sn_inconsistencies']()
+  inconsitencies_metrics = xcweaver[deployment_type, 'metrics', 'sn_inconsistencies']()
   inconsistencies_count = sum(int(value) for value in pattern.findall(inconsitencies_metrics))
 
   pc_inconsistencies = "{:.2f}".format((inconsistencies_count / composed_posts_count) * 100)

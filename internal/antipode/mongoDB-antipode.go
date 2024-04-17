@@ -22,6 +22,7 @@ type Document struct {
 }
 
 func CreateMongoDB(host string, port string, database string) MongoDB {
+
 	return MongoDB{options.Client().ApplyURI("mongodb://" + host + ":" + port),
 		database,
 	}
@@ -30,6 +31,8 @@ func CreateMongoDB(host string, port string, database string) MongoDB {
 // devo verificar primeiro se já existe essa key? E caso exista fazer update?
 // falta fechar a conecção
 func (m MongoDB) write(ctx context.Context, collection string, key string, obj AntiObj) error {
+
+	fmt.Println("uri: ", m.clientOptions.GetURI())
 
 	client, err := mongo.Connect(ctx, m.clientOptions)
 	if err != nil {
@@ -42,6 +45,11 @@ func (m MongoDB) write(ctx context.Context, collection string, key string, obj A
 			log.Fatal(err)
 		}
 	}()
+
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("mongodb cannot be reached after connecting: %s", err.Error())
+	}
 
 	mongoObj := Document{
 		Key:   key,

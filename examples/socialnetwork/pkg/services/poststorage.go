@@ -12,7 +12,7 @@ import (
 	"socialnetwork/pkg/model"
 	"socialnetwork/pkg/storage"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/bradfitz/gomemcache/memcache"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,7 +26,7 @@ type PostStorageService interface {
 	ReadPosts(ctx context.Context, reqID int64, postIDs []int64) ([]model.Post, error)
 }
 
-var _ weaver.NotRetriable = PostStorageService.StorePost
+var _ xcweaver.NotRetriable = PostStorageService.StorePost
 
 type postStorageServiceOptions struct {
 	MongoDBAddr   string `toml:"mongodb_address"`
@@ -37,14 +37,17 @@ type postStorageServiceOptions struct {
 }
 
 type postStorageService struct {
-	weaver.Implements[PostStorageService]
-	weaver.WithConfig[postStorageServiceOptions]
-	mongoClient     *mongo.Client
-	memCachedClient *memcache.Client
+	xcweaver.Implements[PostStorageService]
+	xcweaver.WithConfig[postStorageServiceOptions]
+	mongoClientPostStorage xcweaver.Antipode
+	memCachedClient        *memcache.Client
+	//To remove
+	mongoClient *mongo.Client
 }
 
 func (p *postStorageService) Init(ctx context.Context) error {
 	logger := p.Logger(ctx)
+
 	var err error
 	p.mongoClient, err = storage.MongoDBClient(ctx, p.Config().MongoDBAddr, p.Config().MongoDBPort)
 	if err != nil {
@@ -61,7 +64,7 @@ func (p *postStorageService) Init(ctx context.Context) error {
 
 	logger.Info("post storage service running!", "region", p.Config().Region,
 		"mongodb_addr", p.Config().MongoDBAddr, "mongodb_port", p.Config().MongoDBPort,
-		"memcached_addr", p.Config().MemCachedAddr, "memcached_port", p.Config().MemCachedPort,
+		"memcached_addr", p.Config().MemCachedAddr, "memcached_port", p.Config().MemCachedPort, "antipode", p.mongoClientPostStorage,
 	)
 	return nil
 }
@@ -75,17 +78,29 @@ func (p *postStorageService) StorePost(ctx context.Context, reqID int64, post mo
 	)
 	writePostStartMs := time.Now().UnixMilli()
 
-	collection := p.mongoClient.Database("post-storage").Collection("posts")
-	r, err := collection.InsertOne(ctx, post)
+	postIDStr := strconv.FormatInt(post.PostID, 10)
+
+	postJSON, err := json.Marshal(post)
+	if err != nil {
+		logger.Debug("error converting post to JSON", "post", post, "msg", err.Error())
+		return err
+	}
+	postStr := string(postJSON)
+
+	ctx, err = p.mongoClientPostStorage.Write(ctx, "posts", postIDStr, postStr)
+
+	/*collection := p.mongoClient.Database("post-storage").Collection("posts")
+	r, err := collection.InsertOne(ctx, post)*/
 	if err != nil {
 		logger.Error("error writing post", "msg", err.Error())
 	}
+	logger.Debug("write post done!", "key", postIDStr, "post", postStr)
 	regionLabel := sn_metrics.RegionLabel{Region: p.Config().Region}
 	logger.Debug("before write post metric 1", "region_label", regionLabel)
 	sn_metrics.WritePostDurationMs.Get(regionLabel)
 	logger.Debug("before write post metric 2", "region_label", regionLabel)
 	sn_metrics.WritePostDurationMs.Get(regionLabel).Put(float64(time.Now().UnixMilli() - writePostStartMs))
-	logger.Debug("inserted post", "objectid", r.InsertedID)
+	//logger.Debug("inserted post", "objectid", r.InsertedID)
 
 	return nil
 }
@@ -96,7 +111,7 @@ func (p *postStorageService) ReadPost(ctx context.Context, reqID int64, postID i
 
 	var post model.Post
 	postIDStr := strconv.FormatInt(postID, 10)
-	item, err := p.memCachedClient.Get(postIDStr)
+	/*item, err := p.memCachedClient.Get(postIDStr)
 
 	if err != nil && err != memcache.ErrCacheMiss {
 		// error reading cache
@@ -127,7 +142,21 @@ func (p *postStorageService) ReadPost(ctx context.Context, reqID int64, postID i
 			logger.Warn(errMsg)
 			return post, fmt.Errorf(errMsg)
 		}
+	}*/
+
+	result, lineage, err := p.mongoClientPostStorage.Read(ctx, "posts", postIDStr)
+	if err != nil {
+		logger.Error("error reading post from mongo", "msg", err.Error())
+		return post, err
 	}
+	logger.Debug("postStorage service | lineage and message successfully read!", "region", p.Config().Region, "lineage", lineage, "message", result)
+	err = json.Unmarshal([]byte(result), &post)
+	if err != nil {
+		errMsg := fmt.Sprintf("post_id: %s not found in mongodb", postIDStr)
+		logger.Warn(errMsg)
+		return post, fmt.Errorf(errMsg)
+	}
+
 	return post, nil
 }
 

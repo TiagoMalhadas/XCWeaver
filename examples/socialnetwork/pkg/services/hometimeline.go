@@ -6,7 +6,7 @@ import (
 	"socialnetwork/pkg/storage"
 	"strconv"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -16,9 +16,9 @@ type HomeTimelineService interface {
 }
 
 type homeTimelineService struct {
-	weaver.Implements[HomeTimelineService]
-	weaver.WithConfig[homeTimelineServiceOptions]
-	postStorageService weaver.Ref[PostStorageService]
+	xcweaver.Implements[HomeTimelineService]
+	xcweaver.WithConfig[homeTimelineServiceOptions]
+	postStorageService xcweaver.Ref[PostStorageService]
 	redisClient        *redis.Client
 }
 

@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/dgrijalva/jwt-go"
 	"go.mongodb.org/mongo-driver/bson"
@@ -44,10 +44,10 @@ type Claims struct {
 }
 
 type userService struct {
-	weaver.Implements[UserService]
-	weaver.WithConfig[userServiceOptions]
-	socialGraphService weaver.Ref[SocialGraphService]
-	composePostService weaver.Ref[ComposePostService]
+	xcweaver.Implements[UserService]
+	xcweaver.WithConfig[userServiceOptions]
+	socialGraphService xcweaver.Ref[SocialGraphService]
+	composePostService xcweaver.Ref[ComposePostService]
 	machineID          string
 	counter            int64
 	currentTimestamp   int64
@@ -62,7 +62,7 @@ type userServiceOptions struct {
 	MemCachedAddr string `toml:"memcached_address"`
 	MongoDBPort   int    `toml:"mongodb_port"`
 	MemCachedPort int    `toml:"memcached_port"`
-	Region    	  string `toml:"region"`
+	Region        string `toml:"region"`
 }
 
 func (u *userService) getCounter(timestamp int64) (int64, error) {

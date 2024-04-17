@@ -1,18 +1,18 @@
 package trace
 
 import (
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 
 	"go.opentelemetry.io/otel/trace"
 )
 
 type SpanContext struct {
-	weaver.AutoMarshal
-	TraceID 	[16]byte `json:"trace_id"`
-	SpanID 		[8]byte `json:"span_id"`
-	TraceFlags 	byte 	`json:"trace_flags"`
-	TraceState 	string 	`json:"trace_state"`
-	Remote 		bool 	`json:"remote"`
+	xcweaver.AutoMarshal
+	TraceID    [16]byte `json:"trace_id"`
+	SpanID     [8]byte  `json:"span_id"`
+	TraceFlags byte     `json:"trace_flags"`
+	TraceState string   `json:"trace_state"`
+	Remote     bool     `json:"remote"`
 }
 
 func ParseSpanContext(sc SpanContext) (trace.SpanContext, error) {
@@ -25,7 +25,7 @@ func ParseSpanContext(sc SpanContext) (trace.SpanContext, error) {
 		SpanID:     sc.SpanID,
 		TraceFlags: trace.TraceFlags(sc.TraceFlags),
 		TraceState: traceState,
-		Remote: 	sc.Remote,
+		Remote:     sc.Remote,
 	}
 	return trace.NewSpanContext(config), nil
 }
@@ -36,6 +36,6 @@ func BuildSpanContext(sc trace.SpanContext) SpanContext {
 		SpanID:     sc.SpanID(),
 		TraceFlags: byte(sc.TraceFlags()),
 		TraceState: sc.TraceState().String(),
-		Remote: 	sc.IsRemote(),
+		Remote:     sc.IsRemote(),
 	}
 }

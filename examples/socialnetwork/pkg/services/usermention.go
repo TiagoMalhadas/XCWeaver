@@ -7,7 +7,7 @@ import (
 	"socialnetwork/pkg/model"
 	"socialnetwork/pkg/storage"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/bradfitz/gomemcache/memcache"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,9 +19,9 @@ type UserMentionService interface {
 }
 
 type userMentionService struct {
-	weaver.Implements[UserMentionService]
-	weaver.WithConfig[userMentionServiceOptions]
-	composePost     weaver.Ref[ComposePostService]
+	xcweaver.Implements[UserMentionService]
+	xcweaver.WithConfig[userMentionServiceOptions]
+	composePost     xcweaver.Ref[ComposePostService]
 	mongoClient     *mongo.Client
 	memCachedClient *memcache.Client
 }

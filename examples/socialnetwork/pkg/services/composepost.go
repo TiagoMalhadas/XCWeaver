@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -13,8 +12,7 @@ import (
 	"socialnetwork/pkg/storage"
 	sn_trace "socialnetwork/pkg/trace"
 
-	"github.com/ServiceWeaver/weaver"
-	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -33,23 +31,23 @@ const NUM_COMPONENTS int = 6 // corresponds to the number of exposed methods
 const REDIS_EXPIRE_TIME int = 12
 
 type composePostService struct {
-	weaver.Implements[ComposePostService]
-	weaver.WithConfig[composePostServiceOptions]
-	postStorageService  weaver.Ref[PostStorageService]
-	userTimelineService weaver.Ref[UserTimelineService]
-	_                   weaver.Ref[WriteHomeTimelineService]
+	xcweaver.Implements[ComposePostService]
+	xcweaver.WithConfig[composePostServiceOptions]
+	postStorageService  xcweaver.Ref[PostStorageService]
+	userTimelineService xcweaver.Ref[UserTimelineService]
+	_                   xcweaver.Ref[WriteHomeTimelineService]
 	redisClient         *redis.Client
-	amqClientPool 		*storage.RabbitMQClientPool
-	
+	//amqClientPool       *storage.RabbitMQClientPool
+	rabbitClientCompose xcweaver.Antipode
 }
 
 type composePostServiceOptions struct {
-	RabbitMQAddr string 	`toml:"rabbitmq_address"`
-	RedisAddr    string 	`toml:"redis_address"`
-	RabbitMQPort int    	`toml:"rabbitmq_port"`
-	RedisPort    int    	`toml:"redis_port"`
-	Region       string 	`toml:"region"`
-	Regions      []string 	`toml:"regions"`
+	RabbitMQAddr string   `toml:"rabbitmq_address"`
+	RedisAddr    string   `toml:"redis_address"`
+	RabbitMQPort int      `toml:"rabbitmq_port"`
+	RedisPort    int      `toml:"redis_port"`
+	Region       string   `toml:"region"`
+	Regions      []string `toml:"regions"`
 }
 
 type MethodLabels struct {
@@ -61,12 +59,7 @@ type MethodLabels struct {
 
 func (c *composePostService) Init(ctx context.Context) error {
 	logger := c.Logger(ctx)
-	var err error
-	c.amqClientPool, err = storage.NewRabbitMQClientPool(ctx, c.Config().RabbitMQAddr, c.Config().RabbitMQPort, 0, 500)
-	if err != nil {
-		logger.Error("error initializing rabbitmq client pool", "msg", err.Error())
-		return err
-	}
+
 	c.redisClient = storage.RedisClient(c.Config().RedisAddr, c.Config().RedisPort)
 	logger.Info("compose post service running!", "region", c.Config().Region, "regions", c.Config().Regions,
 		"rabbitmq_addr", c.Config().RabbitMQAddr, "rabbitmq_port", c.Config().RabbitMQPort,
@@ -186,7 +179,7 @@ func (c *composePostService) UploadCreator(ctx context.Context, reqID int64, cre
 func (c *composePostService) composeAndUpload(ctx context.Context, reqID int64) error {
 	logger := c.Logger(ctx)
 	logger.Debug("entering composeAndUpload", "reqid", reqID)
-	
+
 	var text string
 	var creator model.Creator
 	var medias []model.Media
@@ -290,29 +283,15 @@ func (c *composePostService) composeAndUpload(ctx context.Context, reqID int64) 
 	c.uploadHomeTimelineHelper(ctx, reqID, postID, creator.UserID, timestamp, userMentionIDs)
 
 	// --- User Timeline
-	logger.Debug("calling write user timeline")
+	/*logger.Debug("calling write user timeline")
 	c.userTimelineService.Get().WriteUserTimeline(ctx, reqID, postID, post.Creator.UserID, timestamp)
-
+	*/
 	logger.Debug("done!")
 	return nil
 }
 
 func (c *composePostService) uploadHomeTimelineHelper(ctx context.Context, reqID int64, postID int64, userID int64, timestamp int64, userMentionIDs []int64) error {
 	logger := c.Logger(ctx)
-
-	ch, err := c.amqClientPool.Pop(ctx)
-	defer c.amqClientPool.Push(ch)
-
-	if err != nil {
-		logger.Error("error getting rabbitmq client from pool", "msg", err.Error())
-		panic(err)
-	}
-	err = ch.ExchangeDeclare("write-home-timeline", "topic", false, false, false, false, nil)
-	if err != nil {
-		logger.Error("error declaring exchange for rabbitmq", "msg", err.Error())
-		// errors close the channel so we force the service to restart
-		panic(err)
-	}
 
 	spanContext := trace.SpanContextFromContext(ctx)
 	msg := model.Message{
@@ -333,24 +312,13 @@ func (c *composePostService) uploadHomeTimelineHelper(ctx context.Context, reqID
 		return err
 	}
 
+	c.rabbitClientCompose.Write(ctx, "write-home-timeline", "", string(msgJSON))
+
+	//Retirar?
 	span := trace.SpanFromContext(ctx)
 	if trace.SpanContextFromContext(ctx).IsValid() {
 		logger.Debug("valid span", "s", span.IsRecording())
 	}
-
-	amqMsg := amqp.Publishing{
-		ContentType: "application/json",
-		Body:        []byte(msgJSON),
-	}
-	for _, region := range c.Config().Regions {
-		routingKey := fmt.Sprintf("write-home-timeline-%s", region)
-		err = ch.PublishWithContext(ctx, "write-home-timeline", routingKey, false, false, amqMsg)
-		if err != nil {
-			logger.Error("error publishing to queue", "routing_key", routingKey, "err", err.Error())
-		}
-
-	}
-	c.amqClientPool.Push(ch)
 
 	span = trace.SpanFromContext(ctx)
 	if trace.SpanContextFromContext(ctx).IsValid() {

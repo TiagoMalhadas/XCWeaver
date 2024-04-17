@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -13,7 +12,7 @@ import (
 	"socialnetwork/pkg/storage"
 	sn_trace "socialnetwork/pkg/trace"
 
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,12 +36,13 @@ type writeHomeTimelineServiceOptions struct {
 }
 
 type writeHomeTimelineService struct {
-	weaver.Implements[WriteHomeTimelineService]
-	weaver.WithConfig[writeHomeTimelineServiceOptions]
-	socialGraphService weaver.Ref[SocialGraphService]
+	xcweaver.Implements[WriteHomeTimelineService]
+	xcweaver.WithConfig[writeHomeTimelineServiceOptions]
+	socialGraphService xcweaver.Ref[SocialGraphService]
 	mongoClient        *mongo.Client
 	redisClient        *redis.Client
-	amqClientPool 		*storage.RabbitMQClientPool
+	//amqClientPool      *storage.RabbitMQClientPool
+	rabbitClientWriteHomeTL xcweaver.Antipode
 }
 
 func (w *writeHomeTimelineService) Init(ctx context.Context) error {
@@ -54,11 +54,6 @@ func (w *writeHomeTimelineService) Init(ctx context.Context) error {
 		return err
 	}
 	w.redisClient = storage.RedisClient(w.Config().RedisAddr, w.Config().RedisPort)
-	w.amqClientPool, err = storage.NewRabbitMQClientPool(ctx, w.Config().RabbitMQAddr, w.Config().RabbitMQPort, 0, 500)
-	if err != nil {
-		logger.Error("error initializing rabbitmq client pool", "msg", err.Error())
-		return err
-	}
 
 	var wg sync.WaitGroup
 	wg.Add(w.Config().NumWorkers)
@@ -163,7 +158,8 @@ func (w *writeHomeTimelineService) onReceivedWorker(ctx context.Context, workeri
 	logger.Debug("received rabbitmq message", "workerid", workerid, "post_id", msg.PostID, "msg", msg)
 
 	spanContext, err := sn_trace.ParseSpanContext(msg.SpanContext)
-	if err != nil {		logger.Error("error parsing span context", "workerid", workerid, "msg", err.Error())
+	if err != nil {
+		logger.Error("error parsing span context", "workerid", workerid, "msg", err.Error())
 		return err
 	}
 
@@ -181,45 +177,29 @@ func (w *writeHomeTimelineService) onReceivedWorker(ctx context.Context, workeri
 func (w *writeHomeTimelineService) workerThread(ctx context.Context, workerid int) error {
 	logger := w.Logger(ctx)
 
-	ch, err := w.amqClientPool.Pop(ctx)
-	defer w.amqClientPool.Push(ch)
-
-	if err != nil {
-		logger.Error("error getting rabbitmq client from pool", "msg", err.Error())
-		panic(err)
-	}
-
-	err = ch.ExchangeDeclare("write-home-timeline", "topic", false, false, false, false, nil)
-	if err != nil {
-		logger.Error("error declaring exchange for rabbitmq", "workerid", workerid, "msg", err.Error())
-		return err
-	}
-	routingKey := fmt.Sprintf("write-home-timeline-%s", w.Config().Region)
-	_, err = ch.QueueDeclare(routingKey, false, false, false, false, nil)
-	if err != nil {
-		logger.Error("error declaring queue for rabbitmq", "workerid", workerid, "msg", err.Error())
-		return err
-	}
-
-	err = ch.QueueBind(routingKey, routingKey, "write-home-timeline", false, nil)
-	if err != nil {
-		logger.Error("error binding queue for rabbitmq", "workerid", workerid, "msg", err.Error())
-		return err
-	}
-
-	msgs, err := ch.Consume(routingKey, "", true, false, false, false, nil)
-	if err != nil {
-		logger.Error("error consuming queue", "workerid", workerid, "msg", err.Error())
-		return err
-	}
-
 	var forever chan struct{}
-	go func() {
-		for msg := range msgs {
-			err = w.onReceivedWorker(ctx, workerid, msg.Body)
+	go func() error {
+		for {
+			logger.Debug("before read", "region", w.Config().Region)
+			msg, lineage, err := w.rabbitClientWriteHomeTL.Read(ctx, "write-home-timeline", "")
+			logger.Debug("after read", "region", w.Config().Region)
+			if err != nil {
+				logger.Error("error consuming queue", "workerid", workerid, "msg", err.Error())
+				return err
+			}
+
+			logger.Debug("write home timeline service | lineage and message successfully read!", "region", w.Config().Region, "lineage", lineage, "message", msg)
+
+			ctx, err = xcweaver.Transfer(ctx, lineage)
+
+			if err != nil {
+				logger.Error("error transfering the lineage to context", "workerid", workerid, "msg", err.Error())
+				return err
+			}
+			/*err = w.onReceivedWorker(ctx, workerid, []byte(msg))
 			if err != nil {
 				logger.Warn("error in worker thread", "msg", err.Error())
-			}
+			}*/
 		}
 	}()
 	<-forever

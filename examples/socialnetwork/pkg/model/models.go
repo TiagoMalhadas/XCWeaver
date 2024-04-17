@@ -1,44 +1,44 @@
 package model
 
 import (
-	"github.com/ServiceWeaver/weaver"
+	"github.com/TiagoMalhadas/xcweaver"
 
 	sn_trace "socialnetwork/pkg/trace"
 )
 
 type Message struct {
-	weaver.AutoMarshal
-	ReqID          int64       			 `json:"req_id"`
-	UserID         int64       			 `json:"user_id"`
-	PostID         int64       			 `json:"post_id"`
-	Timestamp      int64       			 `json:"timestamp"`
-	UserMentionIDs []int64     			 `json:"user_mention_ids"`
+	xcweaver.AutoMarshal
+	ReqID          int64   `json:"req_id"`
+	UserID         int64   `json:"user_id"`
+	PostID         int64   `json:"post_id"`
+	Timestamp      int64   `json:"timestamp"`
+	UserMentionIDs []int64 `json:"user_mention_ids"`
 	// tracing
-	SpanContext    	sn_trace.SpanContext `json:"span_context"`
+	SpanContext sn_trace.SpanContext `json:"span_context"`
 	// evaluation metrics
-	NotificationSendTs 	int64 `json:"notification_write"`
+	NotificationSendTs int64 `json:"notification_write"`
 }
 
 type Creator struct {
-	weaver.AutoMarshal
+	xcweaver.AutoMarshal
 	UserID   int64  `bson:"user_id"`
 	Username string `bson:"username"`
 }
 
 type Media struct {
-	weaver.AutoMarshal
+	xcweaver.AutoMarshal
 	MediaID   int64  `bson:"media_id"`
 	MediaType string `bson:"media_type"`
 }
 
 type URL struct {
-	weaver.AutoMarshal
+	xcweaver.AutoMarshal
 	ExpandedUrl  string `bson:"expanded_url"`
 	ShortenedUrl string `bson:"shortened_url"`
 }
 
 type User struct {
-	weaver.AutoMarshal
+	xcweaver.AutoMarshal
 	UserID    int64  `bson:"user_id"`
 	FirstName string `bson:"first_name"`
 	LastName  string `bson:"last_name"`
@@ -48,7 +48,7 @@ type User struct {
 }
 
 type UserMention struct {
-	weaver.AutoMarshal
+	xcweaver.AutoMarshal
 	UserID   int64  `bson:"user_id"`
 	Username string `bson:"username"`
 }
@@ -65,7 +65,7 @@ const (
 type Post struct {
 	// make post serializable
 	// by default, struct literal types are not serializable
-	weaver.AutoMarshal
+	xcweaver.AutoMarshal
 	PostID       int64         `bson:"post_id"`
 	ReqID        int64         `bson:"req_id"`
 	Creator      Creator       `bson:"creator"`
