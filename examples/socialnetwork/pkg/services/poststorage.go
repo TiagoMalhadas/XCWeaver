@@ -118,7 +118,7 @@ func (p *postStorageService) ReadPost(ctx context.Context, reqID int64, postID i
 
 	var post model.Post
 	postIDStr := strconv.FormatInt(postID, 10)
-	/*item, err := p.memCachedClient.Get(postIDStr)
+	item, err := p.memCachedClient.Get(postIDStr)
 
 	if err != nil && err != memcache.ErrCacheMiss {
 		// error reading cache
@@ -135,38 +135,25 @@ func (p *postStorageService) ReadPost(ctx context.Context, reqID int64, postID i
 	} else {
 		// post does not exist in cache
 		// so we get it from db
-		collection := p.mongoClient.Database("post-storage").Collection("posts")
-		filter := bson.D{
-			{Key: "post_id", Value: postID},
-		}
-		result := collection.FindOne(ctx, filter)
-		if result.Err() != nil {
+		result, lineage, err := p.mongoClientPostStorage.Read(ctx, "posts", postIDStr)
+		if err != nil {
+			logger.Error("error reading post from mongo", "msg", err.Error())
 			return post, err
 		}
-		err = result.Decode(&post)
+		logger.Debug("postStorage service | lineage and message successfully read!", "region", p.Config().Region, "lineage", lineage, "message", result)
+		err = json.Unmarshal([]byte(result), &post)
 		if err != nil {
 			errMsg := fmt.Sprintf("post_id: %s not found in mongodb", postIDStr)
 			logger.Warn(errMsg)
 			return post, fmt.Errorf(errMsg)
 		}
-	}*/
-
-	result, lineage, err := p.mongoClientPostStorage.Read(ctx, "posts", postIDStr)
-	if err != nil {
-		logger.Error("error reading post from mongo", "msg", err.Error())
-		return post, err
-	}
-	logger.Debug("postStorage service | lineage and message successfully read!", "region", p.Config().Region, "lineage", lineage, "message", result)
-	err = json.Unmarshal([]byte(result), &post)
-	if err != nil {
-		errMsg := fmt.Sprintf("post_id: %s not found in mongodb", postIDStr)
-		logger.Warn(errMsg)
-		return post, fmt.Errorf(errMsg)
 	}
 
 	return post, nil
 }
 
+// To-Do
+// Use Antipode
 func (p *postStorageService) ReadPosts(ctx context.Context, reqID int64, postIDs []int64) ([]model.Post, error) {
 	logger := p.Logger(ctx)
 	logger.Info("entering ReadPosts", "req_id", reqID, "post_ids", postIDs)

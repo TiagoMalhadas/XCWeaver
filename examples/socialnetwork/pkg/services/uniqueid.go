@@ -42,17 +42,13 @@ func (u *uniqueIdService) Init(ctx context.Context) error {
 func (u *uniqueIdService) getCounter(timestamp int64) (int64, error) {
 	u.mu.Lock()
 	defer u.mu.Unlock()
-	if u.currentTimestamp > timestamp {
+
+	if u.currentTimestamp >= timestamp {
 		return 0, fmt.Errorf("timestamps are not incremental")
-	}
-	if u.currentTimestamp == timestamp {
-		counter := u.counter
-		u.counter += 1
-		return counter, nil
 	} else {
-		u.currentTimestamp = timestamp
-		u.counter = 1
-		return u.counter, nil
+		u.counter += 1
+		counter := u.counter
+		return counter, nil
 	}
 
 }
@@ -68,6 +64,7 @@ func (u *uniqueIdService) UploadUniqueId(ctx context.Context, reqID int64, postT
 		return err
 	}
 	id, err := utils.GenUniqueID(u.machineID, timestamp, counter)
+	logger.Debug("uniqueId created!", "machineID", u.machineID, "timestamp", timestamp, "counter", counter)
 	if err != nil {
 		return err
 	}

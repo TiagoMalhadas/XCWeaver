@@ -37,17 +37,14 @@ type composePostService struct {
 	userTimelineService xcweaver.Ref[UserTimelineService]
 	_                   xcweaver.Ref[WriteHomeTimelineService]
 	redisClient         *redis.Client
-	//amqClientPool       *storage.RabbitMQClientPool
 	rabbitClientCompose xcweaver.Antipode
 }
 
 type composePostServiceOptions struct {
-	RabbitMQAddr string   `toml:"rabbitmq_address"`
-	RedisAddr    string   `toml:"redis_address"`
-	RabbitMQPort int      `toml:"rabbitmq_port"`
-	RedisPort    int      `toml:"redis_port"`
-	Region       string   `toml:"region"`
-	Regions      []string `toml:"regions"`
+	RedisAddr string   `toml:"redis_address"`
+	RedisPort int      `toml:"redis_port"`
+	Region    string   `toml:"region"`
+	Regions   []string `toml:"regions"`
 }
 
 type MethodLabels struct {
@@ -62,7 +59,6 @@ func (c *composePostService) Init(ctx context.Context) error {
 
 	c.redisClient = storage.RedisClient(c.Config().RedisAddr, c.Config().RedisPort)
 	logger.Info("compose post service running!", "region", c.Config().Region, "regions", c.Config().Regions,
-		"rabbitmq_addr", c.Config().RabbitMQAddr, "rabbitmq_port", c.Config().RabbitMQPort,
 		"redis_addr", c.Config().RedisAddr, "redis_port", c.Config().RedisPort,
 	)
 	return nil
@@ -296,9 +292,9 @@ func (c *composePostService) composeAndUpload(ctx context.Context, reqID int64) 
 	c.uploadHomeTimelineHelper(ctx, reqID, postID, creator.UserID, timestamp, userMentionIDs)
 
 	// --- User Timeline
-	/*logger.Debug("calling write user timeline")
+	logger.Debug("calling write user timeline")
 	c.userTimelineService.Get().WriteUserTimeline(ctx, reqID, postID, post.Creator.UserID, timestamp)
-	*/
+
 	logger.Debug("done!")
 	return nil
 }
@@ -325,7 +321,11 @@ func (c *composePostService) uploadHomeTimelineHelper(ctx context.Context, reqID
 		return err
 	}
 
-	c.rabbitClientCompose.Write(ctx, "write-home-timeline", "", string(msgJSON))
+	ctx, err = c.rabbitClientCompose.Write(ctx, "write-home-timeline", "", string(msgJSON))
+	if err != nil {
+		logger.Debug("error sending message over the queue", "msg", err.Error())
+		return err
+	}
 
 	//Retirar?
 	span := trace.SpanFromContext(ctx)

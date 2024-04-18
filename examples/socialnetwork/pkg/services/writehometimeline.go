@@ -38,22 +38,15 @@ type writeHomeTimelineServiceOptions struct {
 type writeHomeTimelineService struct {
 	xcweaver.Implements[WriteHomeTimelineService]
 	xcweaver.WithConfig[writeHomeTimelineServiceOptions]
-	socialGraphService xcweaver.Ref[SocialGraphService]
-	mongoClient        *mongo.Client
-	redisClient        *redis.Client
-	//amqClientPool      *storage.RabbitMQClientPool
+	socialGraphService      xcweaver.Ref[SocialGraphService]
+	redisClient             *redis.Client
 	rabbitClientWriteHomeTL xcweaver.Antipode
 	mongoClientWriteHomeTL  xcweaver.Antipode
 }
 
 func (w *writeHomeTimelineService) Init(ctx context.Context) error {
 	logger := w.Logger(ctx)
-	var err error
-	w.mongoClient, err = storage.MongoDBClient(ctx, w.Config().MongoDBAddr, w.Config().MongoDBPort)
-	if err != nil {
-		logger.Error("error initializing mongodb client", "msg", err.Error())
-		return err
-	}
+
 	w.redisClient = storage.RedisClient(w.Config().RedisAddr, w.Config().RedisPort)
 
 	var wg sync.WaitGroup
@@ -94,12 +87,6 @@ func (w *writeHomeTimelineService) WriteHomeTimeline(ctx context.Context, msg mo
 		return err
 	}
 
-	/*db := w.mongoClient.Database("post-storage")
-	collection := db.Collection("posts")
-
-	var post model.Post
-	filter := bson.D{{Key: "post_id", Value: msg.PostID}}
-	err := collection.FindOne(ctx, filter, nil).Decode(&post)*/
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			trace.SpanFromContext(ctx).SetAttributes(
@@ -181,12 +168,6 @@ func (w *writeHomeTimelineService) onReceivedWorker(ctx context.Context, workeri
 	}
 
 	ctx = trace.ContextWithRemoteSpanContext(ctx, spanContext)
-
-	/* span := trace.SpanFromContext(ctx)
-	ctx, span = s.tracer.Start(ctx, "services.WriteHomeTimelineService.WriteHomeTimeline", trace.WithSpanKind(trace.SpanKindInternal))
-	defer func() {
-		span.End()
-	}() */
 
 	return w.WriteHomeTimeline(ctx, msg)
 }

@@ -4,9 +4,7 @@
 
 ["socialnetwork/pkg/services/ComposePostService"]
 redis_address       = "localhost"
-rabbitmq_address    = "localhost"
 redis_port          = 6381
-rabbitmq_port       = 5672
 region              = "europe-west3"
 regions             = ["europe-west3", "us-central1"]
 
