@@ -2,12 +2,12 @@
 binary = "./us_deployment"
 
 [single]
-antipodeAgents.clientRedis = {datastoreType = "MySQL", host = "mysql-1", port = "3306", user = "root", password = "password", datastore = "posts"}
-antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "rabbit-2", port = "5672", user = "guest", password = "guest", datastore = "rabbitMQ", queue = "notifications"}
+antipodeAgents.clientRedis = {datastoreType = "Redis", host = "localhost", port = "6380", password = "", datastore = "posts"}
+antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "notifications"}
 
 [multi]
-antipodeAgents.clientRedis = {datastoreType = "MySQL", host = "mysql-1", port = "3306", user = "root", password = "password", datastore = "posts"}
-antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "rabbit-2", port = "5672", user = "guest", password = "guest", datastore = "rabbitMQ", queue = "notifications"}
+antipodeAgents.clientRedis = {datastoreType = "Redis", host = "localhost", port = "6380", password = "", datastore = "posts"}
+antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "notifications"}
 
 [gke]
 regions = ["us-west4"]

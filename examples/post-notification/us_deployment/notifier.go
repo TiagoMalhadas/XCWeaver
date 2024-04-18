@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"log"
 
 	"github.com/TiagoMalhadas/xcweaver"
 )
@@ -25,38 +23,40 @@ type notifier struct {
 	clientRabbitMQ  xcweaver.Antipode
 }
 
-func (r *notifier) Init(ctx context.Context) error {
+func (n *notifier) Init(ctx context.Context) error {
+	logger := n.Logger(ctx)
+	logger.Info("notifier service at us running!")
 
 	var forever chan struct{}
 
 	go func() {
 		for {
-			notification, lineage, err := r.clientRabbitMQ.Read(ctx, "notifications", "")
+			notification, lineage, err := n.clientRabbitMQ.Read(ctx, "notifications", "")
 			if err != nil {
-				log.Printf("Failed to read from rabbitMQ: %v", err)
+				logger.Error("Failed to read from rabbitMQ!", "msg", err.Error())
 				continue
 			}
 
 			var decodedNotification Message
 			err = json.Unmarshal([]byte(notification), &decodedNotification)
 			if err != nil {
-				log.Printf("Error unmarshaling JSON: %v", err)
+				logger.Error("Error unmarshaling JSON!", "msg", err.Error())
 				continue
 			}
 
 			postId := decodedNotification.PostId
 			userId := decodedNotification.UserId
+			logger.Debug("New notification received", "postId", postId, "userId", userId)
+			notificationsReceived.Inc()
 
 			ctx, err = xcweaver.Transfer(ctx, lineage)
-
 			if err != nil {
-				fmt.Println(err)
+				logger.Error("Error transfering the new lineage to context!", "msg", err.Error())
 				continue
 			}
 
-			err = r.follower_Notify.Get().Follower_Notify(ctx, postId, userId)
+			err = n.follower_Notify.Get().Follower_Notify(ctx, postId, userId)
 			if err != nil {
-				fmt.Println(err)
 				continue
 			}
 		}

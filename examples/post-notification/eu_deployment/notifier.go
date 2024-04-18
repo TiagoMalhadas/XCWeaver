@@ -23,7 +23,15 @@ type notifier struct {
 	clientRabbitMQ xcweaver.Antipode
 }
 
-func (r *notifier) Notify(ctx context.Context, postId string, userId int) error {
+func (n *notifier) Init(ctx context.Context) error {
+	logger := n.Logger(ctx)
+	logger.Info("notifier service at eu running!")
+
+	return nil
+}
+
+func (n *notifier) Notify(ctx context.Context, postId string, userId int) error {
+	logger := n.Logger(ctx)
 
 	message := Message{postId, userId}
 
@@ -35,10 +43,13 @@ func (r *notifier) Notify(ctx context.Context, postId string, userId int) error 
 	// Convert the byte slice to a string
 	messageString := string(messageJSON)
 
-	ctx, err = r.clientRabbitMQ.Write(ctx, "notifications", "", messageString)
+	_, err = n.clientRabbitMQ.Write(ctx, "notifications", "", messageString)
 	if err != nil {
+		logger.Error("Error writing notification to queue", "msg", err.Error())
 		return err
 	}
+	notificationsSent.Inc()
+	logger.Debug("nofitication successfully written", "postId", postId, "userId", userId)
 
 	return nil
 }

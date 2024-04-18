@@ -68,12 +68,8 @@ region              = "europe-west3"
 
 # WRITE HOME TIMELINE ACCESSES STORAGES IN "US"
 ["socialnetwork/pkg/services/WriteHomeTimelineService"]
-rabbitmq_address    = "localhost"
-mongodb_address     = "localhost"
 redis_address       = "localhost" #uses HomeTimelineService cache (redis)
-mongodb_port        = 27018
 redis_port          = 6386
-rabbitmq_port       = 5673
 num_workers         = 16
 region              = "us-central1"
 

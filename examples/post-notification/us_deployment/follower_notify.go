@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/TiagoMalhadas/xcweaver"
 )
@@ -18,15 +17,22 @@ type follower_Notify struct {
 	post_storage xcweaver.Ref[Post_storage_america]
 }
 
-func (r *follower_Notify) Follower_Notify(ctx context.Context, postId string, userId int) error {
+func (f *follower_Notify) Init(ctx context.Context) error {
+	logger := f.Logger(ctx)
 
-	post, err := r.post_storage.Get().GetPost(ctx, postId)
+	logger.Info("follower notify service running!")
+	return nil
+}
 
+func (f *follower_Notify) Follower_Notify(ctx context.Context, postId string, userId int) error {
+	logger := f.Logger(ctx)
+
+	post, err := f.post_storage.Get().GetPost(ctx, postId)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Post: ", post)
+	logger.Debug("Post read successfully!", "post", post)
 
 	return nil
 }

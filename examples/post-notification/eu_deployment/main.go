@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -23,10 +22,10 @@ type app struct {
 
 // serve is called by xcweaver.Run and contains the body of the application.
 func serve(ctx context.Context, app *app) error {
+	logger := app.Logger(ctx)
+	logger.Info("post-notification listener available on %v\n", app.post_notification)
 
-	fmt.Printf("post-notification listener available on %v\n", app.post_notification)
-
-	var post_upload Post_upload = app.post_upload.Get()
+	post_upload := app.post_upload.Get()
 
 	// Serve the /post_notification endpoint.
 	http.HandleFunc("/post_notification", func(w http.ResponseWriter, r *http.Request) {

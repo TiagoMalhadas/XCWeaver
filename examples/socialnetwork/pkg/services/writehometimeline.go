@@ -25,14 +25,10 @@ type WriteHomeTimelineService interface {
 }
 
 type writeHomeTimelineServiceOptions struct {
-	RabbitMQAddr string `toml:"rabbitmq_address"`
-	MongoDBAddr  string `toml:"mongodb_address"`
-	RedisAddr    string `toml:"redis_address"`
-	RabbitMQPort int    `toml:"rabbitmq_port"`
-	MongoDBPort  int    `toml:"mongodb_port"`
-	RedisPort    int    `toml:"redis_port"`
-	NumWorkers   int    `toml:"num_workers"`
-	Region       string `toml:"region"`
+	RedisAddr  string `toml:"redis_address"`
+	RedisPort  int    `toml:"redis_port"`
+	NumWorkers int    `toml:"num_workers"`
+	Region     string `toml:"region"`
 }
 
 type writeHomeTimelineService struct {
@@ -60,8 +56,6 @@ func (w *writeHomeTimelineService) Init(ctx context.Context) error {
 	}
 
 	logger.Info("write home timeline service running!", "region", w.Config().Region, "n_workers", w.Config().NumWorkers,
-		"rabbitmq_addr", w.Config().RabbitMQAddr, "rabbitmq_port", w.Config().RabbitMQPort,
-		"mongodb_addr", w.Config().MongoDBAddr, "mongodb_port", w.Config().MongoDBPort,
 		"redis_addr", w.Config().RedisAddr, "redis_port", w.Config().RedisPort,
 	)
 	wg.Wait()

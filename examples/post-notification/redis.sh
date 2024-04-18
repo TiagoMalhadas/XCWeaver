@@ -1,8 +1,8 @@
 #!/bin/bash
 
-sudo docker run -d --rm --name redis-0 --net rabbits -v ${PWD}/clustering/redis-0:/etc/redis/ --cap-add=NET_ADMIN redis:6.0-alpine redis-server /etc/redis/redis.conf
+sudo docker run -d --rm --name redis-0 --net rabbits -p 6379:6379 -v ${PWD}/clustering/redis-0:/etc/redis/ --cap-add=NET_ADMIN redis:6.0-alpine redis-server /etc/redis/redis.conf
 
-sudo docker run -d --rm --name redis-1 --net rabbits -v ${PWD}/clustering/redis-1:/etc/redis/ --cap-add=NET_ADMIN redis:6.0-alpine redis-server /etc/redis/redis.conf
+sudo docker run -d --rm --name redis-1 --net rabbits -p 6380:6379 -v ${PWD}/clustering/redis-1:/etc/redis/ --cap-add=NET_ADMIN redis:6.0-alpine redis-server /etc/redis/redis.conf
 
 # Wait for redis containers to initialize
 sleep 10
