@@ -28,7 +28,7 @@ func CreateMongoDB(host string, port string, database string) MongoDB {
 }
 
 // devo verificar primeiro se já existe essa key? E caso exista fazer update?
-// falta fechar a conecção
+// falta fechar a conexão
 func (m MongoDB) write(ctx context.Context, collectionName string, key string, obj AntiObj) error {
 
 	client, err := mongo.Connect(ctx, m.clientOptions)
