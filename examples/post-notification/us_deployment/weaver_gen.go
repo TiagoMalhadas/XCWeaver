@@ -109,7 +109,7 @@ type follower_Notify_local_stub struct {
 // Check that follower_Notify_local_stub implements the Follower_Notify interface.
 var _ Follower_Notify = (*follower_Notify_local_stub)(nil)
 
-func (s follower_Notify_local_stub) Follower_Notify(ctx context.Context, a0 string, a1 int) (err error) {
+func (s follower_Notify_local_stub) Follower_Notify(ctx context.Context, a0 string, a1 int, a2 int64) (err error) {
 	// Update metrics.
 	begin := s.follower_NotifyMetrics.Begin()
 	defer func() { s.follower_NotifyMetrics.End(begin, err != nil, 0, 0) }()
@@ -126,7 +126,7 @@ func (s follower_Notify_local_stub) Follower_Notify(ctx context.Context, a0 stri
 		}()
 	}
 
-	return s.impl.Follower_Notify(ctx, a0, a1)
+	return s.impl.Follower_Notify(ctx, a0, a1, a2)
 }
 
 type main_local_stub struct {
@@ -184,7 +184,7 @@ type follower_Notify_client_stub struct {
 // Check that follower_Notify_client_stub implements the Follower_Notify interface.
 var _ Follower_Notify = (*follower_Notify_client_stub)(nil)
 
-func (s follower_Notify_client_stub) Follower_Notify(ctx context.Context, a0 string, a1 int) (err error) {
+func (s follower_Notify_client_stub) Follower_Notify(ctx context.Context, a0 string, a1 int, a2 int64) (err error) {
 	// Update metrics.
 	var requestBytes, replyBytes int
 	begin := s.follower_NotifyMetrics.Begin()
@@ -217,12 +217,14 @@ func (s follower_Notify_client_stub) Follower_Notify(ctx context.Context, a0 str
 	size := 0
 	size += (4 + len(a0))
 	size += 8
+	size += 8
 	enc := codegen.NewEncoder()
 	enc.Reset(size)
 
 	// Encode arguments.
 	enc.String(a0)
 	enc.Int(a1)
+	enc.Int64(a2)
 	var shardKey uint64
 
 	// Call the remote method.
@@ -376,11 +378,13 @@ func (s follower_Notify_server_stub) follower_Notify(ctx context.Context, args [
 	a0 = dec.String()
 	var a1 int
 	a1 = dec.Int()
+	var a2 int64
+	a2 = dec.Int64()
 
 	// TODO(rgrandl): The deferred function above will recover from panics in the
 	// user code: fix this.
 	// Call the local method.
-	appErr := s.impl.Follower_Notify(ctx, a0, a1)
+	appErr := s.impl.Follower_Notify(ctx, a0, a1, a2)
 
 	// Encode the results.
 	enc := codegen.NewEncoder()
@@ -472,8 +476,8 @@ type follower_Notify_reflect_stub struct {
 // Check that follower_Notify_reflect_stub implements the Follower_Notify interface.
 var _ Follower_Notify = (*follower_Notify_reflect_stub)(nil)
 
-func (s follower_Notify_reflect_stub) Follower_Notify(ctx context.Context, a0 string, a1 int) (err error) {
-	err = s.caller("Follower_Notify", ctx, []any{a0, a1}, []any{})
+func (s follower_Notify_reflect_stub) Follower_Notify(ctx context.Context, a0 string, a1 int, a2 int64) (err error) {
+	err = s.caller("Follower_Notify", ctx, []any{a0, a1, a2}, []any{})
 	return
 }
 

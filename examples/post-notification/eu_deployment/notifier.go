@@ -3,18 +3,21 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/TiagoMalhadas/xcweaver"
 )
 
 type Message struct {
-	PostId string
-	UserId int
+	PostId                  string
+	UserId                  int
+	StartTimeMs             int64
+	NotificationStartTimeMs int64
 }
 
 // Server component.
 type Notifier interface {
-	Notify(context.Context, string, int) error
+	Notify(context.Context, string, int, int64) error
 }
 
 // Implementation of the Notifier component.
@@ -30,11 +33,11 @@ func (n *notifier) Init(ctx context.Context) error {
 	return nil
 }
 
-func (n *notifier) Notify(ctx context.Context, postId string, userId int) error {
+func (n *notifier) Notify(ctx context.Context, postId string, userId int, startTimeMs int64) error {
 	logger := n.Logger(ctx)
 
-	message := Message{postId, userId}
-
+	notificationStartTimeMs := time.Now().UnixMilli()
+	message := Message{postId, userId, startTimeMs, notificationStartTimeMs}
 	messageJSON, err := json.Marshal(message)
 	if err != nil {
 		return err

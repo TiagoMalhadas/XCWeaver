@@ -8,7 +8,7 @@ import (
 
 // Post_upload component.
 type Post_upload interface {
-	Post(context.Context, string, int) error
+	Post(context.Context, string, int, int64) error
 }
 
 // Implementation of the Post_upload component.
@@ -27,7 +27,7 @@ func (p *post_upload) Init(ctx context.Context) error {
 
 // Forwards the post data to Post_storage component and then sends the post id to
 // the Notifier component
-func (p *post_upload) Post(ctx context.Context, post string, userId int) error {
+func (p *post_upload) Post(ctx context.Context, post string, userId int, startTimeMs int64) error {
 	logger := p.Logger(ctx)
 
 	//send post to post_storage
@@ -43,7 +43,7 @@ func (p *post_upload) Post(ctx context.Context, post string, userId int) error {
 	}
 
 	//send postID and userId to notifier
-	err = p.notifier.Get().Notify(ctx, postId, userId)
+	err = p.notifier.Get().Notify(ctx, postId, userId, startTimeMs)
 	if err != nil {
 		return err
 	}

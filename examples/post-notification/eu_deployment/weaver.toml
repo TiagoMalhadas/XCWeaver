@@ -9,7 +9,7 @@ antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "localhost",
 [multi]
 listeners.post_notification = {address = "0.0.0.0:12345"}
 antipodeAgents.clientRedis = {datastoreType = "Redis", host = "localhost", port = "6379", password = "", datastore = "posts"}
-antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "notifications"}
+antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "guest", password = "guest", datastore = "rabbitMQ", queue = "notifications"}
 
 [gke]
 regions = ["europe-west6"]

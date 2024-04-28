@@ -120,7 +120,7 @@ type notifier_local_stub struct {
 // Check that notifier_local_stub implements the Notifier interface.
 var _ Notifier = (*notifier_local_stub)(nil)
 
-func (s notifier_local_stub) Notify(ctx context.Context, a0 string, a1 int) (err error) {
+func (s notifier_local_stub) Notify(ctx context.Context, a0 string, a1 int, a2 int64) (err error) {
 	// Update metrics.
 	begin := s.notifyMetrics.Begin()
 	defer func() { s.notifyMetrics.End(begin, err != nil, 0, 0) }()
@@ -137,7 +137,7 @@ func (s notifier_local_stub) Notify(ctx context.Context, a0 string, a1 int) (err
 		}()
 	}
 
-	return s.impl.Notify(ctx, a0, a1)
+	return s.impl.Notify(ctx, a0, a1, a2)
 }
 
 type post_storage_europe_local_stub struct {
@@ -178,7 +178,7 @@ type post_upload_local_stub struct {
 // Check that post_upload_local_stub implements the Post_upload interface.
 var _ Post_upload = (*post_upload_local_stub)(nil)
 
-func (s post_upload_local_stub) Post(ctx context.Context, a0 string, a1 int) (err error) {
+func (s post_upload_local_stub) Post(ctx context.Context, a0 string, a1 int, a2 int64) (err error) {
 	// Update metrics.
 	begin := s.postMetrics.Begin()
 	defer func() { s.postMetrics.End(begin, err != nil, 0, 0) }()
@@ -195,7 +195,7 @@ func (s post_upload_local_stub) Post(ctx context.Context, a0 string, a1 int) (er
 		}()
 	}
 
-	return s.impl.Post(ctx, a0, a1)
+	return s.impl.Post(ctx, a0, a1, a2)
 }
 
 // Client stub implementations.
@@ -215,7 +215,7 @@ type notifier_client_stub struct {
 // Check that notifier_client_stub implements the Notifier interface.
 var _ Notifier = (*notifier_client_stub)(nil)
 
-func (s notifier_client_stub) Notify(ctx context.Context, a0 string, a1 int) (err error) {
+func (s notifier_client_stub) Notify(ctx context.Context, a0 string, a1 int, a2 int64) (err error) {
 	// Update metrics.
 	var requestBytes, replyBytes int
 	begin := s.notifyMetrics.Begin()
@@ -248,12 +248,14 @@ func (s notifier_client_stub) Notify(ctx context.Context, a0 string, a1 int) (er
 	size := 0
 	size += (4 + len(a0))
 	size += 8
+	size += 8
 	enc := codegen.NewEncoder()
 	enc.Reset(size)
 
 	// Encode arguments.
 	enc.String(a0)
 	enc.Int(a1)
+	enc.Int64(a2)
 	var shardKey uint64
 
 	// Call the remote method.
@@ -345,7 +347,7 @@ type post_upload_client_stub struct {
 // Check that post_upload_client_stub implements the Post_upload interface.
 var _ Post_upload = (*post_upload_client_stub)(nil)
 
-func (s post_upload_client_stub) Post(ctx context.Context, a0 string, a1 int) (err error) {
+func (s post_upload_client_stub) Post(ctx context.Context, a0 string, a1 int, a2 int64) (err error) {
 	// Update metrics.
 	var requestBytes, replyBytes int
 	begin := s.postMetrics.Begin()
@@ -378,12 +380,14 @@ func (s post_upload_client_stub) Post(ctx context.Context, a0 string, a1 int) (e
 	size := 0
 	size += (4 + len(a0))
 	size += 8
+	size += 8
 	enc := codegen.NewEncoder()
 	enc.Reset(size)
 
 	// Encode arguments.
 	enc.String(a0)
 	enc.Int(a1)
+	enc.Int64(a2)
 	var shardKey uint64
 
 	// Call the remote method.
@@ -475,11 +479,13 @@ func (s notifier_server_stub) notify(ctx context.Context, args []byte) (res []by
 	a0 = dec.String()
 	var a1 int
 	a1 = dec.Int()
+	var a2 int64
+	a2 = dec.Int64()
 
 	// TODO(rgrandl): The deferred function above will recover from panics in the
 	// user code: fix this.
 	// Call the local method.
-	appErr := s.impl.Notify(ctx, a0, a1)
+	appErr := s.impl.Notify(ctx, a0, a1, a2)
 
 	// Encode the results.
 	enc := codegen.NewEncoder()
@@ -563,11 +569,13 @@ func (s post_upload_server_stub) post(ctx context.Context, args []byte) (res []b
 	a0 = dec.String()
 	var a1 int
 	a1 = dec.Int()
+	var a2 int64
+	a2 = dec.Int64()
 
 	// TODO(rgrandl): The deferred function above will recover from panics in the
 	// user code: fix this.
 	// Call the local method.
-	appErr := s.impl.Post(ctx, a0, a1)
+	appErr := s.impl.Post(ctx, a0, a1, a2)
 
 	// Encode the results.
 	enc := codegen.NewEncoder()
@@ -591,8 +599,8 @@ type notifier_reflect_stub struct {
 // Check that notifier_reflect_stub implements the Notifier interface.
 var _ Notifier = (*notifier_reflect_stub)(nil)
 
-func (s notifier_reflect_stub) Notify(ctx context.Context, a0 string, a1 int) (err error) {
-	err = s.caller("Notify", ctx, []any{a0, a1}, []any{})
+func (s notifier_reflect_stub) Notify(ctx context.Context, a0 string, a1 int, a2 int64) (err error) {
+	err = s.caller("Notify", ctx, []any{a0, a1, a2}, []any{})
 	return
 }
 
@@ -615,8 +623,8 @@ type post_upload_reflect_stub struct {
 // Check that post_upload_reflect_stub implements the Post_upload interface.
 var _ Post_upload = (*post_upload_reflect_stub)(nil)
 
-func (s post_upload_reflect_stub) Post(ctx context.Context, a0 string, a1 int) (err error) {
-	err = s.caller("Post", ctx, []any{a0, a1}, []any{})
+func (s post_upload_reflect_stub) Post(ctx context.Context, a0 string, a1 int, a2 int64) (err error) {
+	err = s.caller("Post", ctx, []any{a0, a1, a2}, []any{})
 	return
 }
 

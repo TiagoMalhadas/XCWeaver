@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/TiagoMalhadas/xcweaver"
 )
@@ -27,6 +28,7 @@ func (p *post_storage_america) Init(ctx context.Context) error {
 func (p *post_storage_america) GetPost(ctx context.Context, postId string) (string, error) {
 	logger := p.Logger(ctx)
 
+	startTimeMs := time.Now().UnixMilli()
 	logger.Debug("calling barrier!")
 	err := p.clientRedis.Barrier(ctx)
 	if err != nil {
@@ -36,6 +38,7 @@ func (p *post_storage_america) GetPost(ctx context.Context, postId string) (stri
 	logger.Debug("barrier executed successfully!")
 
 	post, _, err := p.clientRedis.Read(ctx, "posts", postId)
+	readPostDurationMs.Put(float64(time.Now().UnixMilli() - startTimeMs))
 	if err != nil {
 		inconsistencies.Inc()
 		logger.Error("post not found")

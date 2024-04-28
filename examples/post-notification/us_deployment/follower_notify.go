@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/TiagoMalhadas/xcweaver"
 )
 
 // Follower_Notify component.
 type Follower_Notify interface {
-	Follower_Notify(context.Context, string, int) error
+	Follower_Notify(context.Context, string, int, int64) error
 }
 
 // Implementation of the Follower_Notify component.
@@ -24,10 +25,11 @@ func (f *follower_Notify) Init(ctx context.Context) error {
 	return nil
 }
 
-func (f *follower_Notify) Follower_Notify(ctx context.Context, postId string, userId int) error {
+func (f *follower_Notify) Follower_Notify(ctx context.Context, postId string, userId int, startTimeMs int64) error {
 	logger := f.Logger(ctx)
 
 	post, err := f.post_storage.Get().GetPost(ctx, postId)
+	postNotificationDuration.Put(float64(time.Now().UnixMilli() - startTimeMs))
 	if err != nil {
 		return err
 	}

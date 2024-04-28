@@ -3,13 +3,16 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/TiagoMalhadas/xcweaver"
 )
 
 type Message struct {
-	PostId string
-	UserId int
+	PostId                  string
+	UserId                  int
+	StartTimeMs             int64
+	NotificationStartTimeMs int64
 }
 
 // Notifier component.
@@ -46,7 +49,10 @@ func (n *notifier) Init(ctx context.Context) error {
 
 			postId := decodedNotification.PostId
 			userId := decodedNotification.UserId
+			startTimeMs := decodedNotification.StartTimeMs
+			notificationStartTimeMs := decodedNotification.NotificationStartTimeMs
 			logger.Debug("New notification received", "postId", postId, "userId", userId)
+			queueDurationMs.Put(float64(time.Now().UnixMilli() - notificationStartTimeMs))
 			notificationsReceived.Inc()
 
 			ctx, err = xcweaver.Transfer(ctx, lineage)
@@ -55,7 +61,7 @@ func (n *notifier) Init(ctx context.Context) error {
 				continue
 			}
 
-			err = n.follower_Notify.Get().Follower_Notify(ctx, postId, userId)
+			err = n.follower_Notify.Get().Follower_Notify(ctx, postId, userId, startTimeMs)
 			if err != nil {
 				continue
 			}

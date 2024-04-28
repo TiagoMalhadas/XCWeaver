@@ -92,7 +92,7 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 	msgs, err := channel.Consume(
 		queue.Name, // Queue
 		"",         // Consumer tag
-		true,       // Auto-ack
+		false,      // Auto-ack
 		false,      // Exclusive
 		false,      // No local
 		false,      // No wait
@@ -102,8 +102,9 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 		log.Fatalf("Failed to consume messages from queue: %v", err)
 	}
 
-	// Wait for the first message to arrive
+	// Wait for the first message to arrive and send an acknowledgement
 	msg := <-msgs
+	msg.Ack(false)
 
 	var antiObj AntiObj
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/TiagoMalhadas/xcweaver"
 	"github.com/google/uuid"
@@ -30,7 +31,9 @@ func (p *post_storage_europe) Post(ctx context.Context, post string) ([]byte, st
 
 	id := uuid.New()
 
+	startTimeMs := time.Now().UnixMilli()
 	ctx, err := p.clientRedis.Write(ctx, "posts", id.String(), post)
+	writePostDurationMs.Put(float64(time.Now().UnixMilli() - startTimeMs))
 	if err != nil {
 		logger.Error("Error writing post!", "msg", err.Error())
 		return []byte{}, "", err
