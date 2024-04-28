@@ -89,6 +89,11 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 		return AntiObj{}, err
 	}
 
+	// Consume one message from the queue
+	err = channel.Qos(1, 0, false)
+	if err != nil {
+		return AntiObj{}, err
+	}
 	msgs, err := channel.Consume(
 		queue.Name, // Queue
 		"",         // Consumer tag
@@ -104,7 +109,10 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 
 	// Wait for the first message to arrive and send an acknowledgement
 	msg := <-msgs
-	msg.Ack(false)
+	err = msg.Ack(false)
+	if err != nil {
+		return AntiObj{}, err
+	}
 
 	var antiObj AntiObj
 
