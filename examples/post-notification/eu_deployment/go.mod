@@ -3,7 +3,7 @@ module eu_deployment
 go 1.21.1
 
 require (
-	github.com/TiagoMalhadas/xcweaver v0.5.24
+	github.com/TiagoMalhadas/xcweaver v0.5.25
 	github.com/google/uuid v1.6.0
 	go.opentelemetry.io/otel v1.19.0
 	go.opentelemetry.io/otel/trace v1.19.0

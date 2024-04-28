@@ -6,8 +6,8 @@ github.com/DataDog/hyperloglog v0.0.0-20220804205443-1806d9b66146 h1:S5WsRc58vIe
 github.com/DataDog/hyperloglog v0.0.0-20220804205443-1806d9b66146/go.mod h1:hFPkswc42pKhRbeKDKXy05mRi7J1kJ2vMNbvd9erH0M=
 github.com/DataDog/mmh3 v0.0.0-20210722141835-012dc69a9e49 h1:EbzDX8HPk5uE2FsJYxD74QmMw0/3CqSKhEr6teh0ncQ=
 github.com/DataDog/mmh3 v0.0.0-20210722141835-012dc69a9e49/go.mod h1:SvsjzyJlSg0rKsqYgdcFxeEVflx3ZNAyFfkUHP0TxXg=
-github.com/TiagoMalhadas/xcweaver v0.5.24 h1:SDckTrarZoZwW5cDSFxyHtlfk2lciQhshecuTTBA7ow=
-github.com/TiagoMalhadas/xcweaver v0.5.24/go.mod h1:yTpU1TPJR8AYQRG4lOsN2RKU9/SNodSwrFsXXpvkXTY=
+github.com/TiagoMalhadas/xcweaver v0.5.25 h1:AeVGkJa8ZqZRPM1h13at5FZoj2r1E2lTk4MDH+T3Mr4=
+github.com/TiagoMalhadas/xcweaver v0.5.25/go.mod h1:yTpU1TPJR8AYQRG4lOsN2RKU9/SNodSwrFsXXpvkXTY=
 github.com/antlr/antlr4/runtime/Go/antlr/v4 v4.0.0-20230305170008-8188dc5388df h1:7RFfzj4SSt6nnvCPbCqijJi1nWCd+TqAT3bYCStRC18=
 github.com/antlr/antlr4/runtime/Go/antlr/v4 v4.0.0-20230305170008-8188dc5388df/go.mod h1:pSwJ0fSY5KhvocuWSx4fz3BA8OrA1bQn+K1Eli3BRwM=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=

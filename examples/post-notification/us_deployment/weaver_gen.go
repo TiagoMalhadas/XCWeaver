@@ -326,7 +326,7 @@ func (s post_storage_america_client_stub) GetPost(ctx context.Context, a0 string
 // you run "go build" or "go run".
 var _ codegen.LatestVersion = codegen.Version[[0][20]struct{}](`
 
-ERROR: You generated this file with 'xcweaver generate' v0.5.24 (codegen
+ERROR: You generated this file with 'xcweaver generate' v0.5.25 (codegen
 version v0.20.0). The generated code is incompatible with the version of the
 github.com/TiagoMalhadas/xcweaver module that you're using. The xcweaver module
 version can be found in your go.mod file or by running the following command.

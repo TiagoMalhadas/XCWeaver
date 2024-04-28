@@ -51,7 +51,7 @@ def metrics():
     % inconsistencies @ US:\t\t{pc_inconsistencies}%
     > avg. post notification duration:\t{post_notification_duration_avg_ms}ms
     > avg. write post duration:\t\t{write_post_duration_avg_ms}ms
-    > avg. write post duration:\t\t{read_post_duration_avg_ms}ms
+    > avg. read post duration:\t\t{read_post_duration_avg_ms}ms
     > avg. queue duration @ US:\t\t{queue_duration_avg_ms}ms
   """
   print(results)

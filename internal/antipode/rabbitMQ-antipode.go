@@ -109,7 +109,7 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 
 	// Wait for the first message to arrive and send an acknowledgement
 	msg := <-msgs
-	err = msg.Ack(false)
+	err = msg.Ack(true)
 	if err != nil {
 		return AntiObj{}, err
 	}
