@@ -75,7 +75,7 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 	if err != nil {
 		return AntiObj{}, err
 	}
-	defer channel.Close()
+	//defer channel.Close()
 
 	queue, err := channel.QueueDeclare(
 		r.queue, // Queue name
@@ -106,6 +106,11 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 	if err != nil {
 		log.Fatalf("Failed to consume messages from queue: %v", err)
 	}
+
+	for len(msgs) == 0 {
+
+	}
+	channel.Close()
 
 	// Wait for the first message to arrive and send an acknowledgement
 	msg := <-msgs
