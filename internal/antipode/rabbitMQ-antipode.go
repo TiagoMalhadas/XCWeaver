@@ -109,11 +109,11 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 
 	// Wait for the first message to arrive and send an acknowledgement
 	msg := <-msgs
-	channel.Close()
 	err = msg.Ack(true)
 	if err != nil {
 		return AntiObj{}, err
 	}
+	channel.Close()
 
 	var antiObj AntiObj
 
