@@ -114,7 +114,6 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 			fmt.Println("Channel is not empty")
 			exit = true
 		default:
-			fmt.Println("Channel is empty")
 			exit = false
 		}
 		if exit {
@@ -125,10 +124,10 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 
 	// Wait for the first message to arrive and send an acknowledgement
 	msg := <-msgs
-	err = msg.Ack(true)
+	/*err = msg.Ack(true)
 	if err != nil {
 		return AntiObj{}, err
-	}
+	}*/
 
 	var antiObj AntiObj
 
