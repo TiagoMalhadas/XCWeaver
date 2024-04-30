@@ -97,7 +97,7 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 	msgs, err := channel.Consume(
 		queue.Name, // Queue
 		"",         // Consumer tag
-		false,      // Auto-ack
+		true,       // Auto-ack
 		false,      // Exclusive
 		false,      // No local
 		false,      // No wait
@@ -107,13 +107,28 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 		log.Fatalf("Failed to consume messages from queue: %v", err)
 	}
 
+	var exit bool
+	for {
+		select {
+		case <-msgs:
+			fmt.Println("Channel is not empty")
+			exit = true
+		default:
+			fmt.Println("Channel is empty")
+			exit = false
+		}
+		if exit {
+			break
+		}
+	}
+	channel.Close()
+
 	// Wait for the first message to arrive and send an acknowledgement
 	msg := <-msgs
 	err = msg.Ack(true)
 	if err != nil {
 		return AntiObj{}, err
 	}
-	channel.Close()
 
 	var antiObj AntiObj
 
