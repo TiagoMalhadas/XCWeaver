@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -75,7 +74,7 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 	if err != nil {
 		return AntiObj{}, err
 	}
-	//defer channel.Close()
+	defer channel.Close()
 
 	queue, err := channel.QueueDeclare(
 		r.queue, // Queue name
@@ -90,55 +89,28 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 	}
 
 	// Consume one message from the queue
-	err = channel.Qos(1, 0, false)
-	if err != nil {
-		return AntiObj{}, err
-	}
-	msgs, err := channel.Consume(
-		queue.Name, // Queue
-		"",         // Consumer tag
-		true,       // Auto-ack
-		false,      // Exclusive
-		false,      // No local
-		false,      // No wait
-		nil,        // Args
-	)
-	if err != nil {
-		log.Fatalf("Failed to consume messages from queue: %v", err)
-	}
-
-	/*var exit bool
-	for {
-		select {
-		case <-msgs:
-			fmt.Println("Channel is not empty")
-			exit = true
-		default:
-			exit = false
+	var ok bool
+	var msg amqp.Delivery
+	for !ok {
+		msg, ok, err = channel.Get(queue.Name, false)
+		if err != nil {
+			return AntiObj{}, err
 		}
-		if exit {
-			break
-		}
-	}*/
-
-	fmt.Println(len(msgs))
-	for len(msgs) == 0 {
 	}
-	fmt.Println("out of the loop with size: ", len(msgs))
-	channel.Close()
-
-	// Wait for the first message to arrive and send an acknowledgement
-	msg := <-msgs
-	/*err = msg.Ack(true)
-	if err != nil {
-		return AntiObj{}, err
-	}*/
 
 	var antiObj AntiObj
-
 	err = json.Unmarshal(msg.Body, &antiObj)
 	if err != nil {
+		err = msg.Ack(true)
+		if err != nil {
+			return AntiObj{}, err
+		}
 		return AntiObj{}, fmt.Errorf("Failed to unmarshal JSON: %v", err)
+	}
+
+	err = msg.Ack(true)
+	if err != nil {
+		return AntiObj{}, err
 	}
 
 	return antiObj, err
