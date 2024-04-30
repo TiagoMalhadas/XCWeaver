@@ -121,8 +121,10 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 		}
 	}*/
 
+	fmt.Println(len(msgs))
 	for len(msgs) == 0 {
 	}
+	fmt.Println("out of the loop with size: ", len(msgs))
 	channel.Close()
 
 	// Wait for the first message to arrive and send an acknowledgement
