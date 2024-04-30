@@ -107,7 +107,7 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 		log.Fatalf("Failed to consume messages from queue: %v", err)
 	}
 
-	var exit bool
+	/*var exit bool
 	for {
 		select {
 		case <-msgs:
@@ -119,6 +119,9 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 		if exit {
 			break
 		}
+	}*/
+
+	for len(msgs) == 0 {
 	}
 	channel.Close()
 
