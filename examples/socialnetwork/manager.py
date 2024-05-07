@@ -165,6 +165,9 @@ def metrics(deployment_type='gke', timestamp=None, local=True):
   from plumbum.cmd import xcweaver, grep
   import re
 
+  #To remove
+  sleep(10)
+
   primary_region = 'europe-west3'
   secondary_region = 'us-central-1' if not local else primary_region
 
@@ -189,6 +192,9 @@ def metrics(deployment_type='gke', timestamp=None, local=True):
   queue_duration_metrics = get_filter_metrics(deployment_type, 'sn_queue_duration_ms', secondary_region)
   queue_duration_metrics_values = pattern.findall(queue_duration_metrics)
   queue_duration_avg_ms = sum(float(value) for value in queue_duration_metrics_values)/len(queue_duration_metrics_values)
+  read_post_duration_metrics = get_filter_metrics(deployment_type, 'sn_read_post_duration_ms', primary_region)
+  read_post_duration_metrics_values = pattern.findall(read_post_duration_metrics)
+  read_post_duration_avg_ms = sum(float(value) for value in read_post_duration_metrics_values)/len(read_post_duration_metrics_values)
   received_notifications_metrics = get_filter_metrics(deployment_type, 'sn_received_notifications', secondary_region)
   received_notifications_count = sum(int(value) for value in pattern.findall(received_notifications_metrics))
   inconsitencies_metrics = get_filter_metrics(deployment_type, 'sn_inconsistencies', secondary_region)
@@ -199,6 +205,7 @@ def metrics(deployment_type='gke', timestamp=None, local=True):
   pc_received_notifications = "{:.2f}".format((received_notifications_count / composed_posts_count) * 100)
   compose_post_duration_avg_ms = "{:.2f}".format(compose_post_duration_avg_ms)
   write_post_duration_avg_ms = "{:.2f}".format(write_post_duration_avg_ms)
+  read_post_duration_avg_ms = "{:.2f}".format(read_post_duration_avg_ms)
   queue_duration_avg_ms = "{:.2f}".format(queue_duration_avg_ms)
 
   results = f"""
@@ -208,6 +215,7 @@ def metrics(deployment_type='gke', timestamp=None, local=True):
     % inconsistencies @ US:\t\t{pc_inconsistencies}%
     > avg. compose post duration:\t{compose_post_duration_avg_ms}ms
     > avg. write post duration:\t\t{write_post_duration_avg_ms}ms
+    > avg. read post duration:\t\t{read_post_duration_avg_ms}ms
     > avg. queue duration @ US:\t\t{queue_duration_avg_ms}ms
   """
   print(results)

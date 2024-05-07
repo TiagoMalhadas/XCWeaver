@@ -1,5 +1,9 @@
+#!/usr/bin/env python3
+import argparse
 import datetime
+import sys
 import time
+from plumbum import FG
 from tqdm import tqdm
 import requests
 import random
@@ -98,9 +102,69 @@ def run_test(duration):
         time.sleep(0.01)
 
     progress_thread.join()
+    progress_thread = threading.Thread(target=tqdm_progress, args=(180,))
+    progress_thread.start()
+    progress_thread.join()
+
+def local_wrk2():
+  run_test(30)
+  metrics()
+
+def local_metrics():
+  metrics()
+
+def local_storage_run():
+  from plumbum.cmd import docker_compose, docker
+  docker_compose['up', '-d'] & FG
+  print("[INFO] waiting 30 seconds for storages to be ready...")
+  for _ in tqdm(range(30)):
+      time.sleep(1)
+  docker['exec', '-it', 'mongo-1', 'mongo', '--eval', "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongo-1:27017'}, {_id: 1, host: 'mongo-2:27017'}]})"] & FG
+  print("[INFO] getting replica set status")
+  docker['exec', '-it', 'mongo-1', 'mongo', '--eval', "rs.status()"] & FG
+
+def local_storage_info():
+  print("[INFO] nothing to be done for local")
+  exit(0)
+
+def local_storage_clean():
+  from plumbum.cmd import docker_compose
+  docker_compose['down'] & FG
 
 if __name__ == "__main__":
-    run_test(30)
-    metrics()
-    print(f"[INFO] done!")
+  main_parser = argparse.ArgumentParser()
+  command_parser = main_parser.add_subparsers(help='commands', dest='command')
+
+  commands = [
+    # datastores
+    'storage-run', 'storage-info', 'storage-clean',
+    # eval
+    'wrk2', 'metrics',
+  ]
+
+  for cmd in commands:
+    parser = command_parser.add_parser(cmd)
+    parser.add_argument('--local', action='store_true', help="Running in localhost")
+    parser.add_argument('--gcp', action='store_true',   help="Running in gcp")
+
+  args = vars(main_parser.parse_args())
+  command = args.pop('command').replace('-', '_')
+
+  local = args.pop('local')
+  gcp = args.pop('gcp')
+
+  if local and gcp or not local and not gcp:
+    print("[ERROR] one of --local or --gcp flgs needs to be provided")
+    exit(-1)
+
+  if local:
+    command = 'local_' + command
+  elif gcp:
+    #load_gcp_profile()
+    command = 'gcp_' + command
+
+  print(f"[INFO] ----- {command.upper().replace('_', ' ')} -----\n")
+  getattr(sys.modules[__name__], command)(**args)
+
+  print(f"[INFO] done!")
     

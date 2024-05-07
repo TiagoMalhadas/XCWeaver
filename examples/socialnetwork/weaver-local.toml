@@ -99,8 +99,8 @@ antipodeAgents.mongoClientWriteHomeTL = {datastoreType = "MongoDB", host = "loca
 
 [multi]
 listeners.wrk2 = {address = "127.0.0.1:9000"}
-antipodeAgents.rabbitClientWriteHomeTL = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "write-home-timeline"}
-antipodeAgents.rabbitClientCompose = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "write-home-timeline"}
+antipodeAgents.rabbitClientWriteHomeTL = {datastoreType = "RabbitMQ", host = "localhost", port = "5673", user = "guest", password = "guest", datastore = "rabbitMQ", queue = "write-home-timeline"}
+antipodeAgents.rabbitClientCompose = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "guest", password = "guest", datastore = "rabbitMQ", queue = "write-home-timeline"}
 antipodeAgents.mongoClientPostStorage = {datastoreType = "MongoDB", host = "localhost", port = "27017", datastore = "post-storage"}
 antipodeAgents.mongoClientWriteHomeTL = {datastoreType = "MongoDB", host = "localhost", port = "27018", datastore = "post-storage"}
 

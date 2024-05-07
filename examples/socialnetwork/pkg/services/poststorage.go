@@ -76,7 +76,6 @@ func (p *postStorageService) StorePost(ctx context.Context, reqID int64, post mo
 	trace.SpanFromContext(ctx).SetAttributes(
 		attribute.Int64("poststorage_write_post_ts", time.Now().UnixMilli()),
 	)
-	writePostStartMs := time.Now().UnixMilli()
 
 	postIDStr := strconv.FormatInt(post.PostID, 10)
 
@@ -87,6 +86,7 @@ func (p *postStorageService) StorePost(ctx context.Context, reqID int64, post mo
 	}
 	postStr := string(postJSON)
 
+	writePostStartMs := time.Now().UnixMilli()
 	ctx, err = p.mongoClientPostStorage.Write(ctx, "posts", postIDStr, postStr)
 
 	/*collection := p.mongoClient.Database("post-storage").Collection("posts")

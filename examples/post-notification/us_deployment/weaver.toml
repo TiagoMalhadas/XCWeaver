@@ -1,6 +1,9 @@
 [serviceweaver]
 binary = "./us_deployment"
 
+["us_deployment/Notifier"]
+num_workers         = 16
+
 [single]
 antipodeAgents.clientRedis = {datastoreType = "Redis", host = "localhost", port = "6380", password = "", datastore = "posts"}
 antipodeAgents.clientRabbitMQ = {datastoreType = "RabbitMQ", host = "localhost", port = "5672", user = "admin", password = "admin", datastore = "rabbitMQ", queue = "notifications"}

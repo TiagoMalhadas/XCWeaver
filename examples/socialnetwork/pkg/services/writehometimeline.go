@@ -75,12 +75,9 @@ func (w *writeHomeTimelineService) WriteHomeTimeline(ctx context.Context, msg mo
 
 	postIDStr := strconv.FormatInt(msg.PostID, 10)
 
+	beginningRead := time.Now().UnixMilli()
 	result, _, err := w.mongoClientWriteHomeTL.Read(ctx, "posts", postIDStr)
-	if err != nil {
-		logger.Error("error reading post from mongo", "msg", err.Error())
-		return err
-	}
-
+	sn_metrics.ReadPostDurationMs.Get(regionLabel).Put(float64(time.Now().UnixMilli() - beginningRead))
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			trace.SpanFromContext(ctx).SetAttributes(

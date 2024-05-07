@@ -24,6 +24,11 @@ var (
 		"Duration of queue in milliseconds in the current region",
 		metrics.NonNegativeBuckets,
 	)
+	ReadPostDurationMs = metrics.NewHistogramMap[RegionLabel](
+		"sn_read_post_duration_ms",
+		"Duration of queue in milliseconds in the current region",
+		metrics.NonNegativeBuckets,
+	)
 	// write home timeline service
 	QueueDurationMs = metrics.NewHistogramMap[RegionLabel](
 		"sn_queue_duration_ms",

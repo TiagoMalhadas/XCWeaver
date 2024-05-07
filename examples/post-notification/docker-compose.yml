@@ -1,0 +1,114 @@
+version: '3.9'
+services:
+  # ------------
+  # Post-Storage: REDIS
+  # ------------
+  post-storage-redis-eu:
+    image: redis:6.0-alpine
+    hostname: post-storage-redis-eu
+    container_name: post-storage-redis-eu
+    ports:
+      - 6379:6379
+    cap_add:
+      - NET_ADMIN
+    command: 'redis-server /etc/redis/redis.conf'
+    restart: 'no'
+    volumes:
+      - ./clustering/redis/redis-0:/etc/redis/
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-pn-db-eu]
+    networks:
+      - post_notification_network
+  post-storage-redis-us:
+    image: redis:6.0-alpine
+    hostname: post-storage-redis-us
+    container_name: post-storage-redis-us
+    ports:
+      - 6380:6379
+    cap_add:
+      - NET_ADMIN
+    command: 'redis-server /etc/redis/redis.conf'
+    restart: 'no'
+    volumes:
+      - ./clustering/redis/redis-1:/etc/redis/
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-pn-db-us]
+    networks:
+      - post_notification_network
+
+
+  mongo-1:
+    image: mongo:4.4
+    container_name: mongo-1
+    hostname: mongo-1
+    ports:
+      - "27017:27017"
+    cap_add:
+      - NET_ADMIN
+    command: mongod --replSet rs0
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-pn-db-eu]
+    networks:
+      - post_notification_network
+  mongo-2:
+    image: mongo:4.4
+    container_name: mongo-2
+    hostname: mongo-2
+    ports:
+      - "27018:27017"
+    cap_add:
+      - NET_ADMIN
+    command: mongod --replSet rs0
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-pn-db-us]
+    networks:
+      - post_notification_network
+
+  # ---------------
+  # QUEUE: RABBITMQ
+  # ---------------
+  write-home-timeline-rabbitmq-eu:
+    image: rabbitmq:3.8-management
+    hostname: write-home-timeline-rabbitmq-eu
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "WIWVHCDTCIUAWANLMQAW"
+      RABBITMQ_DEFAULT_VHOST: "/"
+      RABBITMQ_CONFIG_FILE: "/config/rabbitmq"
+    ports:
+      - 15672:15672
+      - 5672:5672
+    restart: 'no'
+    volumes:
+      - ./clustering/rabbitMQ/config/rabbit-1/:/config/
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-pn-db-eu]
+    networks:
+      - post_notification_network
+  write-home-timeline-rabbitmq-us:
+    image: rabbitmq:3.8-management
+    hostname: write-home-timeline-rabbitmq-us
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "WIWVHCDTCIUAWANLMQAW"
+      RABBITMQ_DEFAULT_VHOST: "/"
+      RABBITMQ_CONFIG_FILE: "/config/rabbitmq"
+    ports:
+      - 15673:15672
+      - 5673:5672
+    restart: 'no'
+    volumes:
+      - ./clustering/rabbitMQ/config/rabbit-2/:/config/
+    deploy:
+      placement:
+        constraints: [node.hostname == weaver-pn-db-us]
+    networks:
+      - post_notification_network
+      
+networks:
+  post_notification_network:
+    driver: bridge
+  

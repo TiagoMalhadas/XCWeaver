@@ -235,35 +235,19 @@ services:
   # ---------------
   # QUEUE: RABBITMQ
   # ---------------
-  write-home-timeline-rabbitmq-setup:
-    image: rabbitmq-setup:3.8
-    restart: 'no'
-    environment:
-      RABBITMQ_ERLANG_COOKIE: "WRITE-HOME-TIMELINE-RABBITMQ"
-    deploy:
-      placement:
-        constraints: [node.hostname == weaver-dsb-db-manager]
-      restart_policy:
-        condition: on-failure
-        delay: 1s
-        max_attempts: 3
-    networks:
-      - deathstarbench_network
   write-home-timeline-rabbitmq-eu:
     image: rabbitmq:3.8-management
     hostname: write-home-timeline-rabbitmq-eu
     environment:
-      RABBITMQ_ERLANG_COOKIE: "WRITE-HOME-TIMELINE-RABBITMQ"
+      RABBITMQ_ERLANG_COOKIE: "WIWVHCDTCIUAWANLMQAW"
       RABBITMQ_DEFAULT_VHOST: "/"
-      RABBITMQ_ENABLED_PLUGINS_FILE: "/etc/rabbitmq/enabled_plugins"
+      RABBITMQ_CONFIG_FILE: "/config/rabbitmq"
     ports:
       - 15672:15672
       - 5672:5672
     restart: 'no'
     volumes:
-      - ./docker/config/rabbitmq/write-home-timeline-rabbitmq-eu-definitions.json:/etc/rabbitmq/definitions.json:ro
-      - ./docker/config/rabbitmq/write-home-timeline-rabbitmq-eu.conf:/etc/rabbitmq/rabbitmq.conf:ro
-      - ./docker/config/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./docker/config/rabbit-1/:/config/
     deploy:
       placement:
         constraints: [node.hostname == weaver-dsb-db-eu]
@@ -273,17 +257,15 @@ services:
     image: rabbitmq:3.8-management
     hostname: write-home-timeline-rabbitmq-us
     environment:
+      RABBITMQ_ERLANG_COOKIE: "WIWVHCDTCIUAWANLMQAW"
       RABBITMQ_DEFAULT_VHOST: "/"
-      RABBITMQ_ENABLED_PLUGINS_FILE: "/etc/rabbitmq/enabled_plugins"
-      RABBITMQ_ERLANG_COOKIE: "WRITE-HOME-TIMELINE-RABBITMQ"
+      RABBITMQ_CONFIG_FILE: "/config/rabbitmq"
     ports:
       - 15673:15672
       - 5673:5672
     restart: 'no'
     volumes:
-      - ./docker/config/rabbitmq/write-home-timeline-rabbitmq-us-definitions.json:/etc/rabbitmq/definitions.json:ro
-      - ./docker/config/rabbitmq/write-home-timeline-rabbitmq-us.conf:/etc/rabbitmq/rabbitmq.conf:ro
-      - ./docker/config/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./docker/config/rabbit-2/:/config/
     deploy:
       placement:
         constraints: [node.hostname == weaver-dsb-db-us]
