@@ -594,6 +594,12 @@ type Antipode struct {
 	Datastore_ID   string
 }
 
+// Change for another name?
+type AntipodeObject struct {
+	Version string
+	Lineage []byte
+}
+
 func (a Antipode) String() string {
 	return a.Datastore_ID
 }
@@ -618,6 +624,51 @@ func (a Antipode) Read(ctx context.Context, table string, key string) (string, [
 	}
 
 	return value, lineageBytes, nil
+}
+
+func (a Antipode) Consume(ctx context.Context, table string, stop chan struct{}) (<-chan AntipodeObject, error) {
+
+	msgs, err := antipode.Consume(ctx, a.Datastore_type, table, stop)
+	if err != nil {
+		return nil, err
+	}
+
+	antipodeObjctsChan := make(chan AntipodeObject)
+
+	go func() {
+		defer close(antipodeObjctsChan)
+		//requeue non-processed messages
+		defer func(<-chan AntipodeObject) {
+			for d := range antipodeObjctsChan {
+				var lineage []antipode.WriteIdentifier
+				err := json.Unmarshal(d.Lineage, &lineage)
+				if err != nil {
+					return
+				}
+				obj := antipode.AntiObj{d.Version, lineage}
+				err = antipode.Requeue(ctx, a.Datastore_type, table, obj)
+				if err != nil {
+					return
+				}
+			}
+		}(antipodeObjctsChan)
+		select {
+		case <-stop:
+			return
+		default:
+			for d := range msgs {
+				lineageBytes, err := json.Marshal(d.Lineage)
+				if err != nil {
+					fmt.Errorf(err.Error())
+				}
+				antiObj := AntipodeObject{d.Version, lineageBytes}
+				antipodeObjctsChan <- antiObj
+			}
+		}
+
+	}()
+
+	return antipodeObjctsChan, nil
 }
 
 func (a Antipode) Barrier(ctx context.Context) error {
@@ -651,19 +702,4 @@ func GetLineage(ctx context.Context) ([]byte, error) {
 	}
 
 	return lineageBytes, nil
-}
-
-// to remove
-func InitCtx(ctx context.Context) context.Context {
-
-	return antipode.InitCtx(ctx)
-}
-
-func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, rabbit_password string, queue string) antipode.RabbitMQ {
-
-	return antipode.CreateRabbitMQ(rabbit_host, rabbit_port, rabbit_user, rabbit_password, queue)
-}
-
-func CreateRedis(redis_host string, redis_port string, redis_password string) antipode.Redis {
-	return antipode.CreateRedis(redis_host, redis_port, redis_password)
 }

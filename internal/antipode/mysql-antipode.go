@@ -77,6 +77,10 @@ func (m MySQL) read(ctx context.Context, table string, key string) (AntiObj, err
 	return antiObj, err
 }
 
+func (m MySQL) consume(context.Context, string, chan struct{}) (<-chan AntiObj, error) {
+	return nil, nil
+}
+
 func (m MySQL) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
 
 	// Connect to MySQL database

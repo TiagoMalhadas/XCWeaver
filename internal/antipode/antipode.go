@@ -8,6 +8,7 @@ import (
 type Datastore_type interface {
 	write(context.Context, string, string, AntiObj) error
 	read(context.Context, string, string) (AntiObj, error)
+	consume(context.Context, string, chan struct{}) (<-chan AntiObj, error)
 	barrier(context.Context, []WriteIdentifier, string) error
 }
 
@@ -60,6 +61,11 @@ func Read(ctx context.Context, datastoreType Datastore_type, table string, key s
 	return obj.Version, obj.Lineage, err
 }
 
+func Consume(ctx context.Context, datastoreType Datastore_type, table string, stop chan struct{}) (<-chan AntiObj, error) {
+
+	return datastoreType.consume(ctx, table, stop)
+}
+
 func Barrier(ctx context.Context, datastoreType Datastore_type, datastore_ID string) error {
 	//extract lineage from ctx
 	lineage := ctx.Value(contextKey("lineage")).([]WriteIdentifier)
@@ -70,6 +76,10 @@ func Barrier(ctx context.Context, datastoreType Datastore_type, datastore_ID str
 	}
 
 	return datastoreType.barrier(ctx, lineage, datastore_ID)
+}
+
+func Requeue(ctx context.Context, datastoreType Datastore_type, table string, obj AntiObj) error {
+	return datastoreType.write(ctx, table, "", obj)
 }
 
 func Transfer(ctx context.Context, lineage []WriteIdentifier) (context.Context, error) {

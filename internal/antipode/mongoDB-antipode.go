@@ -91,6 +91,10 @@ func (m MongoDB) read(ctx context.Context, collection string, key string) (AntiO
 	return result.Value, nil
 }
 
+func (m MongoDB) consume(context.Context, string, chan struct{}) (<-chan AntiObj, error) {
+	return nil, nil
+}
+
 func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
 
 	fmt.Println("start barrier")

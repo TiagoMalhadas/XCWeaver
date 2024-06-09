@@ -116,6 +116,84 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 	return antiObj, err
 }
 
+func (r RabbitMQ) consume(ctx context.Context, _ string, stop chan struct{}) (<-chan AntiObj, error) {
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return nil, err
+	}
+
+	queue, err := channel.QueueDeclare(
+		r.queue, // Queue name
+		false,   // Durable
+		false,   // Delete when unused
+		false,   // Exclusive
+		false,   // No-wait
+		nil,     // Arguments
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	msgs, err := channel.Consume(
+		queue.Name, // queue
+		"",         // consumer
+		false,      // auto-ack
+		false,      // exclusive
+		false,      // no-local
+		false,      // no-wait
+		nil,        // args
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	antipodeObjctsChan := make(chan AntiObj)
+
+	go func() {
+		defer close(antipodeObjctsChan)
+		defer channel.Close()
+		//requeue non-processed messages
+		defer func(<-chan AntiObj) {
+			for d := range antipodeObjctsChan {
+				jsonAntiObj, err := json.Marshal(d)
+				if err != nil {
+					fmt.Errorf(err.Error())
+				}
+				err = channel.PublishWithContext(ctx,
+					"",         // exchange
+					queue.Name, // routing key
+					false,      // mandatory
+					false,      // immediate
+					amqp.Publishing{
+						ContentType: "application/json",
+						Body:        jsonAntiObj,
+					})
+				if err != nil {
+					fmt.Errorf(err.Error())
+				}
+			}
+		}(antipodeObjctsChan)
+
+		select {
+		//channel is closed
+		case <-stop:
+			return
+		default:
+			for d := range msgs {
+				var antiObj AntiObj
+				err := json.Unmarshal(d.Body, &antiObj)
+				if err != nil {
+					fmt.Errorf(err.Error())
+				}
+				antipodeObjctsChan <- antiObj
+				d.Ack(true)
+			}
+		}
+	}()
+
+	return antipodeObjctsChan, nil
+}
+
 func (r RabbitMQ) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
 	return nil
 }
