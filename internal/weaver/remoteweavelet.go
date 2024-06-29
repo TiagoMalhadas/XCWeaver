@@ -152,7 +152,6 @@ type antipodeAgent struct {
 	user          string
 	password      string
 	datastore     string
-	queue         string
 }
 
 // NewRemoteWeavelet returns a new RemoteWeavelet that hosts the components
@@ -866,7 +865,7 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 		case "Redis":
 			datastoreType = antipode.CreateRedis(antipodeAgent.host, antipodeAgent.port, antipodeAgent.password)
 		case "RabbitMQ":
-			datastoreType = antipode.CreateRabbitMQ(antipodeAgent.host, antipodeAgent.port, antipodeAgent.user, antipodeAgent.password, antipodeAgent.queue)
+			datastoreType = antipode.CreateRabbitMQ(antipodeAgent.host, antipodeAgent.port, antipodeAgent.user, antipodeAgent.password)
 		case "MongoDB":
 			datastoreType = antipode.CreateMongoDB(antipodeAgent.host, antipodeAgent.port, antipodeAgent.datastore)
 		case "MySQL":
@@ -890,7 +889,7 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 	case "Redis":
 		datastoreType = antipode.CreateRedis(reply.Host, reply.Port, reply.Password)
 	case "RabbitMQ":
-		datastoreType = antipode.CreateRabbitMQ(reply.Host, reply.Port, reply.User, reply.Password, reply.Queue)
+		datastoreType = antipode.CreateRabbitMQ(reply.Host, reply.Port, reply.User, reply.Password)
 	case "MongoDB":
 		datastoreType = antipode.CreateMongoDB(reply.Host, reply.Port, reply.Datastore)
 	case "MySQL":
@@ -900,7 +899,7 @@ func (w *RemoteWeavelet) antipodeAgent(ctx context.Context, name string) (antipo
 	}
 
 	// Store the antipode agent.
-	w.antipodeAgents[name] = antipodeAgent{reply.DatastoreType, reply.Host, reply.Port, reply.User, reply.Password, reply.Datastore, reply.Queue}
+	w.antipodeAgents[name] = antipodeAgent{reply.DatastoreType, reply.Host, reply.Port, reply.User, reply.Password, reply.Datastore}
 	return datastoreType, reply.Datastore, nil
 }
 

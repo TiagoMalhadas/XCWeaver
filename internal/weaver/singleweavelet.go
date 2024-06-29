@@ -366,7 +366,6 @@ func (w *SingleWeavelet) antipodeAgent(name string) (antipode.Datastore_type, er
 	var user string
 	var port string
 	var password string
-	var queue string
 	var database string
 	if opts, ok := w.config.AntipodeAgents[name]; ok {
 		datastoreType = opts.DatastoreType
@@ -374,7 +373,6 @@ func (w *SingleWeavelet) antipodeAgent(name string) (antipode.Datastore_type, er
 		port = opts.Port
 		user = opts.User
 		password = opts.Password
-		queue = opts.Queue
 		database = opts.Datastore
 	}
 
@@ -383,7 +381,7 @@ func (w *SingleWeavelet) antipodeAgent(name string) (antipode.Datastore_type, er
 	case "Redis":
 		antipodeAgent = antipode.CreateRedis(host, port, password)
 	case "RabbitMQ":
-		antipodeAgent = antipode.CreateRabbitMQ(host, port, user, password, queue)
+		antipodeAgent = antipode.CreateRabbitMQ(host, port, user, password)
 	case "MongoDB":
 		antipodeAgent = antipode.CreateMongoDB(host, port, database)
 	case "MySQL":

@@ -91,7 +91,7 @@ func (m MongoDB) read(ctx context.Context, collection string, key string) (AntiO
 	return result.Value, nil
 }
 
-func (m MongoDB) consume(context.Context, string, chan struct{}) (<-chan AntiObj, error) {
+func (m MongoDB) consume(context.Context, string, string, chan struct{}) (<-chan AntiObj, error) {
 	return nil, nil
 }
 

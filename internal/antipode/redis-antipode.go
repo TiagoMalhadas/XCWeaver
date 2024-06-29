@@ -49,7 +49,7 @@ func (r Redis) read(ctx context.Context, _ string, key string) (AntiObj, error) 
 	return obj, err
 }
 
-func (r Redis) consume(context.Context, string, chan struct{}) (<-chan AntiObj, error) {
+func (r Redis) consume(context.Context, string, string, chan struct{}) (<-chan AntiObj, error) {
 	return nil, nil
 }
 

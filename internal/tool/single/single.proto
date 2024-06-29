@@ -48,8 +48,6 @@ message SingleConfig {
     string password = 5;
     // the datastore name
     string datastore = 6;
-    // the datastore queue  //Maybe to remove
-    string queue = 7;
   }
   map<string, AntipodeAgentOptions> antipodeAgents = 5;
 }

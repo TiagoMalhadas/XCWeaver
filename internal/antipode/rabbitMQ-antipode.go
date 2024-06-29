@@ -10,12 +10,11 @@ import (
 
 type RabbitMQ struct {
 	connection *amqp.Connection
-	queue      string
 }
 
 // How can I close the connection?
 // É má prática manter a conexão sempre aberta?
-func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, rabbit_password string, queue string) RabbitMQ {
+func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, rabbit_password string) RabbitMQ {
 
 	conn, err := amqp.Dial("amqp://" + rabbit_user + ":" + rabbit_password + "@" + rabbit_host + ":" + rabbit_port + "/")
 	if err != nil {
@@ -24,10 +23,10 @@ func CreateRabbitMQ(rabbit_host string, rabbit_port string, rabbit_user string, 
 	}
 	//defer conn.Close()
 
-	return RabbitMQ{conn, queue}
+	return RabbitMQ{conn}
 }
 
-func (r RabbitMQ) write(ctx context.Context, _ string, key string, obj AntiObj) error {
+func (r RabbitMQ) write(ctx context.Context, exchange string, key string, obj AntiObj) error {
 
 	jsonAntiObj, err := json.Marshal(obj)
 	if err != nil {
@@ -40,23 +39,30 @@ func (r RabbitMQ) write(ctx context.Context, _ string, key string, obj AntiObj) 
 	}
 	defer channel.Close()
 
-	queue, err := channel.QueueDeclare(
-		r.queue, // Queue name
-		false,   // Durable
-		false,   // Delete when unused
-		false,   // Exclusive
-		false,   // No-wait
-		nil,     // Arguments
-	)
-	if err != nil {
-		return err
+	if exchange == "" {
+		_, err := channel.QueueDeclare(
+			key,   // Queue name
+			false, // Durable
+			false, // Delete when unused
+			false, // Exclusive
+			false, // No-wait
+			nil,   // Arguments
+		)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = channel.ExchangeDeclare(exchange, "topic", false, false, false, false, nil)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = channel.PublishWithContext(ctx,
-		"",         // exchange
-		queue.Name, // routing key
-		false,      // mandatory
-		false,      // immediate
+		exchange, // exchange
+		key,      // routing key
+		false,    // mandatory
+		false,    // immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        jsonAntiObj,
@@ -68,7 +74,7 @@ func (r RabbitMQ) write(ctx context.Context, _ string, key string, obj AntiObj) 
 	return err
 }
 
-func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, error) {
+func (r RabbitMQ) read(ctx context.Context, exchange string, key string) (AntiObj, error) {
 
 	channel, err := r.connection.Channel()
 	if err != nil {
@@ -76,14 +82,24 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 	}
 	defer channel.Close()
 
+	err = channel.ExchangeDeclare("notifier", "topic", false, false, false, false, nil)
+	if err != nil {
+		return AntiObj{}, err
+	}
+
 	queue, err := channel.QueueDeclare(
-		r.queue, // Queue name
-		false,   // Durable
-		false,   // Delete when unused
-		false,   // Exclusive
-		false,   // No-wait
-		nil,     // Arguments
+		key,   // Queue name
+		false, // Durable
+		false, // Delete when unused
+		false, // Exclusive
+		false, // No-wait
+		nil,   // Arguments
 	)
+	if err != nil {
+		return AntiObj{}, err
+	}
+
+	err = channel.QueueBind(key, key, exchange, false, nil)
 	if err != nil {
 		return AntiObj{}, err
 	}
@@ -116,32 +132,42 @@ func (r RabbitMQ) read(ctx context.Context, _ string, key string) (AntiObj, erro
 	return antiObj, err
 }
 
-func (r RabbitMQ) consume(ctx context.Context, _ string, stop chan struct{}) (<-chan AntiObj, error) {
+func (r RabbitMQ) consume(ctx context.Context, exchange string, key string, stop chan struct{}) (<-chan AntiObj, error) {
 	channel, err := r.connection.Channel()
 	if err != nil {
 		return nil, err
 	}
 
+	err = channel.ExchangeDeclare("notifier", "topic", false, false, false, false, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	queue, err := channel.QueueDeclare(
-		r.queue, // Queue name
-		false,   // Durable
-		false,   // Delete when unused
-		false,   // Exclusive
-		false,   // No-wait
-		nil,     // Arguments
+		key,   // Queue name
+		false, // Durable
+		false, // Delete when unused
+		false, // Exclusive
+		false, // No-wait
+		nil,   // Arguments
 	)
 	if err != nil {
 		return nil, err
 	}
 
+	err = channel.QueueBind(key, key, exchange, false, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	msgs, err := channel.Consume(
-		queue.Name, // queue
-		"",         // consumer
-		false,      // auto-ack
-		false,      // exclusive
-		false,      // no-local
-		false,      // no-wait
-		nil,        // args
+		key,   // queue
+		"",    // consumer
+		false, // auto-ack
+		false, // exclusive
+		false, // no-local
+		false, // no-wait
+		nil,   // args
 	)
 	if err != nil {
 		return nil, err
@@ -157,7 +183,7 @@ func (r RabbitMQ) consume(ctx context.Context, _ string, stop chan struct{}) (<-
 			for d := range antipodeObjctsChan {
 				jsonAntiObj, err := json.Marshal(d)
 				if err != nil {
-					fmt.Errorf(err.Error())
+					fmt.Println(err.Error())
 				}
 				err = channel.PublishWithContext(ctx,
 					"",         // exchange
@@ -169,7 +195,7 @@ func (r RabbitMQ) consume(ctx context.Context, _ string, stop chan struct{}) (<-
 						Body:        jsonAntiObj,
 					})
 				if err != nil {
-					fmt.Errorf(err.Error())
+					fmt.Println(err.Error())
 				}
 			}
 		}(antipodeObjctsChan)
@@ -183,7 +209,7 @@ func (r RabbitMQ) consume(ctx context.Context, _ string, stop chan struct{}) (<-
 				var antiObj AntiObj
 				err := json.Unmarshal(d.Body, &antiObj)
 				if err != nil {
-					fmt.Errorf(err.Error())
+					fmt.Println(err.Error())
 				}
 				antipodeObjctsChan <- antiObj
 				d.Ack(true)

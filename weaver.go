@@ -626,9 +626,9 @@ func (a Antipode) Read(ctx context.Context, table string, key string) (string, [
 	return value, lineageBytes, nil
 }
 
-func (a Antipode) Consume(ctx context.Context, table string, stop chan struct{}) (<-chan AntipodeObject, error) {
+func (a Antipode) Consume(ctx context.Context, exchange string, key string, stop chan struct{}) (<-chan AntipodeObject, error) {
 
-	msgs, err := antipode.Consume(ctx, a.Datastore_type, table, stop)
+	msgs, err := antipode.Consume(ctx, a.Datastore_type, exchange, key, stop)
 	if err != nil {
 		return nil, err
 	}
@@ -646,7 +646,7 @@ func (a Antipode) Consume(ctx context.Context, table string, stop chan struct{})
 					return
 				}
 				obj := antipode.AntiObj{d.Version, lineage}
-				err = antipode.Requeue(ctx, a.Datastore_type, table, obj)
+				err = antipode.Requeue(ctx, a.Datastore_type, key, obj)
 				if err != nil {
 					return
 				}
@@ -659,7 +659,7 @@ func (a Antipode) Consume(ctx context.Context, table string, stop chan struct{})
 			for d := range msgs {
 				lineageBytes, err := json.Marshal(d.Lineage)
 				if err != nil {
-					fmt.Errorf(err.Error())
+					fmt.Println(err.Error())
 				}
 				antiObj := AntipodeObject{d.Version, lineageBytes}
 				antipodeObjctsChan <- antiObj

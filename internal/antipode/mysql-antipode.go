@@ -77,7 +77,7 @@ func (m MySQL) read(ctx context.Context, table string, key string) (AntiObj, err
 	return antiObj, err
 }
 
-func (m MySQL) consume(context.Context, string, chan struct{}) (<-chan AntiObj, error) {
+func (m MySQL) consume(context.Context, string, string, chan struct{}) (<-chan AntiObj, error) {
 	return nil, nil
 }
 
