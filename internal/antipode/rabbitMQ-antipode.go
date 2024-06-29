@@ -82,7 +82,7 @@ func (r RabbitMQ) read(ctx context.Context, exchange string, key string) (AntiOb
 	}
 	defer channel.Close()
 
-	err = channel.ExchangeDeclare("notifier", "topic", false, false, false, false, nil)
+	err = channel.ExchangeDeclare(exchange, "topic", false, false, false, false, nil)
 	if err != nil {
 		return AntiObj{}, err
 	}
@@ -138,7 +138,7 @@ func (r RabbitMQ) consume(ctx context.Context, exchange string, key string, stop
 		return nil, err
 	}
 
-	err = channel.ExchangeDeclare("notifier", "topic", false, false, false, false, nil)
+	err = channel.ExchangeDeclare(exchange, "topic", false, false, false, false, nil)
 	if err != nil {
 		return nil, err
 	}
