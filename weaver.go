@@ -589,6 +589,10 @@ func (AutoMarshal) WeaverUnmarshal(*codegen.Decoder) {}
 
 type NotRetriable interface{}
 
+var (
+	ErrNotFound = errors.New("key not found")
+)
+
 type Antipode struct {
 	Datastore_type antipode.Datastore_type
 	Datastore_ID   string
@@ -614,7 +618,9 @@ func (a Antipode) Write(ctx context.Context, table string, key string, value str
 func (a Antipode) Read(ctx context.Context, table string, key string) (string, []byte, error) {
 
 	value, line, err := antipode.Read(ctx, a.Datastore_type, table, key)
-	if err != nil {
+	if err == antipode.ErrNotFound {
+		return "", []byte{}, ErrNotFound
+	} else if err != nil {
 		return "", []byte{}, err
 	}
 

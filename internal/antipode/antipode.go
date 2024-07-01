@@ -2,7 +2,12 @@ package antipode
 
 import (
 	"context"
+	"errors"
 	"fmt"
+)
+
+var (
+	ErrNotFound = errors.New("not found")
 )
 
 type Datastore_type interface {

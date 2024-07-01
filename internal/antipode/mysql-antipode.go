@@ -64,7 +64,9 @@ func (m MySQL) read(ctx context.Context, table string, key string) (AntiObj, err
 	var value []byte
 	query := fmt.Sprintf("SELECT value FROM %s WHERE k = ?", table)
 	err = db.QueryRow(query, key).Scan(&value)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return AntiObj{}, ErrNotFound
+	} else if err != nil {
 		return AntiObj{}, err
 	}
 

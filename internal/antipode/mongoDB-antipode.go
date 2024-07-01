@@ -84,7 +84,9 @@ func (m MongoDB) read(ctx context.Context, collection string, key string) (AntiO
 	var result Document
 	err = client.Database(m.database).Collection(collection).FindOne(context.Background(), filter).Decode(&result)
 
-	if err != nil {
+	if err == mongo.ErrNoDocuments {
+		return AntiObj{}, ErrNotFound
+	} else if err != nil {
 		return AntiObj{}, err
 	}
 

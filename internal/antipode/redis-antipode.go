@@ -42,7 +42,9 @@ func (r Redis) read(ctx context.Context, _ string, key string) (AntiObj, error) 
 
 	var obj AntiObj
 	err = json.Unmarshal(jsonAntiObj, &obj)
-	if err != nil {
+	if err == redis.Nil {
+		return AntiObj{}, ErrNotFound
+	} else if err != nil {
 		return AntiObj{}, err
 	}
 
