@@ -22,7 +22,7 @@ type Document struct {
 
 func CreateMongoDB(host string, port string, database string) MongoDB {
 	clientOptions := options.Client().ApplyURI("mongodb://" + host + ":" + port + "/?directConnection=true")
-	client, err := mongo.Connect(_, clientOptions)
+	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		panic(err)
 	}
