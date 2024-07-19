@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,8 +11,8 @@ import (
 )
 
 type MongoDB struct {
-	clientOptions *options.ClientOptions
-	database      string
+	mongoClient *mongo.Client
+	database    string
 }
 
 type Document struct {
@@ -22,7 +21,12 @@ type Document struct {
 }
 
 func CreateMongoDB(host string, port string, database string) MongoDB {
-	return MongoDB{options.Client().ApplyURI("mongodb://" + host + ":" + port + "/?directConnection=true"),
+	clientOptions := options.Client().ApplyURI("mongodb://" + host + ":" + port + "/?directConnection=true")
+	client, err := mongo.Connect(_, clientOptions)
+	if err != nil {
+		panic(err)
+	}
+	return MongoDB{client,
 		database,
 	}
 }
@@ -31,19 +35,7 @@ func CreateMongoDB(host string, port string, database string) MongoDB {
 // falta fechar a conexão
 func (m MongoDB) write(ctx context.Context, collectionName string, key string, obj AntiObj) error {
 
-	client, err := mongo.Connect(ctx, m.clientOptions)
-	if err != nil {
-		return err
-	}
-
-	// Disconnect from MongoDB when the function returns
-	defer func() {
-		if err := client.Disconnect(ctx); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	collection := client.Database(m.database).Collection(collectionName)
+	collection := m.mongoClient.Database(m.database).Collection(collectionName)
 
 	filter := bson.D{{"key", key}}
 
@@ -52,7 +44,7 @@ func (m MongoDB) write(ctx context.Context, collectionName string, key string, o
 		Value: obj,
 	}
 
-	_, err = collection.ReplaceOne(context.Background(), filter, replacement, options.Replace().SetUpsert(true))
+	_, err := collection.ReplaceOne(context.Background(), filter, replacement, options.Replace().SetUpsert(true))
 
 	/*mongoObj := Document{
 		Key:   key,
@@ -67,22 +59,10 @@ func (m MongoDB) write(ctx context.Context, collectionName string, key string, o
 // posso assumir que não há mais do que um objeto com a mesma key?
 func (m MongoDB) read(ctx context.Context, collection string, key string) (AntiObj, error) {
 
-	client, err := mongo.Connect(ctx, m.clientOptions)
-	if err != nil {
-		return AntiObj{}, err
-	}
-
-	// Disconnect from MongoDB when the function returns
-	defer func() {
-		if err := client.Disconnect(ctx); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
 	filter := bson.D{{"key", key}}
 
 	var result Document
-	err = client.Database(m.database).Collection(collection).FindOne(context.Background(), filter).Decode(&result)
+	err := m.mongoClient.Database(m.database).Collection(collection).FindOne(context.Background(), filter).Decode(&result)
 
 	if err == mongo.ErrNoDocuments {
 		return AntiObj{}, ErrNotFound
@@ -101,18 +81,6 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 
 	fmt.Println("start barrier")
 
-	client, err := mongo.Connect(ctx, m.clientOptions)
-	if err != nil {
-		return err
-	}
-
-	// Disconnect from MongoDB when the function returns
-	defer func() {
-		if err := client.Disconnect(ctx); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
 	for _, writeIdentifier := range lineage {
 		fmt.Println("key after for: ", writeIdentifier.Key)
 		if writeIdentifier.Dtstid == datastoreID {
@@ -122,7 +90,7 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 				fmt.Println("key: ", writeIdentifier.Key)
 
 				var result Document
-				err = client.Database(m.database).Collection(writeIdentifier.TableId).FindOne(context.Background(), filter).Decode(&result)
+				err := m.mongoClient.Database(m.database).Collection(writeIdentifier.TableId).FindOne(context.Background(), filter).Decode(&result)
 
 				if !errors.Is(err, mongo.ErrNoDocuments) && err != nil {
 					return err
