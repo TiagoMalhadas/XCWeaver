@@ -22,7 +22,7 @@ type Document struct {
 
 func CreateMongoDB(host string, port string, database string) MongoDB {
 	clientOptions := options.Client().ApplyURI("mongodb://" + host + ":" + port + "/?directConnection=true")
-	client, err := mongo.Connect(_, clientOptions)
+	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		panic(err)
 	}
@@ -37,21 +37,21 @@ func (m MongoDB) write(ctx context.Context, collectionName string, key string, o
 
 	collection := m.mongoClient.Database(m.database).Collection(collectionName)
 
-	filter := bson.D{{"key", key}}
+	/*filter := bson.D{{"key", key}}
 
 	replacement := Document{
 		Key:   key,
 		Value: obj,
 	}
 
-	_, err := collection.ReplaceOne(context.Background(), filter, replacement, options.Replace().SetUpsert(true))
+	_, err := collection.ReplaceOne(context.Background(), filter, replacement, options.Replace().SetUpsert(true))*/
 
-	/*mongoObj := Document{
+	mongoObj := Document{
 		Key:   key,
 		Value: obj,
 	}
 
-	_, err = client.Database(m.database).Collection(collection).InsertOne(ctx, mongoObj)*/
+	_, err := collection.InsertOne(ctx, mongoObj)
 
 	return err
 }
