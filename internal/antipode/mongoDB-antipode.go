@@ -62,7 +62,7 @@ func (m MongoDB) read(ctx context.Context, collection string, key string) (AntiO
 	filter := bson.D{{"key", key}}
 
 	var result Document
-	err := m.mongoClient.Database(m.database).Collection(collection).FindOne(context.Background(), filter).Decode(&result)
+	err := m.mongoClient.Database(m.database).Collection(collection).FindOne(ctx, filter).Decode(&result)
 
 	if err == mongo.ErrNoDocuments {
 		return AntiObj{}, ErrNotFound
@@ -89,8 +89,9 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 
 				fmt.Println("key: ", writeIdentifier.Key)
 
-				var result Document
-				err := m.mongoClient.Database(m.database).Collection(writeIdentifier.TableId).FindOne(context.Background(), filter).Decode(&result)
+				cursor, err := m.mongoClient.Database(m.database).Collection(writeIdentifier.TableId).Find(ctx, filter)
+				defer cursor.Close(ctx)
+				//err := m.mongoClient.Database(m.database).Collection(writeIdentifier.TableId).FindOne(context.Background(), filter).Decode(&result)
 
 				if !errors.Is(err, mongo.ErrNoDocuments) && err != nil {
 					return err
@@ -98,11 +99,23 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 					fmt.Println("replication in progress")
 					continue
 				} else {
-					if result.Value.Version == writeIdentifier.Version { //the version replication process is already completed
-						fmt.Println("replication done: ", result.Value.Version)
+					replicationDone := false
+					for cursor.Next(ctx) {
+						var document Document
+						if err := cursor.Decode(&document); err != nil {
+							return err
+						}
+						if document.Value.Version == writeIdentifier.Version { //the version replication process is already completed
+							fmt.Println("replication done: ", document.Value.Version)
+							replicationDone = true
+							break
+						}
+					}
+					if replicationDone { //the version replication process is already completed
+						//fmt.Println("replication done: ", result.Value.Version)
 						break
 					} else { //the version replication process is not yet completed
-						fmt.Println("replication of the new version in progress! Old Version: ", result.Value.Version, " new version: ", writeIdentifier.Version)
+						fmt.Println("replication of the new version in progress!")
 						continue
 					}
 				}
