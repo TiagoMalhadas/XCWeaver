@@ -81,7 +81,6 @@ func (m MySQL) barrier(ctx context.Context, lineage []WriteIdentifier, datastore
 				// Query the database for the value associated with the writeIdentifier.Key
 				query := fmt.Sprintf("SELECT value FROM %s WHERE k = ?", writeIdentifier.TableId)
 				rows, err := m.db.Query(query, writeIdentifier.Key)
-				defer rows.Close()
 
 				if !errors.Is(err, sql.ErrNoRows) && err != nil {
 					return err
@@ -89,6 +88,7 @@ func (m MySQL) barrier(ctx context.Context, lineage []WriteIdentifier, datastore
 					fmt.Println("replication in progress")
 					continue
 				} else {
+					defer rows.Close()
 					replicationDone := false
 					for rows.Next() {
 						var value []byte
@@ -113,7 +113,6 @@ func (m MySQL) barrier(ctx context.Context, lineage []WriteIdentifier, datastore
 						return err
 					}
 					if replicationDone { //the version replication process is already completed
-						//fmt.Println("replication done: ", result.Value.Version)
 						break
 					} else { //the version replication process is not yet completed
 						fmt.Println("replication of the new version in progress!")

@@ -31,20 +31,9 @@ func CreateMongoDB(host string, port string, database string) MongoDB {
 	}
 }
 
-// devo verificar primeiro se já existe essa key? E caso exista fazer update?
-// falta fechar a conexão
 func (m MongoDB) write(ctx context.Context, collectionName string, key string, obj AntiObj) error {
 
 	collection := m.mongoClient.Database(m.database).Collection(collectionName)
-
-	/*filter := bson.D{{"key", key}}
-
-	replacement := Document{
-		Key:   key,
-		Value: obj,
-	}
-
-	_, err := collection.ReplaceOne(context.Background(), filter, replacement, options.Replace().SetUpsert(true))*/
 
 	mongoObj := Document{
 		Key:   key,
@@ -56,7 +45,6 @@ func (m MongoDB) write(ctx context.Context, collectionName string, key string, o
 	return err
 }
 
-// posso assumir que não há mais do que um objeto com a mesma key?
 func (m MongoDB) read(ctx context.Context, collection string, key string) (AntiObj, error) {
 
 	filter := bson.D{{"key", key}}
@@ -90,8 +78,6 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 				fmt.Println("key: ", writeIdentifier.Key)
 
 				cursor, err := m.mongoClient.Database(m.database).Collection(writeIdentifier.TableId).Find(ctx, filter)
-				defer cursor.Close(ctx)
-				//err := m.mongoClient.Database(m.database).Collection(writeIdentifier.TableId).FindOne(context.Background(), filter).Decode(&result)
 
 				if !errors.Is(err, mongo.ErrNoDocuments) && err != nil {
 					return err
@@ -99,6 +85,7 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 					fmt.Println("replication in progress")
 					continue
 				} else {
+					defer cursor.Close(ctx)
 					replicationDone := false
 					for cursor.Next(ctx) {
 						var document Document
@@ -112,7 +99,6 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 						}
 					}
 					if replicationDone { //the version replication process is already completed
-						//fmt.Println("replication done: ", result.Value.Version)
 						break
 					} else { //the version replication process is not yet completed
 						fmt.Println("replication of the new version in progress!")

@@ -15,8 +15,8 @@ type Redis struct {
 func CreateRedis(redis_host string, redis_port string, redis_password string) Redis {
 	return Redis{redis.NewClient(&redis.Options{
 		Addr:     redis_host + ":" + redis_port,
-		Password: redis_password, // no password set
-		DB:       0,              // use default DB
+		Password: redis_password,
+		DB:       0, // use default DB
 	})}
 }
 
