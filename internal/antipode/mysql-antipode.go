@@ -13,34 +13,30 @@ import (
 // It assumes by default that the table where the queries will be executed has
 // exactly two columns called k and value
 type MySQL struct {
-	dsn       string
+	db        *sql.DB
 	datastore string
 }
 
 func CreateMySQL(host string, port string, user string, password string, datastore string) MySQL {
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, datastore)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		panic(err)
+	}
 
-	return MySQL{dsn, datastore}
+	return MySQL{db, datastore}
 }
 
 func (m MySQL) write(ctx context.Context, table string, key string, obj AntiObj) error {
-
-	// Connect to MySQL database
-	db, err := sql.Open("mysql", m.dsn)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
 
 	jsonAntiObj, err := json.Marshal(obj)
 	if err != nil {
 		return err
 	}
 
-	// Prepare the statement and execute the query
 	query := fmt.Sprintf("INSERT INTO %s VALUES (?, ?)", table)
-	stmt, err := db.Prepare(query)
+	stmt, err := m.db.Prepare(query)
 	if err != nil {
 		return err
 	}
@@ -51,19 +47,12 @@ func (m MySQL) write(ctx context.Context, table string, key string, obj AntiObj)
 	return err
 }
 
+// If there is more than one value for the same key this function only returns one
 func (m MySQL) read(ctx context.Context, table string, key string) (AntiObj, error) {
 
-	// Connect to MySQL database
-	db, err := sql.Open("mysql", m.dsn)
-	if err != nil {
-		return AntiObj{}, err
-	}
-	defer db.Close()
-
-	// Query the database for the value associated with the key
 	var value []byte
 	query := fmt.Sprintf("SELECT value FROM %s WHERE k = ?", table)
-	err = db.QueryRow(query, key).Scan(&value)
+	err := m.db.QueryRow(query, key).Scan(&value)
 	if err == sql.ErrNoRows {
 		return AntiObj{}, ErrNotFound
 	} else if err != nil {
@@ -85,21 +74,14 @@ func (m MySQL) consume(context.Context, string, string, chan struct{}) (<-chan A
 
 func (m MySQL) barrier(ctx context.Context, lineage []WriteIdentifier, datastoreID string) error {
 
-	// Connect to MySQL database
-	db, err := sql.Open("mysql", m.dsn)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
 	for _, writeIdentifier := range lineage {
 		fmt.Println("key after for: ", writeIdentifier.Key)
 		if writeIdentifier.Dtstid == datastoreID {
 			for {
 				// Query the database for the value associated with the writeIdentifier.Key
-				var value []byte
 				query := fmt.Sprintf("SELECT value FROM %s WHERE k = ?", writeIdentifier.TableId)
-				err = db.QueryRow(query, writeIdentifier.Key).Scan(&value)
+				rows, err := m.db.Query(query, writeIdentifier.Key)
+				defer rows.Close()
 
 				if !errors.Is(err, sql.ErrNoRows) && err != nil {
 					return err
@@ -107,17 +89,34 @@ func (m MySQL) barrier(ctx context.Context, lineage []WriteIdentifier, datastore
 					fmt.Println("replication in progress")
 					continue
 				} else {
-					var antiObj AntiObj
-					err = json.Unmarshal(value, &antiObj)
-					if err != nil {
+					replicationDone := false
+					for rows.Next() {
+						var value []byte
+						err := rows.Scan(&value)
+						if err != nil {
+							return err
+						}
+						var antiObj AntiObj
+						err = json.Unmarshal(value, &antiObj)
+						if err != nil {
+							return err
+						}
+
+						if antiObj.Version == writeIdentifier.Version { //the version replication process is already completed
+							fmt.Println("replication done: ", antiObj.Version)
+							replicationDone = true
+							break
+						}
+					}
+					//checking there were no errors during iteration
+					if err := rows.Err(); err != nil && !replicationDone {
 						return err
 					}
-
-					if antiObj.Version == writeIdentifier.Version { //the version replication process is already completed
-						fmt.Println("replication done: ", antiObj.Version)
+					if replicationDone { //the version replication process is already completed
+						//fmt.Println("replication done: ", result.Value.Version)
 						break
 					} else { //the version replication process is not yet completed
-						fmt.Println("replication of the new version in progress")
+						fmt.Println("replication of the new version in progress!")
 						continue
 					}
 				}
