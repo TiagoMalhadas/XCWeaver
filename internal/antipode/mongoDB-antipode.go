@@ -85,11 +85,11 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 					fmt.Println("replication in progress")
 					continue
 				} else {
-					defer cursor.Close(ctx)
 					replicationDone := false
 					for cursor.Next(ctx) {
 						var document Document
 						if err := cursor.Decode(&document); err != nil {
+							cursor.Close(ctx)
 							return err
 						}
 						if document.Value.Version == writeIdentifier.Version { //the version replication process is already completed
@@ -98,6 +98,7 @@ func (m MongoDB) barrier(ctx context.Context, lineage []WriteIdentifier, datasto
 							break
 						}
 					}
+					cursor.Close(ctx)
 					if replicationDone { //the version replication process is already completed
 						break
 					} else { //the version replication process is not yet completed
