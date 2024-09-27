@@ -59,5 +59,17 @@ func GetDeployerConfig[T, L any, TP configProtoPointer[T, L]](key, shortKey stri
 			return nil, fmt.Errorf("listeners %s specified in the config not found in the binary", lis)
 		}
 	}
+
+	binAntipode, err := bin.ReadAntipodeAgents(app.Binary)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read Antipode agents from binary %s: %w", app.Binary, err)
+	}
+	all = make(map[string]struct{})
+	for _, c := range binAntipode {
+		for _, l := range c.AntipodeAgents {
+			all[l] = struct{}{}
+			fmt.Println(l)
+		}
+	}
 	return config, nil
 }
