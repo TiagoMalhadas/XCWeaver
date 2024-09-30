@@ -56,7 +56,7 @@ func validateRegistrations(regs []*codegen.Registration) error {
 				}
 
 			case f.Type == reflection.Type[Listener]():
-				// f is a weaver.Listener.
+				// f is a xcweaver.Listener.
 				name := f.Name
 				if tag, ok := f.Tag.Lookup("xcweaver"); ok {
 					if !isValidListenerName(tag) {
@@ -111,7 +111,7 @@ func isValidListenerName(name string) bool {
 }
 
 // isValidAntipodeAgentName returns whether the provided name is a valid
-// weaver.Antipode name.
+// xcweaver.Antipode name.
 func isValidAntipodeAgentName(name string) bool {
 	// We allow valid Go identifiers [1]. This code is taken from [2].
 	//
