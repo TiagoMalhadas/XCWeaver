@@ -69,7 +69,6 @@ func GetDeployerConfig[T, L any, A any, TP configProtoPointer[T, L, A]](key, sho
 	for _, c := range binAntipode {
 		for _, l := range c.AntipodeAgents {
 			all[l] = struct{}{}
-			fmt.Println(l)
 		}
 	}
 	for anti := range TP(config).GetAntipodeAgents() {

@@ -682,7 +682,6 @@ func (a Antipode) Barrier(ctx context.Context) error {
 	return antipode.Barrier(ctx, a.Datastore_type, a.Datastore_ID)
 }
 
-// convert to Antipode method?
 func Transfer(ctx context.Context, lineage []byte) (context.Context, error) {
 
 	var line []antipode.WriteIdentifier
@@ -694,7 +693,6 @@ func Transfer(ctx context.Context, lineage []byte) (context.Context, error) {
 	return antipode.Transfer(ctx, line)
 }
 
-// convert to Antipode method?
 func GetLineage(ctx context.Context) ([]byte, error) {
 
 	line, err := antipode.GetLineage(ctx)
